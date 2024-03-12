@@ -12,4 +12,6 @@ COPY package.json .
 COPY package-lock.json .
 RUN npm ci --omit dev
 
+ENV BODY_SIZE_LIMIT=0
+
 CMD node /insight-ui
