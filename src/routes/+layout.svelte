@@ -1,4 +1,7 @@
 <script>
+    import '@fontsource-variable/rubik/index.css';
+    import '@fontsource-variable/roboto-slab/index.css';
+
     import { onMount, onDestroy } from "svelte";
     import { invalidate } from "$app/navigation";
     import Navigation from '$lib/Navigation.svelte';
