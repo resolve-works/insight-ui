@@ -1,5 +1,6 @@
 <script lang="ts">
     import { onMount } from 'svelte';
+    import worker_url from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
     export let url: string;
     export let index: number;
@@ -16,7 +17,7 @@
     onMount(async () => {
         const { getDocument, GlobalWorkerOptions } = await import('pdfjs-dist');
 
-        GlobalWorkerOptions.workerSrc = '/pdf-worker';
+        GlobalWorkerOptions.workerSrc = worker_url;
 
         const pdf = await getDocument(url).promise;
 
