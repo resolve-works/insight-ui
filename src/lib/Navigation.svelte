@@ -4,9 +4,9 @@
     import Icon from '$lib/Icon.svelte';
 
     const items = [
-        { href: "/search", name: "Search", class: "gg-search" },
+        { href: "/search", name: "Documents", class: "gg-file-document" },
         { href: "/conversations", name: "Conversations", class: "gg-comment" },
-        { href: "/files", name: "Files", class: "gg-folder"},
+        { href: "/files", name: "Uploads", class: "gg-folder"},
     ]
 
     const logout_url = new URL(env.PUBLIC_OIDC_ENDPOINT)

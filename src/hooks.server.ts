@@ -18,10 +18,6 @@ function auth_redirect(event: RequestEvent) {
 }
 
 export async function handle({event, resolve}) {
-    if(event.url.pathname.startsWith('/api')) {
-        return resolve(event);
-    }
-
     // Did the authentication platform just redirect to us with a new code?
     const code = event.url.searchParams.get('code')
     if(code !== null) {
@@ -93,9 +89,7 @@ export async function handle({event, resolve}) {
 }
 
 export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
-    const url = new URL(request.url)
-
-    if(url.pathname.startsWith('/api/v1')) {
+    if(request.url.startsWith(env.API_ENDPOINT)) {
         request.headers.append('Authorization', 'Bearer ' + event.locals.access_token)
     }
 

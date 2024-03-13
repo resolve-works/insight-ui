@@ -1,3 +1,4 @@
+import { env } from '$env/dynamic/private'
 import type { Actions } from './$types';
 import { sign } from '$lib/sign';
 import { Channel } from '$lib/amqp.js';
@@ -5,7 +6,7 @@ import { Channel } from '$lib/amqp.js';
 export async function load({ fetch, depends }) {
     depends('api:files')
 
-    const res = await fetch('/api/v1/files?is_uploaded=eq.true&select=id,name,status,documents(id,name,status)&order=created_at.desc')
+    const res = await fetch(`${env.API_ENDPOINT}/files?is_uploaded=eq.true&select=id,name,status,documents(id,name,status)&order=created_at.desc`)
 
     const files = await res.json()
     return { files }
@@ -18,7 +19,7 @@ export const actions = {
 
         // Filter for 0 size files as submitting empty file input results in single 0 size file?
         for(const upload of uploads.filter(file => file.size > 0)) {
-            const response = await fetch('/api/v1/files', {
+            const response = await fetch(`${env.API_ENDPOINT}/files`, {
                 method: 'POST',
                 body: JSON.stringify({ name: upload.name }),
                 headers: { 
@@ -40,7 +41,7 @@ export const actions = {
                 }
             })
 
-            const patch_response = await fetch(`/api/v1/files?id=eq.${file.id}`, {
+            const patch_response = await fetch(`${env.API_ENDPOINT}/files?id=eq.${file.id}`, {
                 method: 'PATCH',
                 body: JSON.stringify({ is_uploaded: true }),
                 headers: { 'Content-Type': 'application/json', }
@@ -54,7 +55,7 @@ export const actions = {
 
     remove: async ({ request, fetch, locals }) => {
         const data = await request.formData();
-        await fetch(`/api/v1/files?id=eq.${data.get('id')}`, { 
+        await fetch(`${env.API_ENDPOINT}/files?id=eq.${data.get('id')}`, { 
             method: 'PATCH', 
             body: JSON.stringify({ is_deleted: true }),
             headers: { 'Content-Type': 'application/json' }
