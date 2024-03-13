@@ -5,7 +5,9 @@ import type { Connection, Channel as AMQPChannel } from 'amqplib';
 
 export function connect(access_token: string) {
     const password = `${encodeURIComponent(access_token)}`
-    return amqplib.connect(`amqps://username:${password}@${env.RABBITMQ_HOST}`);
+    const ssl = env.RABBITMQ_SSL?.toLowerCase() == 'true' ? true : false
+
+    return amqplib.connect(`amqp${ssl ? 's' : ''}://username:${password}@${env.RABBITMQ_HOST}`);
 }
 
 export class Channel {
