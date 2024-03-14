@@ -19,5 +19,12 @@ export function sign(path: string, locals: App.Locals, method: string = 'GET') {
         },
     }
 
-    return presignSignatureV4(request, access_key_id, secret_access_key, session_token, 'insight', new Date(), 60 * 60)
+    return presignSignatureV4(
+        request, 
+        access_key_id, 
+        secret_access_key, 
+        session_token, 
+        env.STORAGE_REGION, 
+        new Date(), 60 * 60
+    )
 }

@@ -41,6 +41,10 @@ export const actions = {
                 }
             })
 
+            if(storage_response.status !== 200) {
+                throw new Error(await storage_response.text())
+            }
+
             const patch_response = await fetch(`${env.API_ENDPOINT}/files?id=eq.${file.id}`, {
                 method: 'PATCH',
                 body: JSON.stringify({ is_uploaded: true }),

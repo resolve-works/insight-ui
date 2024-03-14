@@ -5,11 +5,13 @@ import { XMLParser } from 'fast-xml-parser';
 
 export class InvalidRefreshTokenError extends Error {}
 
-export async function get_storage_tokens(access_token: string) {
-    const url = new URL(env.STORAGE_ENDPOINT)
+export async function get_storage_tokens(access_token: string, sub: string) {
+    const url = new URL(env.STORAGE_IDENTITY_ENDPOINT)
     url.searchParams.set("Action", "AssumeRoleWithWebIdentity")
     url.searchParams.set("Version", "2011-06-15")
     url.searchParams.set("DurationSeconds", "3600")
+    url.searchParams.set('RoleArn', env.STORAGE_IDENTITY_ROLE)
+    url.searchParams.set('RoleSessionName', sub)
     url.searchParams.set("WebIdentityToken", access_token)
     const response = await fetch(url, { method: 'post' })
 
