@@ -10,9 +10,12 @@ export async function get_storage_tokens(access_token: string, sub: string) {
     url.searchParams.set("Action", "AssumeRoleWithWebIdentity")
     url.searchParams.set("Version", "2011-06-15")
     url.searchParams.set("DurationSeconds", "3600")
-    url.searchParams.set('RoleArn', env.STORAGE_IDENTITY_ROLE)
     url.searchParams.set('RoleSessionName', sub)
     url.searchParams.set("WebIdentityToken", access_token)
+    // Minio does not require this, AWS does
+    if(env.STORAGE_IDENTITY_ROLE) {
+        url.searchParams.set('RoleArn', env.STORAGE_IDENTITY_ROLE)
+    }
     const response = await fetch(url, { method: 'post' })
 
     const parser = new XMLParser();
