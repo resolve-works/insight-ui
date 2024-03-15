@@ -1,6 +1,7 @@
 
 import { env } from '$env/dynamic/private'
 import type { Actions } from './$types';
+import { Channel } from '$lib/amqp';
 
 export async function load({ fetch, depends }) {
     depends('api:conversations')
@@ -11,13 +12,22 @@ export async function load({ fetch, depends }) {
 }
 
 export const actions = {
-    default: async ({ request, fetch }) => {
+    default: async ({ request, fetch, locals }) => {
         // Strip keys=>value that are empty
         const entries = Array.from(await request.formData()).filter(([key, value]) => !!value);
-        await fetch(`${env.API_ENDPOINT}/prompts`, {
+        const response = await fetch(`${env.API_ENDPOINT}/prompts`, {
             method: 'POST',
             body: JSON.stringify(Object.fromEntries(entries)),
-            headers: { 'Content-Type': 'application/json', }
+            headers: { 
+                'Content-Type': 'application/json',
+                'Prefer': 'return=representation'
+            }
         })
+        const prompts = await response.json()
+        const prompt = prompts[0]
+
+        const channel = await Channel.connect(locals.access_token)
+        channel.publish('answer_prompt', { id: prompt.id });
+        channel.close()
     }
 } satisfies Actions
