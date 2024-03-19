@@ -18,15 +18,15 @@ export async function handle({ event, resolve }) {
         try {
             const tokens = await authorization_code_request(redirect_uri, code)
             await store_tokens(event.cookies, tokens)
-
-            // redirect to clear URL of params
-            event.url.searchParams.delete('code');
-            event.url.searchParams.delete('session_state');
-            event.url.searchParams.delete('iss');
-            throw redirect(307, event.url)
         } catch(e) {
             throw redirect_to_oidc_provider(redirect_uri);
         }
+
+        // redirect to clear URL of params
+        event.url.searchParams.delete('code');
+        event.url.searchParams.delete('session_state');
+        event.url.searchParams.delete('iss');
+        throw redirect(307, event.url)
     }
 
     // If we don't have a token, go get them
