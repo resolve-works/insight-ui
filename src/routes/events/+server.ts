@@ -15,16 +15,17 @@ export async function GET({ cookies, locals }) {
 
     // Forward rabbitmq messages for user
 	const readable = new ReadableStream({
-		start(ctr) {
+		start(controller) {
             // Pinging ensures that our connection stays alive
-            interval = setInterval(() => ctr.enqueue(JSON.stringify({ message: 'ping' })), 30000)
+            interval = setInterval(() => controller.enqueue(JSON.stringify({ message: 'ping' })), 30000)
 
             channel.consume(queue, (message) => {
                 if (message !== null) {
-                    ctr.enqueue(JSON.stringify({ 
+                    const data = JSON.stringify({ 
                         routing_key: message.fields.routingKey, 
                         content: JSON.parse(message.content.toString()),
-                    }))
+                    });
+                    controller.enqueue(data)
                     channel.ack(message);
                 } else {
                     console.log('Consumer cancelled by server');

@@ -5,6 +5,7 @@ import type { HandleFetch } from '@sveltejs/kit';
 import { 
     redirect_to_oidc_provider, 
     authorization_code_request, 
+    refresh_tokens,
     store_tokens, 
     parse_token 
 } from '$lib/auth.ts';
@@ -42,12 +43,20 @@ export async function handle({ event, resolve }) {
 }
 
 export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
-    if(request.url.startsWith(env.API_ENDPOINT)) {
-        request.headers.append('Authorization', 'Bearer ' + event.cookies.get('access_token'))
-    }
+    // Handle API / search API auth
+    if(request.url.startsWith(env.API_ENDPOINT) || request.url.startsWith(env.OPENSEARCH_ENDPOINT)) {
+        // Add token as bearer auth
+        request.headers.set('Authorization', 'Bearer ' + event.cookies.get('access_token'))
+        const response = await fetch(request.clone());
 
-    if(request.url.startsWith(env.OPENSEARCH_ENDPOINT)) {
-        request.headers.append('Authorization', 'Bearer ' + event.cookies.get('access_token'))
+        // Unauthorized? Try to refresh the tokens
+        if(response.status == 401) {
+            await refresh_tokens(event.cookies)
+            request.headers.set('Authorization', 'Bearer ' + event.cookies.get('access_token'))
+            return fetch(request)
+        }
+
+        return response
     }
 
 	return fetch(request);
