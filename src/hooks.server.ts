@@ -39,7 +39,8 @@ export async function handle({event, resolve}) {
             throw auth_redirect(event);
         }
 
-        const { refresh_token } = await token_response.json();
+        const { refresh_token, access_token } = await token_response.json();
+        event.cookies.set('access_token', access_token, { path: '/' })
         event.cookies.set('refresh_token', refresh_token, { path: '/' })
 
         // redirect to clear URL of params
@@ -49,42 +50,48 @@ export async function handle({event, resolve}) {
         throw redirect(307, event.url)
     }
 
-    // TODO - don't always refresh
-    // No code, do we have a refresh token?
-    if(event.cookies.get('refresh_token') !== undefined) {
-        try {
-            const { access_token, refresh_token } 
-                = await get_tokens_through_refresh(event.cookies.get('refresh_token') as string) 
-                
-            // Parse JWT payload to get claims
-            const payload = access_token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-            const payload_data = JSON.parse(atob(payload))
-            const sub = payload_data.sub
+    // If we don't have a refresh token, go get it
+    if(event.cookies.get('refresh_token') === undefined) {
+        throw auth_redirect(event)
+    }
 
-            const storage_tokens = await get_storage_tokens(access_token, sub)
+    // Resolve event as it has tokens
+    return resolve(event)
 
-            event.locals = { 
-                access_token,
-                ...storage_tokens,
-                sub,
-            }
+    // Refresh token
+    /*
+    try {
+        const { access_token, refresh_token } 
+            = await get_tokens_through_refresh(event.cookies.get('refresh_token') as string) 
+            
+        // Parse JWT payload to get claims
+        const payload = access_token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        const payload_data = JSON.parse(atob(payload))
+        const sub = payload_data.sub
 
-            // Refresh token was good, store new response
-            event.cookies.set('refresh_token', refresh_token, { path: '/' })
+        const storage_tokens = await get_storage_tokens(access_token, sub)
 
-            // Resolve event with new tokens
-            return resolve(event)
-        } catch(error) {
-            if(error instanceof InvalidRefreshTokenError) {
-                // Remove stale token and redirect to login
-                event.cookies.delete('refresh_token', { path: '/' })
-                throw auth_redirect(event)
-            } else {
-                throw error;
-            }
+        event.locals = { 
+            access_token,
+            ...storage_tokens,
+            sub,
         }
 
+        // Refresh token was good, store new response
+        event.cookies.set('refresh_token', refresh_token, { path: '/' })
+
+        // Resolve event with new tokens
+        return resolve(event)
+    } catch(error) {
+        if(error instanceof InvalidRefreshTokenError) {
+            // Remove stale token and redirect to login
+            event.cookies.delete('refresh_token', { path: '/' })
+            throw auth_redirect(event)
+        } else {
+            throw error;
+        }
     }
+    */
 
     throw auth_redirect(event)
 }
