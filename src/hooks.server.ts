@@ -1,14 +1,13 @@
 
 import { env } from '$env/dynamic/private';
-import { env as public_env } from '$env/dynamic/public';
 import { redirect } from '@sveltejs/kit';
 import type { RequestEvent, HandleFetch } from '@sveltejs/kit';
 
-import { get_tokens_through_refresh, get_storage_tokens, InvalidRefreshTokenError } from '$lib/auth.ts';
+import { get_tokens_through_refresh, get_storage_tokens, parse_token, InvalidRefreshTokenError } from '$lib/auth.ts';
 
 function auth_redirect(event: RequestEvent) {
     // No code or previous token, redirect to login
-    const url = new URL(public_env.PUBLIC_OIDC_ENDPOINT + '/auth')
+    const url = new URL(env.OIDC_ENDPOINT + '/auth')
     url.searchParams.set('scope', 'profile email')
     url.searchParams.set('response_type', 'code')
     url.searchParams.set('client_id', env.OIDC_CLIENT_ID)
@@ -29,7 +28,7 @@ export async function handle({event, resolve}) {
             code, 
         }
 
-        const token_response = await fetch(public_env.PUBLIC_OIDC_ENDPOINT + '/token', {
+        const token_response = await fetch(env.OIDC_ENDPOINT + '/token', {
             method: 'post',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams(data).toString(),
@@ -39,9 +38,13 @@ export async function handle({event, resolve}) {
             throw auth_redirect(event);
         }
 
-        const { refresh_token, access_token } = await token_response.json();
-        event.cookies.set('access_token', access_token, { path: '/' })
-        event.cookies.set('refresh_token', refresh_token, { path: '/' })
+        // Succesfully got fresh tokens, get fresh storage tokens also and store it all in cookies
+        const { access_token, refresh_token } = await token_response.json()
+        const storage_tokens = await get_storage_tokens(access_token)
+        const tokens = { access_token, refresh_token, ...storage_tokens }
+        for(const [key, value] of Object.entries(tokens)) {
+            event.cookies.set(key, value, { path: '/' })
+        }
 
         // redirect to clear URL of params
         event.url.searchParams.delete('code');
@@ -50,9 +53,20 @@ export async function handle({event, resolve}) {
         throw redirect(307, event.url)
     }
 
-    // If we don't have a refresh token, go get it
-    if(event.cookies.get('refresh_token') === undefined) {
+    // If we don't have a token, go get them
+    const access_token = event.cookies.get('access_token');
+    const refresh_token = event.cookies.get('refresh_token');
+    if(refresh_token === undefined || access_token === undefined) {
         throw auth_redirect(event)
+    }
+
+    // So we do have tokens, add them to locals
+    const { sub } = parse_token(access_token)
+    event.locals = { ...event.locals, sub, access_token, refresh_token }
+
+    for(const key of ['access_key_id', 'secret_access_key', 'session_token']) {
+        const value = event.cookies.get(key);
+        event.locals = { ...event.locals, [key]: value }
     }
 
     // Resolve event as it has tokens

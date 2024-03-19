@@ -1,12 +1,18 @@
 
 import { env } from '$env/dynamic/private';
-import { env as public_env } from '$env/dynamic/public';
 import { XMLParser } from 'fast-xml-parser';
 
 export class InvalidRefreshTokenError extends Error {}
 
-export async function get_storage_tokens(access_token: string, sub: string) {
+export function parse_token(token: string) {
+    const payload = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    const payload_data = JSON.parse(atob(payload))
+    return { sub: payload_data.sub }
+}
+
+export async function get_storage_tokens(access_token: string) {
     const url = new URL(env.STORAGE_IDENTITY_ENDPOINT)
+    const { sub } = parse_token(access_token)
     url.searchParams.set("Action", "AssumeRoleWithWebIdentity")
     url.searchParams.set("Version", "2011-06-15")
     url.searchParams.set("DurationSeconds", "3600")
@@ -34,7 +40,7 @@ export async function get_tokens_through_refresh(refresh_token: string) {
         scope: 'profile email', 
     }
 
-    const response = await fetch(public_env.PUBLIC_OIDC_ENDPOINT + '/token', {
+    const response = await fetch(env.OIDC_ENDPOINT + '/token', {
         method: 'post',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams(data).toString(),
