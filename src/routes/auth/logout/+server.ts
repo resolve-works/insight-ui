@@ -1,11 +1,10 @@
 
 import { redirect } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
+import { clear_tokens } from '$lib/auth'
 
 export async function POST(event) {
-    for(const key of ['access_token', 'refresh_token', 'access_key_id', 'secret_access_key', 'session_token']) {
-        event.cookies.delete(key, { path: '/' })
-    }
+    clear_tokens(event.cookies)
 
     const url = new URL(env.OIDC_ENDPOINT)
     url.pathname += '/logout'

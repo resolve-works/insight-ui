@@ -7,6 +7,7 @@ import {
     authorization_code_request, 
     refresh_tokens,
     store_tokens, 
+    clear_tokens,
     parse_token 
 } from '$lib/auth.ts';
 
@@ -51,7 +52,14 @@ export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 
         // Unauthorized? Try to refresh the tokens
         if(response.status == 401) {
-            await refresh_tokens(event.cookies)
+            try {
+                await refresh_tokens(event.cookies)
+            } catch(e) {
+                // Could be that the refresh token was revoked
+                clear_tokens(event.cookies)
+                const redirect_uri = event.url.origin + event.url.pathname;
+                throw redirect_to_oidc_provider(redirect_uri)
+            }
             request.headers.set('Authorization', 'Bearer ' + event.cookies.get('access_token'))
             return fetch(request)
         }

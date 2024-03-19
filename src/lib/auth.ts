@@ -66,6 +66,15 @@ export async function store_tokens(cookies: Cookies, { access_token, refresh_tok
 }
 
 /**
+ * Clear tokens from cookie
+ */
+export function clear_tokens(cookies: Cookies) {
+    for(const key of ['access_token', 'refresh_token', 'access_key_id', 'secret_access_key', 'session_token']) {
+        cookies.delete(key, { path: '/' })
+    }
+}
+
+/**
  * Request new tokens from OIDC provider with provider supplied auth code
  */
 export async function authorization_code_request(redirect_uri: string, code: string) {
