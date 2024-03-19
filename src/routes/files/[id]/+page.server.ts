@@ -4,7 +4,7 @@ import type { Actions } from './$types';
 import { sign } from '$lib/sign.ts';
 import { Channel } from '$lib/amqp.ts';
 
-export async function load({ params, fetch, locals, depends }) {
+export async function load({ params, fetch, cookies, depends }) {
     depends('api:files')
 
     const res = await fetch(`${env.API_ENDPOINT}/files?id=eq.${params.id}&select=path,number_of_pages,documents(id,name,path,from_page,to_page,status)`)
@@ -18,14 +18,19 @@ export async function load({ params, fetch, locals, depends }) {
         // When you say "to 137" to a human, they expect 137 to be in the
         // range. We are counting to document.length, which is not in the
         // range. Therefore we don't have to increment to_page with 1
-        documents: documents.map(document => ({ ...document, from_page: document.from_page + 1 })),
-        url: sign(path, locals) 
+        documents: documents.map((document: Record<string, any>) => {
+            return { 
+                ...document, 
+                from_page: document.from_page + 1 
+            }
+        }),
+        url: sign(path, cookies) 
     }
 }
 
 export const actions = {
     // Store created & updated documents
-    store: async ({ request, fetch, params, locals }) => {
+    store: async ({ request, fetch, params, cookies }) => {
         const data = await request.formData();
 
         // This was something very abstract and complex, kept simple for a reason
@@ -47,7 +52,7 @@ export const actions = {
             return id ? { id: id.toString(), ...document } : { file_id: params.id, ...document };
         })
 
-        const channel = await Channel.connect(locals.access_token)
+        const channel = await Channel.connect(cookies)
 
         // Update existing documents
         const to_be_updated = documents.filter(document => 'id' in document);
@@ -78,11 +83,11 @@ export const actions = {
             }
         }
 
-        channel.close()
+        await channel.close()
     },
 
     // Remove a single document
-    remove: async ({ request, fetch, locals }) => {
+    remove: async ({ request, fetch, cookies }) => {
         const data = await request.formData();
         await fetch(`${env.API_ENDPOINT}/documents?id=eq.${data.get('id')}`, { 
             method: 'PATCH', 
@@ -90,8 +95,8 @@ export const actions = {
             headers: { 'Content-Type': 'application/json' }
         })
 
-        const channel = await Channel.connect(locals.access_token)
+        const channel = await Channel.connect(cookies)
         channel.publish('delete_document', { id:`${data.get('id')}` });
-        channel.close()
+        await channel.close()
     },
 } satisfies Actions;

@@ -1,12 +1,17 @@
 
+import type { Cookies } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
 import { presignSignatureV4 } from 'minio/dist/esm/signing.mjs'
 
 /**
  * Sign a S3 storage path for method. Keep this on the server because of the crypto dependency
  */
-export function sign(path: string, locals: App.Locals, method: string = 'GET') {
-    const { access_key_id, secret_access_key, session_token } = locals;
+export function sign(path: string, cookies: Cookies, method: string = 'GET') {
+    let values: Record<string, any> = {}
+    for(const key of ['access_key_id', 'secret_access_key', 'session_token']) {
+        values[key] = cookies.get(key)
+    }
+    const { access_key_id, secret_access_key, session_token } = values;
     const url = new URL(env.STORAGE_ENDPOINT)
 
     const request = {

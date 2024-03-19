@@ -1,8 +1,8 @@
 
 import { connect } from '$lib/amqp.ts';
 
-export async function GET({ locals }) {
-    const connection = await connect(locals.access_token)
+export async function GET({ cookies, locals }) {
+    const connection = await connect(cookies)
     const channel = await connection.createChannel()
 
     // Make sure user queue exists

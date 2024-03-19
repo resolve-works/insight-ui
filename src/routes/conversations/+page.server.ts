@@ -12,7 +12,7 @@ export async function load({ fetch, depends }) {
 }
 
 export const actions = {
-    default: async ({ request, fetch, locals }) => {
+    default: async ({ request, fetch, cookies }) => {
         // Strip keys=>value that are empty
         const entries = Array.from(await request.formData()).filter(([key, value]) => !!value);
         const response = await fetch(`${env.API_ENDPOINT}/prompts`, {
@@ -26,7 +26,7 @@ export const actions = {
         const prompts = await response.json()
         const prompt = prompts[0]
 
-        const channel = await Channel.connect(locals.access_token)
+        const channel = await Channel.connect(cookies)
         channel.publish('answer_prompt', { id: prompt.id });
         channel.close()
     }

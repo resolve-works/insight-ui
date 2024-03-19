@@ -13,7 +13,7 @@ export async function load({ fetch, depends }) {
 }
 
 export const actions = {
-    upload: async ({ request, fetch, locals }) => {
+    upload: async ({ request, fetch, cookies }) => {
         const data = await request.formData();
         const uploads: File[] = data.getAll('files') as File[]
 
@@ -29,7 +29,7 @@ export const actions = {
             })
             const files = await response.json()
             const file = files[0]
-            const url = sign(file.path, locals, 'PUT')
+            const url = sign(file.path, cookies, 'PUT')
             const storage_response = await fetch(url, { 
                 method: 'PUT', 
                 body: upload.stream(), 
@@ -51,13 +51,13 @@ export const actions = {
                 headers: { 'Content-Type': 'application/json', }
             })
 
-            const channel = await Channel.connect(locals.access_token)
+            const channel = await Channel.connect(cookies)
             channel.publish('analyze_file', { id: file.id });
             channel.close()
         }
     },
 
-    remove: async ({ request, fetch, locals }) => {
+    remove: async ({ request, fetch, cookies }) => {
         const data = await request.formData();
         await fetch(`${env.API_ENDPOINT}/files?id=eq.${data.get('id')}`, { 
             method: 'PATCH', 
@@ -65,8 +65,8 @@ export const actions = {
             headers: { 'Content-Type': 'application/json' }
         })
 
-        const channel = await Channel.connect(locals.access_token)
+        const channel = await Channel.connect(cookies)
         channel.publish('delete_file', { id:`${data.get('id')}` });
-        channel.close()
+        await channel.close()
     },
 } satisfies Actions;

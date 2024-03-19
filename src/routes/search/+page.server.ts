@@ -1,14 +1,13 @@
 
 import { env } from '$env/dynamic/private'
 
-export async function load({ url, locals, fetch }) {
+export async function load({ url, fetch }) {
     const query = url.searchParams.get('query');
 
     const res = await fetch(`${env.OPENSEARCH_ENDPOINT}/documents/_search`, {
         method: 'post',
         headers: { 
             'Content-Type': 'application/json', 
-            'Authorization': `Bearer ${locals.access_token}` 
         },
         body: JSON.stringify({
             "_source": {"excludes": ["pages"]},

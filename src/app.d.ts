@@ -5,11 +5,6 @@ declare global {
 		// interface Error {}
         interface Locals {
             sub: string,
-            access_token: string;
-            refresh_token: string;
-            access_key_id: string;
-            secret_access_key: string;
-            session_token: string;
         }
 		// interface PageData {}
 		// interface Platform {}
