@@ -69,9 +69,12 @@
 
     .chat {
         display: grid;
-        grid-template-rows: auto min-content;
+        grid-template-rows: 1fr auto;
         min-height: 100%;
-        justify-content: space-between;
+    }
+
+    .messages {
+        width: 100%;
     }
 
     .message {

@@ -3,6 +3,7 @@
     import { enhance } from '$app/forms';
     import Card from '$lib/Card.svelte';
     import Icon from '$lib/Icon.svelte';
+    import Buttongroup from '$lib/Buttongroup.svelte';
 
     export let id: string;
     export let name: string;
@@ -13,20 +14,32 @@
 </script>
 
 <Card>
-    <h3>
-        <a class="unstyled" href={`/uploads/${id}`}>
-            {name}
-        </a>
+    <header>
+        <h3>
+            {#if documents.length == 0}
+                {name}
+            {:else if documents.length == 1 }
+                <a class="unstyled" href={`/documents/${documents[0].id}`}>
+                    {name}
+                </a>
+            {:else}
+                <a class="unstyled" href={`/uploads/${id}`}>
+                    {name}
+                </a>
+            {/if}
+        </h3>
 
         {#if ! is_idle}
             <Icon class="gg-loadbar" />
         {:else}
-            <form method="POST" action="?/remove" use:enhance>
-                <input type="hidden" name="id" value={id} />
-                <button class="primary"><Icon class="gg-trash" /> Delete</button>
-            </form>
+            <Buttongroup>
+                <form method="POST" action="?/remove" use:enhance>
+                    <input type="hidden" name="id" value={id} />
+                    <button><Icon class="gg-trash" /> Delete</button>
+                </form>
+            </Buttongroup>
         {/if}
-    </h3>
+    </header>
 
     {#if documents.length > 1}
         <p>{documents.length} embedded document{documents.length == 1 ? '' : 's'}</p>
@@ -34,7 +47,7 @@
 </Card>
 
 <style>
-    h3 {
+    header {
         display: grid;
         grid-template-columns: auto auto;
         align-items: center;
@@ -44,10 +57,6 @@
     p {
         display: flex;
         gap: 0.5rem;
-    }
-
-    button {
-        margin: -1rem;
     }
 </style>
 
