@@ -25,7 +25,7 @@
 </script>
 
 <div class="buttongroup" bind:this={element} class:enhance={is_enhanced} class:open={is_open}>
-    <button class="toggle" on:click={() => is_open = ! is_open}><Icon class="gg-more-vertical-alt" /></button>
+    <button class="toggle" on:click|preventDefault|stopPropagation={() => is_open = ! is_open}><Icon class="gg-more-vertical-alt" /></button>
 
     <div class="holder">
         <div class="buttons">

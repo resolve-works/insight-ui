@@ -1,3 +1,4 @@
+import { fail } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private'
 import type { Actions } from './$types';
 
@@ -30,61 +31,40 @@ export async function load({ params, fetch, cookies, depends }) {
 }
 
 export const actions = {
-    // Store created & updated documents
-    store: async ({ request, fetch, params, cookies }) => {
+    // Create new document
+    create: async ({ request, fetch, params, cookies }) => {
         const data = await request.formData();
 
-        // This was something very abstract and complex, kept simple for a reason
-        const id = data.getAll('id');
-        const name = data.getAll('name');
-        // Machines index from 0, the HtmlInput is 1 indexed, see load function
-        const from_page = data.getAll('from_page')
-            .map(value => parseInt(value.toString()) - 1);
-        const to_page = data.getAll('to_page')
-            .map(value => parseInt(value.toString()));
+        const name = data.get('name');
+        const from_page = data.get('from_page');
+        const to_page = data.get('to_page');
+        
+        const body = { name, from_page, to_page }
 
-        const documents = id.map((id, i) => {
-            const document = { 
-                name: name[i], 
-                from_page: from_page[i], 
-                to_page: to_page[i],
+		if ( ! from_page || ! to_page) {
+			return fail(400, body);
+		}
+
+        const response = await fetch(`${env.API_ENDPOINT}/documents`, {
+            method: 'POST',
+            body: JSON.stringify({
+                file_id: params.id,
+                ...body,
+            }),
+            headers: { 
+                'Content-Type': 'application/json',
+                'Prefer': 'return=representation',
             }
-            // Add file id when creating, or ID when it's set to update
-            return id ? { id: id.toString(), ...document } : { file_id: params.id, ...document };
         })
 
+        const documents = await response.json()
+        const document = documents[0]
+
         const channel = await Channel.connect(cookies)
+        channel.publish('ingest_document', { id: document.id });
+        await channel.close();
 
-        // Update existing documents
-        const to_be_updated = documents.filter(document => 'id' in document);
-        for(const document of to_be_updated) {
-            await fetch(`${env.API_ENDPOINT}/documents?id=eq.${document.id}`, { 
-                method: 'PATCH', 
-                body: JSON.stringify(document),
-                headers: { 'Content-Type': 'application/json' }
-            })
-            channel.publish('ingest_document', { id: document.id });
-        }
-
-        // Bulk insert new ones
-        const to_be_created = documents.filter(document => ! ('id' in document))
-        if(to_be_created.length) {
-            const response = await fetch(`${env.API_ENDPOINT}/documents`, {
-                method: 'POST',
-                body: JSON.stringify(to_be_created),
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Prefer': 'return=representation',
-                }
-            })
-
-            const created_documents = await response.json()
-            for(const document of created_documents) {
-                channel.publish('ingest_document', { id: document.id });
-            }
-        }
-
-        await channel.close()
+		return { success: true };
     },
 
     // Remove a single document

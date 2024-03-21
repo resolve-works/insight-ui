@@ -16,9 +16,7 @@
 <Card>
     <header>
         <h3>
-            {#if documents.length == 0}
-                {name}
-            {:else if documents.length == 1 }
+            {#if documents.length == 1 }
                 <a class="unstyled" href={`/documents/${documents[0].id}`}>
                     {name}
                 </a>

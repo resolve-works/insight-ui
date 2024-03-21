@@ -7,6 +7,8 @@
     import Buttongroup from '$lib/Buttongroup.svelte'
 
     export let data;
+
+    let is_enhanced = false;
 </script>
 
 <Page>
@@ -30,7 +32,7 @@
         </table>
     </section>
 
-    <section>
+    <section class:enhanced={is_enhanced}>
         <h2>Embedded documents</h2>
 
         {#each data.documents as document}
@@ -47,7 +49,9 @@
                     </h3>
 
                     <Buttongroup>
-                        <a class='button' href="/new"><Icon class="gg-pen" /> Edit</a>
+                        <a class='button' href={`/documents/${document.id}/edit`}>
+                            <Icon class="gg-pen" /> Edit
+                        </a>
 
                         <form method="POST" action="?/remove" use:enhance>
                             <input type="hidden" name="id" value={document.id} />
@@ -56,38 +60,49 @@
                     </Buttongroup>
                 </header>
 
-                <p>from page <span>{document.from_page}</span> to page <span>{document.to_page}</span></p>
+                <footer>
+                    <div>
+                        from page 
+                        <span>{document.from_page}</span> 
+                        to page 
+                        <span>{document.to_page}</span>
+                    </div>
+                </footer>
             </Card>
         {/each}
 
         <Card>
-            <form class="form" method="POST" action="?/create" use:enhance>
-                <fieldset>
-                    <input type="text" name="name" placeholder="Document name" />
-                </fieldset>
+            <form method="POST" action="?/create" use:enhance>
+                <header>
+                    <h3>
+                        <input type="text" name="name" placeholder="Document name" />
+                    </h3>
+                </header>
 
-                <fieldset class="lower">
+                <footer>
                     <div>
-                        from page <input type="number" name="from_page" placeholder="1" max="{data.number_of_pages}" /> 
-                        to page <input type="number" name="to_page" min="1" placeholder={data.number_of_pages} />
+                        from page 
+                        <input type="number" name="from_page" placeholder="1" max="{data.number_of_pages}" /> 
+                        to page 
+                        <input type="number" name="to_page" min="1" placeholder={data.number_of_pages} />
                     </div>
 
                     <button class="primary"><Icon class="gg-add" /> Create</button>
-                </fieldset>
+                </footer>
             </form>
         </Card>
     </section>
 </Page>
 
 <style>
-    header {
+    header, footer {
         display: grid;
         grid-template-columns: 1fr auto;
         align-items: center;
     }
 
-    p {
-        margin-top: 0;
+    footer {
+        margin-bottom: 1rem;
     }
 
     span {
@@ -106,17 +121,5 @@
     input[type=number] {
         max-width: 8rem;
         margin: 0 0.5rem;
-    }
-
-    fieldset {
-        margin: 1rem 0;
-        border: none;
-        padding: 0;
-    }
-
-    fieldset.lower {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        align-items: center;
     }
 </style>
