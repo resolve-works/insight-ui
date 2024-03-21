@@ -38,20 +38,16 @@ export async function load({ url, fetch }) {
     return {
         query,
         total: body['hits']['total']['value'],
-        hits: body['hits']['hits'].map(hit => {
+        documents: body['hits']['hits'].map(hit => {
             return {
+                id: hit['_id'],
                 filename: hit['_source']['filename'],
                 pages: hit["inner_hits"]["pages"]["hits"]["hits"]
                     .filter(page => "highlight" in page)
                     .map(page => {
-                        const page_url = new URL(url);
-                        const index = page['_source']['index'] + 1;
-                        page_url.pathname = `/search/${hit['_id']}`;
-                        page_url.searchParams.set('page', index)
-
                         return {
-                            index,
-                            url: page_url.toString(),
+                            // Humans index from 1
+                            index: page['_source']['index'] + 1,
                             highlights: page["highlight"]["pages.contents"],
                         }
                     })

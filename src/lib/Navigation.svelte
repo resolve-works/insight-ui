@@ -3,9 +3,9 @@
     import Icon from '$lib/Icon.svelte';
 
     const items = [
-        { href: "/search", name: "Documents", class: "gg-file-document" },
+        { href: "/documents", name: "Documents", class: "gg-file-document" },
         { href: "/conversations", name: "Conversations", class: "gg-comment" },
-        { href: "/files", name: "Uploads", class: "gg-folder"},
+        { href: "/uploads", name: "Uploads", class: "gg-folder"},
     ]
 </script>
 

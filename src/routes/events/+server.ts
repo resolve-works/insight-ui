@@ -14,8 +14,8 @@ export async function GET({ cookies, locals }) {
     let interval: ReturnType<typeof setInterval>;
 
     // Forward rabbitmq messages for user
-	const readable = new ReadableStream({
-		start(controller) {
+    const readable = new ReadableStream({
+        start(controller) {
             // Pinging ensures that our connection stays alive
             interval = setInterval(() => controller.enqueue(JSON.stringify({ message: 'ping' })), 30000)
 
@@ -31,18 +31,18 @@ export async function GET({ cookies, locals }) {
                     console.log('Consumer cancelled by server');
                 }
             });
-		},
-		cancel() {
+        },
+        cancel() {
             clearInterval(interval)
             connection.close()
-		}
-	});
+        }
+    });
 
-	return new Response(readable, {
-		headers: {
-			'Content-Type': 'text/event-stream',
+    return new Response(readable, {
+        headers: {
+            'Content-Type': 'text/event-stream',
             'Cache-Control': 'no-cache',
             'X-Accel-Buffering': 'no'
-		}
-	});
+        }
+    });
 }

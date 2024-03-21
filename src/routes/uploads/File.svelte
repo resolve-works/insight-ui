@@ -14,7 +14,7 @@
 
 <Card>
     <h3>
-        <a href={`/files/${id}`}>
+        <a href={`/uploads/${id}`}>
             {name}
         </a>
 

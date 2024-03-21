@@ -1,5 +1,5 @@
 <script>
-    import Hit from './Hit.svelte'
+    import Document from './Document.svelte'
     import Search from '$lib/Search.svelte'
     import Page from '$lib/Page.svelte';
     import { page } from '$app/stores';
@@ -47,8 +47,8 @@
 </aside>
 
 <Page class="with-sidebar-left">
-    {#each data.hits as hit }
-        <Hit {...hit} />
+    {#each data.documents as document }
+        <Document {...document} />
     {/each}
 </Page>
 

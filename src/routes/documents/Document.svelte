@@ -2,8 +2,9 @@
 <script lang="ts">
     import Icon from '$lib/Icon.svelte';
     import Card from '$lib/Card.svelte';
+    export let id: string;
     export let filename: string;
-    export let pages: { index: number, url: string, highlights: string[] }[];
+    export let pages: { index: number, highlights: string[] }[];
 </script>
 
 <Card>
@@ -16,7 +17,7 @@
     </h3>
 
     {#each pages as page}
-        <a href="{page.url.toString()}">
+        <a href="{`/documents/${id}?page=${page.index}`}">
             <span class="index">
                 <Icon class="gg-file" />
                 {page.index}
