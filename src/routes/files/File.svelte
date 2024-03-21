@@ -23,7 +23,7 @@
         {:else}
             <form method="POST" action="?/remove" use:enhance>
                 <input type="hidden" name="id" value={id} />
-                <button><Icon class="gg-trash" /></button>
+                <button class="primary"><Icon class="gg-trash" /> Delete</button>
             </form>
         {/if}
     </h3>
@@ -57,13 +57,7 @@
     }
 
     button {
-        padding: 1rem;
         margin: -1rem;
-        border: none;
-    }
-
-    button:hover {
-        color: var(--color-primary);
     }
 </style>
 
