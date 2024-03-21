@@ -28,9 +28,9 @@
                     answer_prompt: ['api:conversations'],
                 }
 
-                if(body.routing_key in mapping) {
+                if('task' in body && body.task in mapping) {
                     // @ts-ignore
-                    for(const key of mapping[body.routing_key]) {
+                    for(const key of mapping[body.task]) {
                         invalidate(key)
                     }
                 }
