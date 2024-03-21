@@ -9,15 +9,17 @@
 
 <Card>
     <h3>
-        {#if filename}
-            {filename}
-        {:else}
-            <span class="unnamed">Unnamed document</span>
-        {/if}
+        <a class="unstyled" href={`/documents/${id}`}>
+            {#if filename}
+                {filename}
+            {:else}
+                <span class="unnamed">Unnamed document</span>
+            {/if}
+        </a>
     </h3>
 
     {#each pages as page}
-        <a href="{`/documents/${id}?page=${page.index}`}">
+        <a class="page" href={`/documents/${id}?page=${page.index}`}>
             <span class="index">
                 <Icon class="gg-file" />
                 {page.index}
@@ -44,7 +46,7 @@
         align-items: center;
     }
 
-    a {
+    .page {
         display: grid;
         grid-template-columns: 3rem auto;
         align-items: top;
@@ -53,7 +55,7 @@
         color: currentColor;
     }
 
-    a:hover span {
+    .page:hover span {
         text-decoration: underline;
         color: var(--color-primary);
     }

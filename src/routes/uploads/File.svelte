@@ -14,7 +14,7 @@
 
 <Card>
     <h3>
-        <a href={`/uploads/${id}`}>
+        <a class="unstyled" href={`/uploads/${id}`}>
             {name}
         </a>
 
@@ -34,16 +34,6 @@
 </Card>
 
 <style>
-    a {
-        text-decoration: none;
-        color: var(--text-color-dark);
-    }
-
-    a:hover {
-        text-decoration: underline;
-        color: var(--color-primary);
-    }
-
     h3 {
         display: grid;
         grid-template-columns: auto auto;

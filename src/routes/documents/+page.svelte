@@ -14,31 +14,9 @@
     </header>
 
     <nav>
-        <h2>{data.total} document{data.total == 1 ? '' : 's'} found</h2>
-
-        <h4>Document type:</h4>
-        <ul>
-            <li>
-                <label>
-                    <input type="checkbox" checked={true}> 
-                    Document
-                </label>
-            </li>
-            <li>
-                <label>
-                    <input type="checkbox" checked={true}> 
-                    Email
-                </label>
-            </li>
-            <li>
-                <label>
-                    <input type="checkbox" checked={true}> 
-                    Presentation
-                </label>
-            </li>
-        </ul>
-
-        <br>
+        <section>
+            <h2>{data.total} document{data.total == 1 ? '' : 's'} found</h2>
+        </section>
 
         <p>
             <a class="button secondary" href="/conversations">Start conversation about these documents</a>
