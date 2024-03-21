@@ -35,7 +35,7 @@
     <section class:enhanced={is_enhanced}>
         <h2>Embedded documents</h2>
 
-        {#each data.documents as document}
+        {#each data.documents as document (document.id)}
             <Card>
                 <header>
                     <h3>
@@ -82,9 +82,9 @@
                 <footer>
                     <div>
                         from page 
-                        <input type="number" name="from_page" placeholder="1" max="{data.number_of_pages}" /> 
+                        <input type="number" name="from_page" placeholder="1" min="1" max="{data.number_of_pages}" /> 
                         to page 
-                        <input type="number" name="to_page" min="1" placeholder={data.number_of_pages} />
+                        <input type="number" name="to_page" placeholder={data.number_of_pages} min="1" max="{data.number_of_pages}" />
                     </div>
 
                     <button class="primary"><Icon class="gg-add" /> Create</button>

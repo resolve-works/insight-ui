@@ -18,7 +18,6 @@
             while (true) {
                 const { value, done } = await reader.read();
                 const body = JSON.parse(value);
-                console.log(body)
 
                 const mapping = {
                     upload_file: ['api:files'],

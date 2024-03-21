@@ -49,7 +49,10 @@ export const actions = {
             method: 'POST',
             body: JSON.stringify({
                 file_id: params.id,
-                ...body,
+                name: body.name,
+                to_page: parseInt(to_page.toString()),
+                // Computers index by 0
+                from_page: parseInt(from_page.toString()) - 1,
             }),
             headers: { 
                 'Content-Type': 'application/json',
