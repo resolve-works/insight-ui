@@ -56,9 +56,12 @@
 
     .buttongroup.enhance .toggle {
         display: block;
+        padding: 0.75rem;
+        border-color: transparent;
     }
 
     .buttongroup.enhance.open .toggle {
+        border-color: var(--input-border-color);
         border-bottom-color: var(--color-white);
         border-bottom-left-radius: 0;
         border-bottom-right-radius: 0;
@@ -74,7 +77,7 @@
         right: 0;
         top: calc(var(--input-border-size) * -1);
         border-radius: var(--input-border-radius);
-        border: var(--input-border-size) solid #B5BEC8;
+        border: var(--input-border-size) solid var(--input-border-color);
     }
 
     .buttongroup.enhance.open .buttons {
@@ -93,7 +96,7 @@
     :global(.buttongroup.enhance .buttons .button),
     :global(.buttongroup.enhance .buttons button) {
         border-color: transparent;
-        border-radius: 0;
+        border-top-right-radius: 0;
         width: 100%;
     }
 </style>
