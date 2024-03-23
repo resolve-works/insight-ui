@@ -20,6 +20,7 @@ export async function handle({ event, resolve }) {
             const tokens = await authorization_code_request(redirect_uri, code)
             await store_tokens(event.cookies, tokens)
         } catch(e) {
+            console.error(e)
             throw redirect_to_oidc_provider(redirect_uri);
         }
 
