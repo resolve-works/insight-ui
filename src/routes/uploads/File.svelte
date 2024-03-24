@@ -27,16 +27,18 @@
             {/if}
         </h3>
 
-        {#if ! is_idle}
-            <Icon class="gg-loadbar" />
-        {:else}
+        <div class="actions">
+            {#if ! is_idle}
+                <Icon class="gg-loadbar" />
+            {/if}
+
             <Buttongroup>
                 <form method="POST" action="?/remove" use:enhance>
                     <input type="hidden" name="id" value={id} />
                     <button><Icon class="gg-trash" /> Delete</button>
                 </form>
             </Buttongroup>
-        {/if}
+        </div>
     </header>
 
     {#if documents.length > 1}
@@ -50,6 +52,12 @@
         grid-template-columns: auto auto;
         align-items: center;
         justify-content: space-between;
+    }
+
+    .actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
     }
 
     p {

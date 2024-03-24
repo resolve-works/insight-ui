@@ -8,8 +8,8 @@
     let is_enhanced = false;
     let is_open = false;
 
-    function close(e) {
-        if( ! element.contains(e.target)) {
+    function close(e: MouseEvent) {
+        if(e.target !== null && ! element.contains(e.target)) {
             is_open = false;
         }
     }
@@ -19,7 +19,7 @@
 
         document.addEventListener('click', close)
         return () => {
-          window.removeEventListener("click", close);
+            document.removeEventListener("click", close);
         }
     })
 </script>

@@ -54,12 +54,6 @@
         border-color: var(--color-subnavigation-darker);
     }
 
-    ul {
-        margin: 0 0 2rem 0;
-        padding: 0;
-        list-style-type: none;
-    }
-
     a.button {
         display: block;
     }
