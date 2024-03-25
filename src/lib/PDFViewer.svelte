@@ -19,7 +19,7 @@
 
         GlobalWorkerOptions.workerSrc = worker_url;
 
-        const pdf = await getDocument(url).promise;
+        const pdf = await getDocument({ url, rangeChunkSize: 2097152 }).promise;
 
         load_page = async (index: number) => {
             const page = await pdf.getPage(index)
