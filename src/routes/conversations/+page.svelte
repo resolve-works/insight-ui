@@ -36,7 +36,7 @@
                             <p>{ prompt.response }</p>
 
                             {#each prompt.sources as source}
-                                <a href="/search/{source.id}?page={source.index - source.from_page + 1}">
+                                <a href="/documents/{source.id}?page={source.index - source.from_page + 1}">
                                     <span>
                                         <Icon class="gg-file" />
                                         {source.index - source.from_page + 1}

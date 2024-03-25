@@ -21,8 +21,8 @@
 
         // When upload is done, strip upload
         xhr.upload.addEventListener("loadend", async () => {
-            uploads.update(uploads => uploads.filter(f => f != upload))
             invalidate('api:files')
+            uploads.update(uploads => uploads.filter(f => f != upload))
         });
 
         xhr.open("POST", '?/upload', true);

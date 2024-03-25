@@ -53,7 +53,7 @@ export const actions = {
 
             const channel = await Channel.connect(cookies)
             channel.publish('analyze_file', { id: file.id });
-            channel.close()
+            await channel.close()
         }
     },
 
