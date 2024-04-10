@@ -9,6 +9,7 @@ export async function load({ params, fetch, cookies }) {
 
     return {
         ...document,
+        number_of_pages: document.to_page - document.from_page,
         url: sign(document.path, cookies),
     }
 }
