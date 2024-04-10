@@ -5,6 +5,7 @@
     export let url: string;
     export let index: number;
 
+    let container: HTMLElement;
     let canvas: HTMLCanvasElement;
     let load_page: Function;
 
@@ -24,7 +25,8 @@
         load_page = async (index: number) => {
             const page = await pdf.getPage(index)
 
-            const scale = 1;
+            const default_viewport = page.getViewport({ scale: 1, });
+            const scale = container.clientWidth / default_viewport.width;
             const viewport = page.getViewport({ scale: scale, });
             // Support HiDPI-screens.
             const outputScale = window.devicePixelRatio || 1;
@@ -48,7 +50,7 @@
     })
 </script>
 
-<article>
+<article bind:this={container}>
     <canvas bind:this={canvas} />
 </article>
 
@@ -56,5 +58,7 @@
     article {
         display: grid;
         justify-content: center;
+        max-width: 80rem;
+        margin: 0 auto;
     }
 </style>
