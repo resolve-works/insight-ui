@@ -2,11 +2,14 @@
     import { onMount } from 'svelte';
     import worker_url from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
+    import 'pdfjs-dist/web/pdf_viewer.css'
+
     export let url: string;
     export let index: number;
 
     let container: HTMLElement;
     let canvas: HTMLCanvasElement;
+    let text: HTMLElement;
     let load_page: Function;
 
     $: {
@@ -16,7 +19,7 @@
     }
 
     onMount(async () => {
-        const { getDocument, GlobalWorkerOptions } = await import('pdfjs-dist');
+        const { getDocument, GlobalWorkerOptions, renderTextLayer } = await import('pdfjs-dist');
 
         GlobalWorkerOptions.workerSrc = worker_url;
 
@@ -46,19 +49,29 @@
               : undefined;
 
             page.render({ canvasContext: context, transform, viewport });
+
+            text.style.setProperty('--scale-factor', scale.toString());
+
+            renderTextLayer({
+                textContentSource: await page.getTextContent(),
+                container: text,
+                viewport,
+            });
         }
     })
 </script>
 
 <article bind:this={container}>
     <canvas bind:this={canvas} />
+
+    <div class="textLayer" bind:this={text}></div>
 </article>
 
 <style>
     article {
-        display: grid;
+        position: relative;
         justify-content: center;
-        max-width: 80rem;
+        max-width: 75rem;
         margin: 0 auto;
     }
 </style>
