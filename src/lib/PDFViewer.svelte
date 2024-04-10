@@ -50,6 +50,7 @@
 
             page.render({ canvasContext: context, transform, viewport });
 
+            text.innerHTML = '';
             text.style.setProperty('--scale-factor', scale.toString());
 
             renderTextLayer({
