@@ -53,7 +53,15 @@
         </div>
     </header>
 
-    <PDFViewer url={data.url} index={$page} />
+    <div class="container">
+        <PDFViewer url={data.url} index={$page} />
+
+        <button class="cover-button" on:click|preventDefault={decrease}>
+        </button>
+
+        <button class="cover-button" on:click|preventDefault={increase}>
+        </button>
+    </div>
 </Page>
 
 <style>
@@ -70,12 +78,28 @@
         overflow-x: hidden;
     }
 
-    div {
+    .buttons,
+    .page {
         display: flex;
         gap: 0.5rem;
     }
 
     input {
         max-width: 8rem;
+    }
+
+    .container {
+        position: relative;
+    }
+
+    .cover-button {
+        position: absolute;
+        opacity: 0;
+        width: 50%;
+        top: 0;
+        bottom: 0;
+    }
+    .cover-button:last-child {
+        right: 0;
     }
 </style>

@@ -62,17 +62,17 @@
     })
 </script>
 
-<article bind:this={container}>
+<div class="viewer" bind:this={container}>
     <canvas bind:this={canvas} />
 
     <div class="textLayer" bind:this={text}></div>
-</article>
+</div>
 
 <style>
-    article {
+    .viewer {
         position: relative;
         justify-content: center;
-        max-width: 75rem;
+        max-width: 64rem;
         margin: 0 auto;
     }
 </style>
