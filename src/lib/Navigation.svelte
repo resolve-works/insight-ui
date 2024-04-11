@@ -73,4 +73,8 @@
         border-top: 1px solid var(--color-navigation-lighter);
         border-bottom: 1px solid var(--color-navigation-darker);
     }
+
+    form > button {
+        height: 100%;
+    }
 </style>
