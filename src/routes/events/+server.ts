@@ -13,11 +13,11 @@ export async function GET({ cookies, locals }) {
 
     // Forward rabbitmq messages for user
     const readable = new ReadableStream({
-        start(controller) {
+        async start(controller) {
             // Pinging ensures that our connection stays alive
             interval = setInterval(() => controller.enqueue(JSON.stringify({ ping: true })), 30000)
 
-            channel.consume(queue, (message) => {
+            await channel.consume(queue, (message) => {
                 if (message !== null) {
                     controller.enqueue(message.content.toString())
                     channel.ack(message);
@@ -26,9 +26,9 @@ export async function GET({ cookies, locals }) {
                 }
             });
         },
-        cancel() {
+        async cancel() {
             clearInterval(interval)
-            connection.close()
+            await connection.close()
         }
     });
 
