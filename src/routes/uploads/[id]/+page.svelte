@@ -48,16 +48,22 @@
                         </a>
                     </h3>
 
-                    <Buttongroup>
-                        <a class='button' href={`/documents/${document.id}/edit`}>
-                            <Icon class="gg-pen" /> Edit
-                        </a>
+                    <div class="actions">
+                        {#if ! document.is_ingested || ! document.is_embedded || ! document.is_indexed }
+                            <Icon class="gg-loadbar" />
+                        {/if}
 
-                        <form method="POST" action="?/remove" use:enhance>
-                            <input type="hidden" name="id" value={document.id} />
-                            <button><Icon class="gg-trash" /> Delete</button>
-                        </form>
-                    </Buttongroup>
+                        <Buttongroup>
+                            <a class='button' href={`/documents/${document.id}/edit`}>
+                                <Icon class="gg-pen" /> Edit
+                            </a>
+
+                            <form method="POST" action="?/remove" use:enhance>
+                                <input type="hidden" name="id" value={document.id} />
+                                <button><Icon class="gg-trash" /> Delete</button>
+                            </form>
+                        </Buttongroup>
+                    </div>
                 </header>
 
                 <footer>
@@ -111,6 +117,12 @@
 
     .unnamed {
         color: var(--text-color-page);
+    }
+
+    .actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
     }
 
     input[type=text] {
