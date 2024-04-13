@@ -7,10 +7,9 @@
 
     export let id: string;
     export let name: string;
-    export let status: string;
     export let documents: { id: string, name: string, status: string }[] = []
 
-    $: is_idle = ! status && documents.every(document => ! document.status);
+    $: is_processing = documents.some(document => document.is_ingesting || document.is_indexing || document.is_embedding);
 </script>
 
 <Card>
@@ -28,7 +27,7 @@
         </h3>
 
         <div class="actions">
-            {#if ! is_idle}
+            {#if is_processing}
                 <Icon class="gg-loadbar" />
             {/if}
 
