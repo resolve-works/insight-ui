@@ -6,7 +6,7 @@ import { Channel } from '$lib/amqp.js';
 export async function load({ fetch, depends }) {
     depends('api:files')
 
-    const res = await fetch(`${env.API_ENDPOINT}/files?is_uploaded=eq.true&select=id,name,documents(id,name,is_ingested,is_indexed,is_embedded)&order=created_at.desc`)
+    const res = await fetch(`${env.API_ENDPOINT}/files?is_uploaded=eq.true&select=id,name,number_of_pages,documents(id,name,is_ingested,is_indexed,is_embedded)&order=created_at.desc`)
 
     const files = await res.json()
     return { files }

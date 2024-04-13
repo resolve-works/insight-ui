@@ -78,6 +78,7 @@
         top: calc(var(--input-border-size) * -1);
         border-radius: var(--input-border-radius);
         border: var(--input-border-size) solid var(--input-border-color);
+        background: var(--color-white);
     }
 
     .buttongroup.enhance.open .buttons {
@@ -85,6 +86,8 @@
     }
 
     :global(.buttongroup.enhance.open .buttons > *) {
+        background: transparent;
+        border-radius: 0;
         border-bottom: var(--input-border-size) solid #B5BEC8 !important;
     }
 

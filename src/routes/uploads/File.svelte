@@ -7,9 +7,15 @@
 
     export let id: string;
     export let name: string;
+    export let number_of_pages: number | undefined;
     export let documents: { id: string, name: string, status: string }[] = []
 
-    $: is_processing = documents.some(document => document.is_ingesting || document.is_indexing || document.is_embedding);
+    const is_document_processing = (document: Record<string, any>) => {
+        return document.is_ingesting || document.is_indexing || document.is_embedding
+    }
+
+    // If number_of_pages is not set, file is being analyzed still
+    $: is_processing = ! number_of_pages || documents.some(is_document_processing);
 </script>
 
 <Card>
@@ -32,6 +38,18 @@
             {/if}
 
             <Buttongroup>
+                {#if documents.length == 1 }
+                    <a class="button" href={`/documents/${documents[0].id}/edit`}>
+                        <Icon class="gg-pen" />
+                        Edit
+                    </a>
+
+                    <a class="button" href={`/uploads/${id}`}>
+                        <Icon class="gg-copy" />
+                        Split
+                    </a>
+                {/if}
+
                 <form method="POST" action="?/remove" use:enhance>
                     <input type="hidden" name="id" value={id} />
                     <button><Icon class="gg-trash" /> Delete</button>
