@@ -19,7 +19,7 @@ export async function GET({ cookies, locals }) {
 
             await channel.consume(queue, (message) => {
                 if (message !== null) {
-                    controller.enqueue(message.content.toString())
+                    controller.enqueue(message.content.toString() + '\n\n')
                     channel.ack(message);
                 } else {
                     console.log('Consumer cancelled by server');

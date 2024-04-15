@@ -23,7 +23,8 @@ export async function load({ params, fetch, cookies, depends }) {
         documents: documents.map((document: Record<string, any>) => {
             return { 
                 ...document, 
-                from_page: document.from_page + 1 
+                from_page: document.from_page + 1,
+                is_ready: document.is_ingested && document.is_indexed && document.is_embedded,
             }
         }),
         url: sign(path, cookies) 

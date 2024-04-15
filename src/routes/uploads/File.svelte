@@ -10,12 +10,12 @@
     export let number_of_pages: number | undefined;
     export let documents: { id: string, name: string, status: string }[] = []
 
-    const is_document_processing = (document: Record<string, any>) => {
-        return document.is_ingesting || document.is_indexing || document.is_embedding
+    const document_is_ready = (document: Record<string, any>) => {
+        return document.is_ingested && document.is_indexed && document.is_embedded
     }
 
     // If number_of_pages is not set, file is being analyzed still
-    $: is_processing = ! number_of_pages || documents.some(is_document_processing);
+    $: is_ready = number_of_pages !== undefined && documents.every(document_is_ready);
 </script>
 
 <Card>
@@ -33,7 +33,7 @@
         </h3>
 
         <div class="actions">
-            {#if is_processing}
+            {#if ! is_ready}
                 <Icon class="gg-loadbar" />
             {/if}
 

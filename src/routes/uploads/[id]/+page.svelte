@@ -7,8 +7,6 @@
     import Buttongroup from '$lib/Buttongroup.svelte'
 
     export let data;
-
-    let is_enhanced = false;
 </script>
 
 <Page>
@@ -32,7 +30,7 @@
         </table>
     </section>
 
-    <section class:enhanced={is_enhanced}>
+    <section>
         <h2>Embedded documents</h2>
 
         {#each data.documents as document (document.id)}
@@ -49,7 +47,7 @@
                     </h3>
 
                     <div class="actions">
-                        {#if ! document.is_ingested || ! document.is_embedded || ! document.is_indexed }
+                        {#if ! document.is_ready }
                             <Icon class="gg-loadbar" />
                         {/if}
 
