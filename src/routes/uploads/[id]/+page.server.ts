@@ -1,10 +1,12 @@
 import { fail } from '@sveltejs/kit';
+import { z } from 'zod';
 import { env } from '$env/dynamic/private'
 import type { Actions } from './$types';
+import { sign } from '$lib/sign';
+import { Channel } from '$lib/amqp';
 
-import { sign } from '$lib/sign.ts';
-import { Channel } from '$lib/amqp.ts';
-
+const schema = (number_of_pages: number) => {
+}
 export async function load({ params, fetch, cookies, depends }) {
     depends('api:files')
 
@@ -14,7 +16,7 @@ export async function load({ params, fetch, cookies, depends }) {
 
     return { 
         name,
-        number_of_pages, 
+        number_of_pages,
         // Humans index from 1
         //
         // When you say "to 137" to a human, they expect 137 to be in the
@@ -27,48 +29,81 @@ export async function load({ params, fetch, cookies, depends }) {
                 is_ready: document.is_ingested && document.is_indexed && document.is_embedded,
             }
         }),
-        url: sign(path, cookies) 
+        url: sign(path, cookies),
     }
 }
 
 export const actions = {
     // Create new document
     create: async ({ request, fetch, params, cookies }) => {
-        const data = await request.formData();
+        const res = await fetch(`${env.API_ENDPOINT}/files?id=eq.${params.id}&select=number_of_pages`)
+        const files = await res.json();
+        const { number_of_pages } = files[0];
 
-        const name = data.get('name');
-        const from_page = data.get('from_page');
-        const to_page = data.get('to_page');
-        
-        const body = { name, from_page, to_page }
+        const schema = z
+            .object({
+                name: z.string(),
+                from_page: z.coerce.number().int().gte(1).lte(number_of_pages),
+                to_page: z.coerce.number().int().gte(1).lte(number_of_pages),
+            })
+            .required({ from_page: true, to_page: true })
+            .superRefine((data, context) => {
+                if(data.from_page > data.to_page) {
+                    context.addIssue({
+                        message: "Number must be smaller or equal to last page",
+                        path: ["from_page"],
+                        code: z.ZodIssueCode.too_big,
+                        type: "number",
+                        maximum: data.to_page,
+                        inclusive: true,
+                    })
+                    context.addIssue({
+                        message: "Number must be greater or equal to first page",
+                        path: ["to_page"],
+                        code: z.ZodIssueCode.too_small,
+                        type: "number",
+                        minimum: data.from_page,
+                        inclusive: true,
+                    })
+                }
+            })
 
-		if ( ! from_page || ! to_page) {
-			return fail(400, body);
-		}
+        const form_data = Object.fromEntries((await request.formData()).entries())
 
-        const response = await fetch(`${env.API_ENDPOINT}/documents`, {
-            method: 'POST',
-            body: JSON.stringify({
-                file_id: params.id,
-                name: body.name,
-                to_page: parseInt(to_page.toString()),
-                // Computers index by 0
-                from_page: parseInt(from_page.toString()) - 1,
-            }),
-            headers: { 
-                'Content-Type': 'application/json',
-                'Prefer': 'return=representation',
+        try {
+            const data = schema.parse(form_data)
+
+            const response = await fetch(`${env.API_ENDPOINT}/documents`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    file_id: params.id,
+                    name: data.name,
+                    to_page: data.to_page,
+                    // Computers index by 0
+                    from_page: data.from_page - 1,
+                }),
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=representation',
+                }
+            })
+
+            const documents = await response.json()
+            const document = documents[0]
+
+            const channel = await Channel.connect(cookies)
+            channel.publish('ingest_document', { id: document.id });
+            await channel.close();
+        } catch(err) {
+            if( ! (err instanceof z.ZodError)) {
+                throw err
             }
-        })
 
-        const documents = await response.json()
-        const document = documents[0]
-
-        const channel = await Channel.connect(cookies)
-        channel.publish('ingest_document', { id: document.id });
-        await channel.close();
-
-		return { success: true };
+            return fail(400, { 
+                data: form_data, 
+                errors: err.format() 
+            })
+        }
     },
 
     // Remove a single document

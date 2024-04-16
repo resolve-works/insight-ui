@@ -47,6 +47,7 @@
         --input-border-size: 0.125rem;
         --input-border-radius: 0.4rem;
         --input-border-color: #D0D5DC;
+        --invalid-input-border-color: var(--color-primary);
 
         --font-body: 'Rubik Variable', sans-serif;
         --font-heading: 'Roboto Slab Variable', sans-serif;
@@ -143,6 +144,11 @@
         border-radius: var(--input-border-radius);
         border: var(--input-border-size) solid var(--input-border-color);
         background: var(--text-color-light);
+    }
+
+    textarea.invalid,
+    input.invalid {
+        border-color: var(--invalid-input-border-color);
     }
 
     textarea:disabled,
