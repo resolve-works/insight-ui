@@ -4,15 +4,17 @@
     import Page from '$lib/Page.svelte';
     import Card from '$lib/Card.svelte';
     import Icon from '$lib/Icon.svelte';
+    import Unnamed from '$lib/Unnamed.svelte';
     import Buttongroup from '$lib/Buttongroup.svelte'
     import ValidationErrors from '$lib/ValidationErrors.svelte';
+    import Section from '$lib/Section.svelte';
 
     export let data;
     export let form;
 </script>
 
 <Page>
-    <section>
+    <Section>
         <header>
             <h2>
                 {data.name}
@@ -30,20 +32,20 @@
                 <td>{data.number_of_pages}</td>
             </tr>
         </table>
-    </section>
+    </Section>
 
-    <section>
+    <Section>
         <h2>Embedded documents</h2>
 
         {#each data.documents as document (document.id)}
             <Card>
-                <header>
-                    <h3>
+                <div class="document">
+                    <h3 class="no-text-overflow">
                         <a class="unstyled" href={`/documents/${document.id}`}>
                             {#if document.name}
                                 {document.name}
                             {:else}
-                                <span class="unnamed">Unnamed document</span>
+                                <Unnamed>Unnamed document</Unnamed>
                             {/if}
                         </a>
                     </h3>
@@ -64,41 +66,42 @@
                             </form>
                         </Buttongroup>
                     </div>
-                </header>
 
-                <footer>
                     <div>
                         from page 
                         <span>{document.from_page}</span> 
                         to page 
                         <span>{document.to_page}</span>
                     </div>
-                </footer>
+                </div>
             </Card>
         {/each}
 
         <Card>
             <form method="POST" action="?/create" use:enhance>
-                <header>
-                    <h3>
-                        <input 
-                            type="text" 
-                            name="name" 
-                            placeholder="Document name" 
-                            />
-                    </h3>
-                </header>
+                {#if form?.errors.from_page?._errors}
+                    <ValidationErrors title="From page" errors={form?.errors.from_page?._errors} />
+                {/if}
+                {#if form?.errors.to_page?._errors}
+                    <ValidationErrors title="To page" errors={form?.errors.to_page?._errors} />
+                {/if}
 
-                <footer>
+                <div class="document">
+                    <input 
+                        type="text" 
+                        name="name" 
+                        placeholder="Document name" 
+                        />
+
                     <div>
                         from page 
                         <input 
                             type="number" 
                             name="from_page" 
-                            class:invalid={form && "from_page" in form?.errors}
                             placeholder="1"
                             min="1"
                             max={data.number_of_pages}
+                            class:invalid={form && "from_page" in form?.errors}
                             value={form?.data.from_page}
                             /> 
                         to page 
@@ -114,47 +117,36 @@
                     </div>
 
                     <button class="primary"><Icon class="gg-add" /> Create</button>
-                </footer>
-
-                {#if form?.errors.from_page?._errors}
-                    <ValidationErrors title="From page" errors={form?.errors.from_page?._errors} />
-                {/if}
-                {#if form?.errors.to_page?._errors}
-                    <ValidationErrors title="To page" errors={form?.errors.to_page?._errors} />
-                {/if}
+                </div>
             </form>
         </Card>
-    </section>
+    </Section>
 </Page>
 
 <style>
-    header, footer {
+    header,
+    .document {
         display: grid;
         grid-template-columns: 1fr auto;
         align-items: center;
     }
 
-    footer {
-        margin-bottom: 1rem;
+    .document input[type=text] {
+        grid-column: 1 / 3;
+    }
+
+    .document {
+        padding-bottom: 1rem;
     }
 
     span {
         font-weight: bold;
     }
 
-    .unnamed {
-        color: var(--text-color-page);
-    }
-
-    .actions {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
     input[type=text] {
         width: 100%;
         max-width: 50rem;
+        margin: 1rem 0;
     }
 
     input[type=number] {

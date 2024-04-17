@@ -2,6 +2,7 @@
 <script lang="ts">
     import Icon from '$lib/Icon.svelte';
     import Card from '$lib/Card.svelte';
+    import Unnamed from '$lib/Unnamed.svelte';
     export let id: string;
     export let filename: string;
     export let pages: { index: number, highlights: string[] }[];
@@ -13,7 +14,7 @@
             {#if filename}
                 {filename}
             {:else}
-                <span class="unnamed">Unnamed document</span>
+                <Unnamed>Unnamed document</Unnamed>
             {/if}
         </a>
     </h3>
@@ -35,10 +36,6 @@
 </Card>
 
 <style>
-    .unnamed {
-        color: var(--text-color-page);
-    }
-
     .index {
         display: grid;
         height: 2rem;

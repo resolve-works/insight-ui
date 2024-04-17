@@ -2,6 +2,7 @@
     import Document from './Document.svelte'
     import Search from '$lib/Search.svelte'
     import Page from '$lib/Page.svelte';
+    import Section from '$lib/Section.svelte';
     import { page } from '$app/stores';
     const query = $page.url.searchParams.get('query') || ''
 
@@ -14,9 +15,9 @@
     </header>
 
     <nav>
-        <section>
+        <Section>
             <h2>{data.total} document{data.total == 1 ? '' : 's'} found</h2>
-        </section>
+        </Section>
 
         <p>
             <a class="button secondary" href="/conversations">Start conversation about these documents</a>

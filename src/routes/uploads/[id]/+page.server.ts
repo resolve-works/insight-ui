@@ -4,9 +4,8 @@ import { env } from '$env/dynamic/private'
 import type { Actions } from './$types';
 import { sign } from '$lib/sign';
 import { Channel } from '$lib/amqp';
+import { pagerange_schema, name_schema, pagerange_refinement } from '$lib/validation/document';
 
-const schema = (number_of_pages: number) => {
-}
 export async function load({ params, fetch, cookies, depends }) {
     depends('api:files')
 
@@ -40,33 +39,9 @@ export const actions = {
         const files = await res.json();
         const { number_of_pages } = files[0];
 
-        const schema = z
-            .object({
-                name: z.string(),
-                from_page: z.coerce.number().int().gte(1).lte(number_of_pages),
-                to_page: z.coerce.number().int().gte(1).lte(number_of_pages),
-            })
-            .required({ from_page: true, to_page: true })
-            .superRefine((data, context) => {
-                if(data.from_page > data.to_page) {
-                    context.addIssue({
-                        message: "Number must be smaller or equal to last page",
-                        path: ["from_page"],
-                        code: z.ZodIssueCode.too_big,
-                        type: "number",
-                        maximum: data.to_page,
-                        inclusive: true,
-                    })
-                    context.addIssue({
-                        message: "Number must be greater or equal to first page",
-                        path: ["to_page"],
-                        code: z.ZodIssueCode.too_small,
-                        type: "number",
-                        minimum: data.from_page,
-                        inclusive: true,
-                    })
-                }
-            })
+        const schema = pagerange_schema(number_of_pages)
+            .merge(name_schema)
+            .superRefine(pagerange_refinement)
 
         const form_data = Object.fromEntries((await request.formData()).entries())
 
@@ -78,9 +53,9 @@ export const actions = {
                 body: JSON.stringify({
                     file_id: params.id,
                     name: data.name,
-                    to_page: data.to_page,
                     // Computers index by 0
                     from_page: data.from_page - 1,
+                    to_page: data.to_page,
                 }),
                 headers: { 
                     'Content-Type': 'application/json',

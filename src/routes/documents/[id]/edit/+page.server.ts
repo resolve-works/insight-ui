@@ -3,9 +3,11 @@ import { Channel } from '$lib/amqp.js';
 import type { Actions } from '@sveltejs/kit';
 import { fail } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private'
+import { z } from 'zod';
+import { name_schema, pagerange_schema, pagerange_refinement } from '$lib/validation/document'
 
 export async function load({ params, fetch }) {
-    const res = await fetch(`${env.API_ENDPOINT}/documents?id=eq.${params.id}&select=id,name,from_page,to_page,file_id,files(number_of_pages,name)`)
+    const res = await fetch(`${env.API_ENDPOINT}/documents?id=eq.${params.id}&select=id,name,from_page,to_page,is_ingested,is_indexed,is_embedded,file_id,files(number_of_pages,name)`)
     const documents = await res.json();
     const document = documents[0]
 
@@ -31,29 +33,36 @@ export const actions = {
     },
 
     update_split: async ({ request, fetch, params, cookies }) => {
-        const data = await request.formData();
+        const res = await fetch(`${env.API_ENDPOINT}/documents?id=eq.${params.id}&select=files(number_of_pages)`)
+        const documents = await res.json();
+        const { number_of_pages } = documents[0].files
 
-        const from_page = data.get('from_page');
-        const to_page = data.get('to_page');
-        
-		if ( ! from_page || ! to_page) {
-			return fail(400, { name, from_page, to_page });
-		}
+        const schema = pagerange_schema(number_of_pages)
+            .superRefine(pagerange_refinement)
 
-        const body = {
-            to_page: parseInt(to_page.toString()),
-            // Computers index by 0
-            from_page: parseInt(from_page.toString()) - 1,
+        const form_data = Object.fromEntries((await request.formData()).entries())
+
+        try {
+            const data = schema.parse(form_data)
+
+            const response = await fetch(`${env.API_ENDPOINT}/documents`, {
+                method: 'PATCH',
+                body: JSON.stringify({ from_page: data.from_page - 1, to_page: data.to_page }),
+                headers: { 'Content-Type': 'application/json' }
+            })
+
+            const channel = await Channel.connect(cookies)
+            channel.publish('ingest_document', { id: params.id });
+            await channel.close();
+        } catch(err) {
+            if( ! (err instanceof z.ZodError)) {
+                throw err
+            }
+
+            return fail(400, { 
+                data: form_data, 
+                errors: err.format() 
+            })
         }
-
-        const response = await fetch(`${env.API_ENDPOINT}/documents`, {
-            method: 'PATCH',
-            body: JSON.stringify(body),
-            headers: { 'Content-Type': 'application/json' }
-        })
-
-        const channel = await Channel.connect(cookies)
-        channel.publish('ingest_document', { id: params.id });
-        await channel.close();
     }
 } satisfies Actions;

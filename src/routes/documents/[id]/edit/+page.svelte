@@ -4,15 +4,25 @@
     import Page from '$lib/Page.svelte';
     import Icon from '$lib/Icon.svelte';
     import Card from '$lib/Card.svelte';
+    import Unnamed from '$lib/Unnamed.svelte';
+    import ValidationErrors from '$lib/ValidationErrors.svelte';
+    import Section from '$lib/Section.svelte';
 
-    export let data: Record<any, any>;
+    export let data;
+    export let form;
 </script>
 
 <Page>
-    <section>
-        <h2>
-            Edit document
-        </h2>
+    <Section>
+        <div class="grid">
+            <h2 class="no-text-overflow">
+                {#if data.name}
+                    Edit "{data.name}"
+                {:else}
+                    Edit "<Unnamed>Unnamed Document</Unnamed>"
+                {/if}
+            </h2>
+        </div>
 
         <Card>
             <form method="POST" action="?/update_name" use:enhance={() => async ({ update }) => update({ reset: false })}>
@@ -21,7 +31,7 @@
                 <button class="primary"><Icon class="gg-pen" /> Change name</button>
             </form>
         </Card>
-    </section>
+    </Section>
 
     <h2>
         {#if data.is_whole_document }
@@ -40,12 +50,35 @@
     </p>
 
     <Card>
+        {#if form?.errors.from_page?._errors}
+            <ValidationErrors title="From page" errors={form?.errors.from_page?._errors} />
+        {/if}
+        {#if form?.errors.to_page?._errors}
+            <ValidationErrors title="To page" errors={form?.errors.to_page?._errors} />
+        {/if}
+
         <form method="POST" action="?/update_split" use:enhance={() => async ({ update }) => update({ reset: false })}>
             <div>
                 from page 
-                <input type="number" name="from_page" placeholder="1" value={data.from_page} min="1" max="{data.files.number_of_pages}" /> 
+                <input 
+                    type="number" 
+                    name="from_page" 
+                    placeholder="1"
+                    min="1"
+                    max={data.files.number_of_pages}
+                    class:invalid={form && "from_page" in form?.errors}
+                    value={form?.data.from_page ?? data.from_page}
+                    /> 
                 to page 
-                <input type="number" name="to_page" min="1" max="{data.files.number_of_pages}" value={data.to_page} placeholder={data.files.number_of_pages} />
+                <input 
+                    type="number" 
+                    name="to_page" 
+                    class:invalid={form && "to_page" in form?.errors}
+                    placeholder="{data.files.number_of_pages}"
+                    min="1"
+                    max={data.files.number_of_pages}
+                    value={form?.data.to_page ?? data.to_page}
+                    />
             </div>
 
             <button class="primary"><Icon class="gg-copy" /> Update split</button>
@@ -54,13 +87,18 @@
 </Page>
 
 <style>
+    .grid {
+        display: grid;
+    }
+
     form {
         display: grid;
         grid-template-columns: 1fr auto;
         align-items: center;
     }
 
-    form {
+    input,
+    button {
         margin: 1rem 0;
     }
 
@@ -71,6 +109,6 @@
 
     input[type=number] {
         max-width: 8rem;
-        margin: 0 0.5rem;
+        margin: 1rem 0.5rem;
     }
 </style>
