@@ -9,7 +9,7 @@ import { pagerange_schema, name_schema, pagerange_refinement } from '$lib/valida
 export async function load({ params, fetch, cookies, depends }) {
     depends('api:files')
 
-    const res = await fetch(`${env.API_ENDPOINT}/files?id=eq.${params.id}&select=name,path,number_of_pages,documents(id,name,path,from_page,to_page,is_ingested,is_embedded,is_indexed)`)
+    const res = await fetch(`${env.API_ENDPOINT}/files?id=eq.${params.id}&select=name,path,number_of_pages,documents(id,name,path,from_page,to_page,is_ready)`)
     const files = await res.json();
     const { name, path, documents, number_of_pages } = files[0]
 
@@ -25,7 +25,6 @@ export async function load({ params, fetch, cookies, depends }) {
             return { 
                 ...document, 
                 from_page: document.from_page + 1,
-                is_ready: document.is_ingested && document.is_indexed && document.is_embedded,
             }
         }),
         url: sign(path, cookies),

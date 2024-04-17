@@ -79,10 +79,10 @@
 
         <Card>
             <form method="POST" action="?/create" use:enhance>
-                {#if form?.errors.from_page?._errors}
+                {#if form?.errors?.from_page?._errors}
                     <ValidationErrors title="From page" errors={form?.errors.from_page?._errors} />
                 {/if}
-                {#if form?.errors.to_page?._errors}
+                {#if form?.errors?.to_page?._errors}
                     <ValidationErrors title="To page" errors={form?.errors.to_page?._errors} />
                 {/if}
 
@@ -101,18 +101,18 @@
                             placeholder="1"
                             min="1"
                             max={data.number_of_pages}
-                            class:invalid={form && "from_page" in form?.errors}
-                            value={form?.data.from_page}
+                            class:invalid={form?.errors && "from_page" in form?.errors}
+                            value={form?.data?.from_page}
                             /> 
                         to page 
                         <input 
                             type="number" 
                             name="to_page" 
-                            class:invalid={form && "to_page" in form?.errors}
+                            class:invalid={form?.errors && "to_page" in form?.errors}
                             placeholder="{data.number_of_pages}"
                             min="1"
                             max={data.number_of_pages}
-                            value={form?.data.to_page}
+                            value={form?.data?.to_page}
                             />
                     </div>
 
@@ -137,6 +137,12 @@
 
     .document {
         padding-bottom: 1rem;
+    }
+
+    .actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
     }
 
     span {

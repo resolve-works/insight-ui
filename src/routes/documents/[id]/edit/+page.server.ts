@@ -6,8 +6,10 @@ import { env } from '$env/dynamic/private'
 import { z } from 'zod';
 import { name_schema, pagerange_schema, pagerange_refinement } from '$lib/validation/document'
 
-export async function load({ params, fetch }) {
-    const res = await fetch(`${env.API_ENDPOINT}/documents?id=eq.${params.id}&select=id,name,from_page,to_page,is_ingested,is_indexed,is_embedded,file_id,files(number_of_pages,name)`)
+export async function load({ params, fetch, depends }) {
+    depends('api:documents')
+
+    const res = await fetch(`${env.API_ENDPOINT}/documents?id=eq.${params.id}&select=id,name,from_page,to_page,is_ready,file_id,files(number_of_pages,name)`)
     const documents = await res.json();
     const document = documents[0]
 
@@ -21,20 +23,35 @@ export async function load({ params, fetch }) {
 
 export const actions = {
     update_name: async ({ request, fetch, params, cookies }) => {
-        const data = await request.formData();
+        const form_data = Object.fromEntries((await request.formData()).entries())
 
-        const name = data.get('name');
+        const res = await fetch(`${env.API_ENDPOINT}/documents?id=eq.${params.id}&select=name`)
+        const documents = await res.json();
+        const { name } = documents[0]
 
-        const response = await fetch(`${env.API_ENDPOINT}/documents`, {
+        const data = name_schema.parse(form_data);
+
+        if(data.name == name) {
+            return {}
+        }
+
+        const response = await fetch(`${env.API_ENDPOINT}/documents?id=eq.${params.id}`, {
             method: 'PATCH',
-            body: JSON.stringify({ name }),
+            body: JSON.stringify(data),
             headers: { 'Content-Type': 'application/json' }
         })
+
+        const channel = await Channel.connect(cookies)
+        channel.publish('index_document', { id: params.id });
+        await channel.close();
+
+        return {}
     },
 
     update_split: async ({ request, fetch, params, cookies }) => {
-        const res = await fetch(`${env.API_ENDPOINT}/documents?id=eq.${params.id}&select=files(number_of_pages)`)
+        const res = await fetch(`${env.API_ENDPOINT}/documents?id=eq.${params.id}&select=from_page,to_page,files(number_of_pages)`)
         const documents = await res.json();
+        const { from_page, to_page } = documents[0]
         const { number_of_pages } = documents[0].files
 
         const schema = pagerange_schema(number_of_pages)
@@ -44,16 +61,25 @@ export const actions = {
 
         try {
             const data = schema.parse(form_data)
+            // Computers index from 0
+            data.from_page = data.from_page - 1;
 
-            const response = await fetch(`${env.API_ENDPOINT}/documents`, {
+            // Don't update when nothing changed
+            if(data.from_page == from_page && data.to_page == to_page) {
+                return { success: true }
+            }
+
+            const response = await fetch(`${env.API_ENDPOINT}/documents?id=eq.${params.id}`, {
                 method: 'PATCH',
-                body: JSON.stringify({ from_page: data.from_page - 1, to_page: data.to_page }),
+                body: JSON.stringify(data),
                 headers: { 'Content-Type': 'application/json' }
             })
 
             const channel = await Channel.connect(cookies)
             channel.publish('ingest_document', { id: params.id });
             await channel.close();
+
+            return {}
         } catch(err) {
             if( ! (err instanceof z.ZodError)) {
                 throw err

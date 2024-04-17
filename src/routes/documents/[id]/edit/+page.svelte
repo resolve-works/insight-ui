@@ -28,7 +28,9 @@
             <form method="POST" action="?/update_name" use:enhance={() => async ({ update }) => update({ reset: false })}>
                 <input type="text" name="name" placeholder="Document name" value={data.name} />
 
-                <button class="primary"><Icon class="gg-pen" /> Change name</button>
+                <button class="primary" disabled={ ! data.is_ready }>
+                    <Icon class="gg-pen" /> Change name
+                </button>
             </form>
         </Card>
     </Section>
@@ -50,10 +52,10 @@
     </p>
 
     <Card>
-        {#if form?.errors.from_page?._errors}
+        {#if form?.errors?.from_page?._errors}
             <ValidationErrors title="From page" errors={form?.errors.from_page?._errors} />
         {/if}
-        {#if form?.errors.to_page?._errors}
+        {#if form?.errors?.to_page?._errors}
             <ValidationErrors title="To page" errors={form?.errors.to_page?._errors} />
         {/if}
 
@@ -66,22 +68,30 @@
                     placeholder="1"
                     min="1"
                     max={data.files.number_of_pages}
-                    class:invalid={form && "from_page" in form?.errors}
-                    value={form?.data.from_page ?? data.from_page}
+                    class:invalid={form?.errors && "from_page" in form?.errors}
+                    value={form?.data?.from_page ?? data.from_page}
                     /> 
                 to page 
                 <input 
                     type="number" 
                     name="to_page" 
-                    class:invalid={form && "to_page" in form?.errors}
+                    class:invalid={form?.errors && "to_page" in form?.errors}
                     placeholder="{data.files.number_of_pages}"
                     min="1"
                     max={data.files.number_of_pages}
-                    value={form?.data.to_page ?? data.to_page}
+                    value={form?.data?.to_page ?? data.to_page}
                     />
             </div>
 
-            <button class="primary"><Icon class="gg-copy" /> Update split</button>
+            <div class="actions">
+                {#if ! data.is_ready }
+                    <Icon class="gg-loadbar" />
+                {/if}
+
+                <button class="primary" disabled={ ! data.is_ready }>
+                    <Icon class="gg-copy" /> Update split
+                </button>
+            </div>
         </form>
     </Card>
 </Page>
@@ -89,6 +99,12 @@
 <style>
     .grid {
         display: grid;
+    }
+
+    .actions {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
     }
 
     form {

@@ -8,14 +8,10 @@
     export let id: string;
     export let name: string;
     export let number_of_pages: number | undefined;
-    export let documents: { id: string, name: string, status: string }[] = []
-
-    const document_is_ready = (document: Record<string, any>) => {
-        return document.is_ingested && document.is_indexed && document.is_embedded
-    }
+    export let documents: { id: string, name: string, is_ready: boolean }[] = []
 
     // If number_of_pages is not set, file is being analyzed still
-    $: is_ready = number_of_pages !== undefined && documents.every(document_is_ready);
+    $: is_ready = number_of_pages !== undefined && documents.every(document => document.is_ready);
 </script>
 
 <Card>

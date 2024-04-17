@@ -34,9 +34,9 @@
                     const mapping = {
                         upload_file: ['api:files'],
                         analyze_file: ['api:files'],
-                        ingest_document: ['api:files'],
-                        index_document: ['api:files'],
-                        embed_document: ['api:files'],
+                        ingest_document: ['api:files', 'api:documents'],
+                        index_document: ['api:files', 'api:documents'],
+                        embed_document: ['api:files', 'api:documents'],
                         answer_prompt: ['api:conversations'],
                     }
 
