@@ -5,9 +5,9 @@
     import { uploads } from './stores.ts';
     import { invalidate } from '$app/navigation';
 
-    export let upload: File
+    export let file: File
 
-    let total = upload.size;
+    let total = file.size;
     let loaded = 0;
 
     onMount(async () => {
@@ -22,18 +22,18 @@
         // When upload is done, strip upload
         xhr.upload.addEventListener("loadend", async () => {
             invalidate('api:files')
-            uploads.update(uploads => uploads.filter(f => f != upload))
+            uploads.update(uploads => uploads.filter(upload => upload.file != file))
         });
 
         xhr.open("POST", '?/upload', true);
         const data = new FormData();
-        data.append('files', upload)
+        data.append('files', file)
         xhr.send(data);
     })
 </script>
 
 <Card>
-    <h3>{upload.name}</h3>
+    <h3>{file.name}</h3>
     <p>Uploading...</p>
     <progress value={loaded} max={total}></progress>
 </Card>

@@ -11,10 +11,6 @@
     let button: HTMLButtonElement;
     let submit_button: HTMLButtonElement;
 
-    function upload(file: File) {
-        uploads.update(uploads => [...uploads, file])
-    }
-
     function drop(e: DragEvent) {
         is_dragover = false;
     
@@ -27,8 +23,14 @@
     }
 
     // Add files to the uploads store to show nice progress objects to user
-    function submit({ formData, cancel }) {
-        uploads.update(uploads => [...uploads, ...formData.getAll('files')])
+    function submit({ formData, cancel }: { formData: FormData, cancel: Function }) {
+        const files = formData.getAll('files') as File[]
+        uploads.update(uploads => {
+            return [
+                ...uploads, 
+                ...files.map((file) => ({ id: self.crypto.randomUUID(), file }))
+            ]
+        })
         cancel()
         return {}
     }

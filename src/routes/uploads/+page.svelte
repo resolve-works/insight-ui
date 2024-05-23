@@ -7,14 +7,23 @@
     import { uploads } from './stores.ts';
 
     export let data;
+
+    const PARALLEL_UPLOADS = 3;
+
+    $: active = $uploads.slice(0, PARALLEL_UPLOADS);
+    $: pending = $uploads.slice(PARALLEL_UPLOADS);
 </script>
 
 <Page>
     <Uploader />
 
-    {#each $uploads as upload (upload.name) }
-        <Upload upload={upload} />
+    {#each active as upload (upload.id) }
+        <Upload file={upload.file} />
     {/each}
+
+    {#if pending.length > 0}
+        <p>{pending.length} pending</p>
+    {/if}
 
     {#each data.files as file (file.id)}
         <File {...file} />
