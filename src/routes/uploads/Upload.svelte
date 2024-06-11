@@ -1,41 +1,59 @@
 
-<script lang="ts">
-    import { onMount } from 'svelte';
-    import Card from '$lib/Card.svelte';
-    import { uploads } from './stores.ts';
-    import { invalidate } from '$app/navigation';
-
-    export let file: File
-
-    let total = file.size;
-    let loaded = 0;
-
-    onMount(async () => {
+<script context="module" lang="ts">
+    export class Upload extends EventTarget {
+        id: string
+        file: File
         // https://github.com/whatwg/fetch/issues/607
         // Fetch doesn't allow tracking progress for now
-        const xhr = new XMLHttpRequest()
-        xhr.upload.addEventListener("progress", e => {
-            loaded = e.loaded;
-            total = e.total;
-        });
+        xhr: XMLHttpRequest = new XMLHttpRequest()
+        // Track progress
+        total: number
+        loaded = 0
 
-        // When upload is done, strip upload
-        xhr.upload.addEventListener("loadend", async () => {
-            invalidate('api:files')
-            uploads.update(uploads => uploads.filter(upload => upload.file != file))
-        });
+        is_started = false;
 
-        xhr.open("POST", '?/upload', true);
-        const data = new FormData();
-        data.append('files', file)
-        xhr.send(data);
-    })
+        constructor(file: File) {
+            super()
+            this.id = self.crypto.randomUUID()
+            this.file = file
+            this.total = file.size
+        }
+
+        start() {
+            this.is_started = true;
+
+            this.xhr.upload.addEventListener("progress", e => {
+                this.loaded = e.loaded;
+                this.total = e.total;
+            });
+
+            // TODO - handle error states
+            this.xhr.upload.addEventListener("loadend", async () => {
+                this.dispatchEvent(new Event('upload_finished'))
+            });
+
+            const data = new FormData();
+            data.append('files', this.file)
+
+            this.xhr.open("POST", '?/upload', true);
+            this.xhr.send(data);
+        }
+    }
+</script>
+
+<script lang="ts">
+    import Card from '$lib/Card.svelte';
+
+    export let upload: Upload
+
+    let total = upload.file.size;
+    let loaded = 0;
 </script>
 
 <Card>
-    <h3>{file.name}</h3>
+    <h3>{upload.file.name}</h3>
     <p>Uploading...</p>
-    <progress value={loaded} max={total}></progress>
+    <progress value={upload.loaded} max={upload.total}></progress>
 </Card>
 
 <style>

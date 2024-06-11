@@ -3,10 +3,17 @@ import type { Actions } from './$types';
 import { sign } from '$lib/sign';
 import { Channel } from '$lib/amqp.js';
 
-export async function load({ fetch, depends }) {
+const PAGE_SIZE = 5
+
+export async function load({ fetch, depends, params }) {
     depends('api:files')
 
-    const res = await fetch(`${env.API_ENDPOINT}/files?is_uploaded=eq.true&select=id,name,number_of_pages,documents(id,name,is_ready)&order=created_at.desc`)
+    const url = `${env.API_ENDPOINT}/files`
+        + `?is_uploaded=eq.true` 
+        + `&select=id,name,number_of_pages,documents(id,name,is_ready)` 
+        + `&order=created_at.desc`
+
+    const res = await fetch(url)
 
     const files = await res.json()
     return { files }

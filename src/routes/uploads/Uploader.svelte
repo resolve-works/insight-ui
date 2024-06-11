@@ -4,6 +4,7 @@
     import { enhance } from '$app/forms';
     import { onMount } from 'svelte';
     import { uploads } from './stores.ts';
+    import { Upload } from './Upload.svelte';
 
     let is_dragover = false;
     let form: HTMLFormElement;
@@ -26,10 +27,7 @@
     function submit({ formData, cancel }: { formData: FormData, cancel: Function }) {
         const files = formData.getAll('files') as File[]
         uploads.update(uploads => {
-            return [
-                ...uploads, 
-                ...files.map((file) => ({ id: self.crypto.randomUUID(), file }))
-            ]
+            return [ ...uploads, ...files.map(file => new Upload(file)) ]
         })
         cancel()
         return {}
