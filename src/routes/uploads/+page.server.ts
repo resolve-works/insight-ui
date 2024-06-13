@@ -5,18 +5,47 @@ import { Channel } from '$lib/amqp.js';
 
 const PAGE_SIZE = 5
 
-export async function load({ fetch, depends, params }) {
+export async function load({ fetch, depends, url }) {
     depends('api:files')
 
-    const url = `${env.API_ENDPOINT}/files`
+    // Try to fetch requested page of items
+    const param = url.searchParams.get('page')
+    const page = param ? parseInt(param) : 1;
+
+    const headers = {
+        'range-unit': 'items',
+        // can be "exact" or "planned", planned uses postgres statistics table
+        // and is not exact, it's fast though
+        prefer: 'count=exact',
+        range: `${(page - 1) * PAGE_SIZE}-${page * PAGE_SIZE - 1}`
+    }
+    
+    const api_url = `${env.API_ENDPOINT}/files`
         + `?is_uploaded=eq.true` 
         + `&select=id,name,number_of_pages,documents(id,name,is_ready)` 
         + `&order=created_at.desc`
 
-    const res = await fetch(url)
+    const res = await fetch(api_url, { headers })
+
+    // Get total items from response
+    const content_range = res.headers.get('content-range')
+    if( ! content_range) {
+        throw new Error('Content')
+    }
+    const [item_range, total] = content_range.split('/')
+    const amount_of_items = parseInt(total)
+    const [first_item, last_item] = item_range.split('-').map(i => parseInt(i))
+    const amount_of_pages = Math.ceil(amount_of_items / PAGE_SIZE)
 
     const files = await res.json()
-    return { files }
+    return { 
+        files,
+        first_item,
+        last_item,
+        amount_of_items,
+        page,
+        amount_of_pages,
+    }
 }
 
 export const actions = {
@@ -36,6 +65,8 @@ export const actions = {
             })
             const files = await response.json()
             const file = files[0]
+
+            // Stream the file to S3 backend
             const url = sign(file.path, cookies, 'PUT')
             const storage_response = await fetch(url, { 
                 method: 'PUT', 
@@ -47,7 +78,6 @@ export const actions = {
                     'Content-Length': upload.size.toString(),
                 }
             })
-
             if(storage_response.status !== 200) {
                 throw new Error(await storage_response.text())
             }
