@@ -1,10 +1,16 @@
 
 <script lang=ts>
     import Icon from '$lib/Icon.svelte';
+    import { invalidate } from '$app/navigation';
     import { enhance } from '$app/forms';
     import { onMount } from 'svelte';
     import { uploads } from './stores.ts';
     import { Upload } from './Upload.svelte';
+    import Section from '$lib/Section.svelte';
+    import UploadComponent from './Upload.svelte';
+    import PendingUpload from './PendingUpload.svelte';
+
+    const PARALLEL_UPLOADS = 3;
 
     let is_dragover = false;
     let form: HTMLFormElement;
@@ -39,31 +45,70 @@
         input.classList.add('hidden')
         submit_button.classList.add('hidden')
     })
+
+
+    $: {
+        for(const upload of $uploads.slice(0, PARALLEL_UPLOADS)) {
+            // Start active uploads that have not been started yet.
+            if( ! upload.is_started) {
+                // Remove uploads from store on completion
+                upload.addEventListener('upload_finished', () => {
+                    invalidate('api:files')
+                    uploads.update(uploads => uploads.filter(u => u != upload))
+                })
+
+                upload.start()
+            }
+        }
+    }
+
+    $: started = $uploads.filter(upload => upload.is_started)
+    $: pending = $uploads.filter(upload => ! upload.is_started)
 </script>
 
-<form method="POST" action="?/upload" enctype="multipart/form-data" bind:this={form} use:enhance={submit}>
-    <input name="files" type="file" accept=".pdf" multiple bind:this={input} on:change={() => form.requestSubmit()} />
-    <button 
-        class="hidden" 
-        bind:this={button} 
-        on:click|preventDefault={() => input.click()} 
-        on:drop|preventDefault={drop}
-        on:dragover|preventDefault
-        on:dragenter|preventDefault={() => is_dragover = true}
-        on:dragexit|preventDefault={() => is_dragover = false}
-        class:dragover={is_dragover}
-        >
-        <span>
-            <Icon class="gg-software-upload" />
-        </span>
+<Section>
+    <form method="POST" action="?/upload" enctype="multipart/form-data" bind:this={form} use:enhance={submit}>
+        <input name="files" type="file" accept=".pdf" multiple bind:this={input} on:change={() => form.requestSubmit()} />
+        <button 
+            class="hidden" 
+            bind:this={button} 
+            on:click|preventDefault={() => input.click()} 
+            on:drop|preventDefault={drop}
+            on:dragover|preventDefault
+            on:dragenter|preventDefault={() => is_dragover = true}
+            on:dragexit|preventDefault={() => is_dragover = false}
+            class:dragover={is_dragover}
+            >
+            <span>
+                <Icon class="gg-software-upload" />
+            </span>
 
-        <h2><b>Choose PDF files</b> or drop them here</h2>
-    </button>
+            <h2><b>Choose PDF files</b> or drop them here</h2>
+        </button>
 
-    <button class="primary" bind:this={submit_button}>
-        Upload
-    </button>
-</form>
+        <button class="primary" bind:this={submit_button}>
+            Upload
+        </button>
+    </form>
+</Section>
+
+{#if started.length > 0}
+    <Section>
+        <h3>Uploading...</h3>
+        {#each started as upload (upload.id) }
+            <UploadComponent upload={upload} />
+        {/each}
+    </Section>
+{/if}
+
+{#if pending.length > 0}
+    <Section>
+        <h3>{pending.length} upload{pending.length > 1 ? 's' : ''} pending...</h3>
+        {#each pending as upload (upload.id) }
+            <PendingUpload upload={upload} />
+        {/each}
+    </Section>
+{/if}
 
 <style>
     :global(.hidden) {

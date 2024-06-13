@@ -45,14 +45,10 @@
     import Card from '$lib/Card.svelte';
 
     export let upload: Upload
-
-    let total = upload.file.size;
-    let loaded = 0;
 </script>
 
 <Card>
     <h3>{upload.file.name}</h3>
-    <p>Uploading...</p>
     <progress value={upload.loaded} max={upload.total}></progress>
 </Card>
 

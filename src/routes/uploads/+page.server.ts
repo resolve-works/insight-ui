@@ -3,7 +3,7 @@ import type { Actions } from './$types';
 import { sign } from '$lib/sign';
 import { Channel } from '$lib/amqp.js';
 
-const PAGE_SIZE = 5
+const PAGE_SIZE = 50
 
 export async function load({ fetch, depends, url }) {
     depends('api:files')
