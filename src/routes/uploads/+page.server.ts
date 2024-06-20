@@ -3,7 +3,7 @@ import type { Actions } from './$types';
 import { sign } from '$lib/sign';
 import { Channel } from '$lib/amqp.js';
 
-const PAGE_SIZE = 50
+const PAGE_SIZE = 100
 
 export async function load({ fetch, depends, url }) {
     depends('api:files')
@@ -63,6 +63,9 @@ export const actions = {
                     'Prefer': 'return=representation',
                 }
             })
+            if(response.status !== 201) {
+                throw new Error(`Error creating file record: "${await response.text()}"`)
+            }
             const files = await response.json()
             const file = files[0]
 
@@ -79,7 +82,7 @@ export const actions = {
                 }
             })
             if(storage_response.status !== 200) {
-                throw new Error(await storage_response.text())
+                throw new Error(`Error streaming response to storage backend: "${await storage_response.text()}"`)
             }
 
             const patch_response = await fetch(`${env.API_ENDPOINT}/files?id=eq.${file.id}`, {

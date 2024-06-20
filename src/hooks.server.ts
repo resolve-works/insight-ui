@@ -4,10 +4,8 @@ import { redirect } from '@sveltejs/kit';
 import type { HandleFetch } from '@sveltejs/kit';
 import { 
     redirect_to_oidc_provider, 
-    authorization_code_request, 
+    get_tokens,
     refresh_tokens,
-    store_tokens, 
-    clear_tokens,
     parse_token 
 } from '$lib/auth.ts';
 
@@ -15,10 +13,9 @@ export async function handle({ event, resolve }) {
     // Did the authentication platform just redirect to us with a new code?
     const redirect_uri = event.url.origin + event.url.pathname;
     const code = event.url.searchParams.get('code')
-    if(code !== null) {
+    if(code) {
         try {
-            const tokens = await authorization_code_request(redirect_uri, code)
-            await store_tokens(event.cookies, tokens)
+            await get_tokens(event.cookies, redirect_uri, code)
         } catch(e) {
             console.error(e)
             throw redirect_to_oidc_provider(redirect_uri);
@@ -34,7 +31,7 @@ export async function handle({ event, resolve }) {
     // If we don't have a token, go get them
     const access_token = event.cookies.get('access_token');
     const refresh_token = event.cookies.get('refresh_token');
-    if(refresh_token === undefined || access_token === undefined) {
+    if( ! refresh_token || ! access_token) {
         throw redirect_to_oidc_provider(redirect_uri)
     }
 
@@ -56,8 +53,6 @@ export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
             try {
                 await refresh_tokens(event.cookies)
             } catch(e) {
-                // Could be that the refresh token was revoked
-                clear_tokens(event.cookies)
                 const redirect_uri = event.url.origin + event.url.pathname;
                 throw redirect_to_oidc_provider(redirect_uri)
             }

@@ -56,6 +56,7 @@ export async function get_storage_tokens(access_token: string) {
 
 /**
  * Store tokens, getting new storage tokens while we're at it
+ * TODO - don't fetch storage tokens here, handle storage token getting errors
  */
 export async function store_tokens(cookies: Cookies, { access_token, refresh_token }: TokenReponse) {
     const storage_tokens = await get_storage_tokens(access_token)
@@ -100,6 +101,14 @@ export async function authorization_code_request(redirect_uri: string, code: str
 }
 
 /**
+ * Request tokens with authorization_code supplied by OIDC provider
+ */
+export async function get_tokens(cookies: Cookies, redirect_uri: string, code: string) {
+    const tokens = await authorization_code_request(redirect_uri, code)
+    await store_tokens(cookies, tokens)
+}
+
+/**
  * Request new tokens from OIDC provider with refresh token
  */
 export async function refresh_token_request(refresh_token: string) {
@@ -123,12 +132,21 @@ export async function refresh_token_request(refresh_token: string) {
     return response.json();
 }
 
+/**
+ * Refresh tokens with refresh_token from cookie
+ */
 export async function refresh_tokens(cookies: Cookies) {
     const refresh_token = cookies.get('refresh_token');
     if( refresh_token === undefined ) {
         throw new Error("No refresh_token")
     }
     
-    const tokens = await refresh_token_request(refresh_token)
-    await store_tokens(cookies, tokens)
+    try {
+        const tokens = await refresh_token_request(refresh_token)
+        await store_tokens(cookies, tokens)
+    } catch(err) {
+        // Could be that the refresh token was revoked
+        clear_tokens(cookies)
+        throw err
+    }
 }
