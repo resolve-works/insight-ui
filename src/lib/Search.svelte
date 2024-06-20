@@ -4,7 +4,7 @@
 </script>
 
 <form method="get" action="/documents">
-    <input name="query" type="text" placeholder="Search documents by keyword" value={value} />
+    <input name="query" type="text" placeholder="Search contents by keyword" value={value} />
 
     <button>
         <Icon class="gg-search" />
