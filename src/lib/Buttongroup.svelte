@@ -65,7 +65,7 @@
         border-bottom-color: var(--color-white);
         border-bottom-left-radius: 0;
         border-bottom-right-radius: 0;
-        z-index: 1;
+        z-index: 2;
     }
 
     .buttongroup.enhance .buttons {
@@ -79,6 +79,7 @@
         border-radius: var(--input-border-radius);
         border: var(--input-border-size) solid var(--input-border-color);
         background: var(--color-white);
+        z-index: 1;
     }
 
     .buttongroup.enhance.open .buttons {

@@ -2,12 +2,14 @@ import { env } from '$env/dynamic/private'
 import type { Actions } from './$types';
 import { sign } from '$lib/sign';
 import { Channel } from '$lib/amqp.js';
+import type { LoadEvent } from '@sveltejs/kit';
+import { schema } from '$lib/validation/folder';
+import { validate, ValidationError } from '$lib/validation';
+import { fail } from '@sveltejs/kit';
 
 const PAGE_SIZE = 100
 
-export async function load({ fetch, depends, url }) {
-    depends('api:files')
-
+async function load_files({ fetch, url }: LoadEvent) {
     // Try to fetch requested page of items
     const param = url.searchParams.get('page')
     const page = param ? parseInt(param) : 1;
@@ -34,10 +36,11 @@ export async function load({ fetch, depends, url }) {
     }
     const [item_range, total] = content_range.split('/')
     const amount_of_items = parseInt(total)
-    const [first_item, last_item] = item_range.split('-').map(i => parseInt(i))
+    const [first_item, last_item] = item_range === '*' ? [undefined, undefined] : item_range.split('-').map(i => parseInt(i))
     const amount_of_pages = Math.ceil(amount_of_items / PAGE_SIZE)
 
     const files = await res.json()
+
     return { 
         files,
         first_item,
@@ -48,7 +51,52 @@ export async function load({ fetch, depends, url }) {
     }
 }
 
+async function load_folders({ fetch }: LoadEvent) {
+    const api_url = `${env.API_ENDPOINT}/folders`
+        + `?select=id,name` 
+        + `&parent_id=is.null`
+        + `&order=created_at.desc`
+
+    const res = await fetch(api_url)
+    const folders = await res.json();
+
+    return { folders }
+}
+
+export async function load(event: LoadEvent) {
+    event.depends('api:files')
+    event.depends('api:folders')
+
+    return {
+        ...await load_files(event),
+        ...await load_folders(event)
+    } 
+
+}
+
 export const actions = {
+    // Create new folder at root
+    create_folder: async ({ request, fetch }) => {
+        try {
+            const data = await validate(request, schema)
+
+            const response = await fetch(`${env.API_ENDPOINT}/folders`, {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=representation',
+                }
+            })
+            // TODO error handling
+        } catch(err) {
+            if(err instanceof ValidationError) {
+                return fail(400, err.format())
+            }
+            throw err
+        }
+    },
+
     upload: async ({ request, fetch, cookies }) => {
         const data = await request.formData();
         const uploads: File[] = data.getAll('files') as File[]
@@ -90,6 +138,7 @@ export const actions = {
                 body: JSON.stringify({ is_uploaded: true }),
                 headers: { 'Content-Type': 'application/json', }
             })
+            // TODO error handling
 
             const channel = await Channel.connect(cookies)
             channel.publish('analyze_file', { id: file.id });

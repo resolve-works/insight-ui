@@ -3,8 +3,8 @@ import { Channel } from '$lib/amqp.js';
 import type { Actions } from '@sveltejs/kit';
 import { fail } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private'
-import { z } from 'zod';
 import { name_schema, pagerange_schema, pagerange_refinement } from '$lib/validation/document'
+import { validate, ValidationError } from '$lib/validation';
 
 export async function load({ params, fetch, depends }) {
     depends('api:documents')
@@ -23,29 +23,25 @@ export async function load({ params, fetch, depends }) {
 
 export const actions = {
     update_name: async ({ request, fetch, params, cookies }) => {
-        const form_data = Object.fromEntries((await request.formData()).entries())
+        try {
+            const data = await validate(request, name_schema);
 
-        const res = await fetch(`${env.API_ENDPOINT}/documents?id=eq.${params.id}&select=name`)
-        const documents = await res.json();
-        const { name } = documents[0]
+            const response = await fetch(`${env.API_ENDPOINT}/documents?id=eq.${params.id}`, {
+                method: 'PATCH',
+                body: JSON.stringify(data),
+                headers: { 'Content-Type': 'application/json' }
+            })
+            // TODO - handle error
 
-        const data = name_schema.parse(form_data);
-
-        if(data.name == name) {
-            return {}
+            const channel = await Channel.connect(cookies)
+            channel.publish('index_document', { id: params.id });
+            await channel.close();
+        } catch(err) {
+            if(err instanceof ValidationError) {
+                return fail(400, err.format())
+            }
+            throw err
         }
-
-        const response = await fetch(`${env.API_ENDPOINT}/documents?id=eq.${params.id}`, {
-            method: 'PATCH',
-            body: JSON.stringify(data),
-            headers: { 'Content-Type': 'application/json' }
-        })
-
-        const channel = await Channel.connect(cookies)
-        channel.publish('index_document', { id: params.id });
-        await channel.close();
-
-        return {}
     },
 
     update_split: async ({ request, fetch, params, cookies }) => {
@@ -57,10 +53,9 @@ export const actions = {
         const schema = pagerange_schema(number_of_pages)
             .superRefine(pagerange_refinement)
 
-        const form_data = Object.fromEntries((await request.formData()).entries())
-
         try {
-            const data = schema.parse(form_data)
+            const data = await validate(request, schema)
+
             // Computers index from 0
             data.from_page = data.from_page - 1;
 
@@ -78,17 +73,11 @@ export const actions = {
             const channel = await Channel.connect(cookies)
             channel.publish('ingest_document', { id: params.id });
             await channel.close();
-
-            return {}
         } catch(err) {
-            if( ! (err instanceof z.ZodError)) {
-                throw err
+            if(err instanceof ValidationError) {
+                return fail(400, err.format())
             }
-
-            return fail(400, { 
-                data: form_data, 
-                errors: err.format() 
-            })
+            throw err
         }
     }
 } satisfies Actions;

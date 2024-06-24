@@ -1,7 +1,6 @@
 
 import { env } from '$env/dynamic/private';
 import { redirect } from '@sveltejs/kit';
-import type { HandleFetch } from '@sveltejs/kit';
 import { 
     redirect_to_oidc_provider, 
     get_tokens,
@@ -38,10 +37,11 @@ export async function handle({ event, resolve }) {
     // So we do have tokens, Add user info & resolve event
     const { sub } = parse_token(access_token)
     event.locals = { ...event.locals, sub }
+
     return resolve(event)
 }
 
-export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
+export async function handleFetch({ event, request, fetch }) {
     // Handle API / search API auth
     if(request.url.startsWith(env.API_ENDPOINT) || request.url.startsWith(env.OPENSEARCH_ENDPOINT)) {
         // Add token as bearer auth
@@ -65,3 +65,4 @@ export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 
 	return fetch(request);
 };
+

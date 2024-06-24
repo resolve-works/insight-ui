@@ -23,7 +23,8 @@
     <a href="{url_for_page(previous_page)}" class="button"><Icon class="gg-chevron-left" /></a>
 
     <p>
-        <span>{first_item + 1}</span> - <span>{last_item + 1}</span>
+        <span>{first_item !== undefined ? first_item + 1 : 0}</span> 
+        - <span>{last_item !== undefined ? last_item + 1 : 0}</span>
         of
         <span>{amount_of_items}</span>
     </p>

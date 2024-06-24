@@ -1,10 +1,10 @@
-import { fail } from '@sveltejs/kit';
-import { z } from 'zod';
 import { env } from '$env/dynamic/private'
 import type { Actions } from './$types';
 import { sign } from '$lib/sign';
 import { Channel } from '$lib/amqp';
 import { pagerange_schema, name_schema, pagerange_refinement } from '$lib/validation/document';
+import { validate, ValidationError } from '$lib/validation/index.js';
+import { fail } from '@sveltejs/kit';
 
 export async function load({ params, fetch, cookies, depends }) {
     depends('api:files')
@@ -42,10 +42,8 @@ export const actions = {
             .merge(name_schema)
             .superRefine(pagerange_refinement)
 
-        const form_data = Object.fromEntries((await request.formData()).entries())
-
         try {
-            const data = schema.parse(form_data)
+            const data = await validate(request, schema)
 
             const response = await fetch(`${env.API_ENDPOINT}/documents`, {
                 method: 'POST',
@@ -69,14 +67,10 @@ export const actions = {
             channel.publish('ingest_document', { id: document.id });
             await channel.close();
         } catch(err) {
-            if( ! (err instanceof z.ZodError)) {
-                throw err
+            if(err instanceof ValidationError) {
+                return fail(400, err.format())
             }
-
-            return fail(400, { 
-                data: form_data, 
-                errors: err.format() 
-            })
+            throw err
         }
     },
 
