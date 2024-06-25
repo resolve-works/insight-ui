@@ -1,69 +1,14 @@
+
 import { env } from '$env/dynamic/private'
+import { fail } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import { sign } from '$lib/sign';
 import { Channel } from '$lib/amqp.js';
-import type { LoadEvent } from '@sveltejs/kit';
 import { schema } from '$lib/validation/folder';
 import { validate, ValidationError } from '$lib/validation';
-import { fail } from '@sveltejs/kit';
+import { load_files, load_folders } from '$lib/uploads';
 
-const PAGE_SIZE = 100
-
-async function load_files({ fetch, url }: LoadEvent) {
-    // Try to fetch requested page of items
-    const param = url.searchParams.get('page')
-    const page = param ? parseInt(param) : 1;
-
-    const headers = {
-        'range-unit': 'items',
-        // can be "exact" or "planned", planned uses postgres statistics table
-        // and is not exact, it's fast though
-        prefer: 'count=exact',
-        range: `${(page - 1) * PAGE_SIZE}-${page * PAGE_SIZE - 1}`
-    }
-    
-    const api_url = `${env.API_ENDPOINT}/files`
-        + `?is_uploaded=eq.true` 
-        + `&select=id,name,number_of_pages,documents(id,name,is_ready)` 
-        + `&order=created_at.desc`
-
-    const res = await fetch(api_url, { headers })
-
-    // Get total items from response
-    const content_range = res.headers.get('content-range')
-    if( ! content_range) {
-        throw new Error('Content')
-    }
-    const [item_range, total] = content_range.split('/')
-    const amount_of_items = parseInt(total)
-    const [first_item, last_item] = item_range === '*' ? [undefined, undefined] : item_range.split('-').map(i => parseInt(i))
-    const amount_of_pages = Math.ceil(amount_of_items / PAGE_SIZE)
-
-    const files = await res.json()
-
-    return { 
-        files,
-        first_item,
-        last_item,
-        amount_of_items,
-        page,
-        amount_of_pages,
-    }
-}
-
-async function load_folders({ fetch }: LoadEvent) {
-    const api_url = `${env.API_ENDPOINT}/folders`
-        + `?select=id,name` 
-        + `&parent_id=is.null`
-        + `&order=created_at.desc`
-
-    const res = await fetch(api_url)
-    const folders = await res.json();
-
-    return { folders }
-}
-
-export async function load(event: LoadEvent) {
+export async function load(event) {
     event.depends('api:files')
     event.depends('api:folders')
 
@@ -71,7 +16,6 @@ export async function load(event: LoadEvent) {
         ...await load_files(event),
         ...await load_folders(event)
     } 
-
 }
 
 export const actions = {

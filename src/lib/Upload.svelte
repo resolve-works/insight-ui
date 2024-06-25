@@ -1,5 +1,5 @@
 
-<script context="module" lang="ts">
+<script lang="ts" context="module">
     export class Upload extends EventTarget {
         id: string
         file: File

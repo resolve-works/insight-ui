@@ -1,14 +1,14 @@
 
 <script lang=ts>
-    import Icon from '$lib/Icon.svelte';
+    import { onMount } from 'svelte';
     import { invalidate } from '$app/navigation';
     import { enhance } from '$app/forms';
-    import { onMount } from 'svelte';
-    import { uploads } from './stores.ts';
-    import { Upload } from './Upload.svelte';
+    import Icon from '$lib/Icon.svelte';
+    import { uploads } from '$lib/stores.ts';
+    import { Upload } from '$lib/Upload.svelte';
     import Section from '$lib/Section.svelte';
-    import UploadComponent from './Upload.svelte';
-    import PendingUpload from './PendingUpload.svelte';
+    import UploadComponent from '$lib/Upload.svelte';
+    import PendingUpload from '$lib/PendingUpload.svelte';
 
     const PARALLEL_UPLOADS = 3;
 

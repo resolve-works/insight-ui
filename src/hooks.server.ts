@@ -48,7 +48,7 @@ export async function handleFetch({ event, request, fetch }) {
         request.headers.set('Authorization', 'Bearer ' + event.cookies.get('access_token'))
         const response = await fetch(request.clone());
 
-        // Unauthorized? Try to refresh the tokens
+        // Unauthorized? Try to refresh the tokens & retry request
         if(response.status == 401) {
             try {
                 await refresh_tokens(event.cookies)
