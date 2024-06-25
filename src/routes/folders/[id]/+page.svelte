@@ -13,11 +13,11 @@
 </script>
 
 <SideBar>
-    <h2 slot="header">Uploads</h2>
+    <h2 slot="header">{data.name}</h2>
 
     <div>
         <ul>
-            {#each data.folders as folder (folder.id)}
+            {#each data.children as folder (folder.id)}
                 <li>
                     <Folder {...folder} />
                 </li>

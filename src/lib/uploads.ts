@@ -46,16 +46,3 @@ export async function load_files({ fetch, url }: ServerLoadEvent, folder_id: str
         amount_of_pages,
     }
 }
-
-export async function load_folders({ fetch }: ServerLoadEvent, parent_id: string | undefined = undefined) {
-    const api_url = `${env.API_ENDPOINT}/folders`
-        + `?select=id,name` 
-        + `&parent_id=` + (parent_id ? `eq.${parent_id}` : 'is.null')
-        + `&order=created_at.desc`
-
-    const res = await fetch(api_url)
-    const folders = await res.json();
-
-    return { folders }
-}
-

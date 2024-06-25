@@ -9,12 +9,21 @@ import { validate, ValidationError } from '$lib/validation';
 import { load_files, load_folders } from '$lib/uploads';
 
 export async function load(event) {
-    event.depends('api:files')
-    event.depends('api:folders')
+    const { depends, fetch } = event
+    depends('api:files')
+    depends('api:folders')
+
+    const api_url = `${env.API_ENDPOINT}/folders`
+        + `?select=id,name` 
+        + `&parent_id=is.null`
+        + `&order=created_at.desc`
+
+    const res = await fetch(api_url)
+    const folders = await res.json();
 
     return {
         ...await load_files(event),
-        ...await load_folders(event)
+        folders,
     } 
 }
 
