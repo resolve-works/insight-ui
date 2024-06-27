@@ -2,12 +2,13 @@
 <script lang=ts>
     import Icon from "$lib/Icon.svelte";
 
-    export let id
+    export let icon = 'folder'
+    export let path
     export let name
 </script>
 
-<a href="/folders/{id}">
-    <Icon class="gg-folder" />
+<a href="{path}">
+    <Icon class="gg-{icon}" />
 
     {name}
 </a>
@@ -17,7 +18,8 @@
         display: flex;
         flex-direction: row;
         gap: 0.8rem;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.6rem;
         color: var(--text-color-white);
+        text-decoration: none;
     }
 </style>

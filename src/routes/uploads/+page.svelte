@@ -5,12 +5,14 @@
     import SideBar from '$lib/SideBar.svelte';
     import File from '$lib/File.svelte';
     import Folder from '$lib/Folder.svelte';
+    import Folders from '$lib/Folders.svelte';
     import Uploader from '$lib/Uploader.svelte';
     import Pagination from '$lib/Pagination.svelte';
     import { enhance } from '$app/forms';
     import { breadcrumbs } from '$lib/stores';
 
     export let data;
+    const { first_item, last_item, amount_of_items, page, amount_of_pages } = data;
 
     $: { breadcrumbs.set([ { name: 'Uploads', path: '/uploads' }, ]) }
 </script>
@@ -19,13 +21,11 @@
     <h2 slot="header">Uploads</h2>
 
     <div>
-        <ul>
-            {#each data.folders as folder (folder.id)}
-                <li>
-                    <Folder {...folder} />
-                </li>
-            {/each}
-        </ul>
+        <p>
+            <Folder name="/" path="/uploads" icon="home" />
+        </p>
+        
+        <Folders folders={data.folders} />
     </div>
 
     <div>
@@ -46,7 +46,7 @@
             <File {...file} />
         {/each}
 
-        <Pagination {...data} />
+        <Pagination {first_item} {last_item} {amount_of_items} {page} {amount_of_pages} />
     </Section>
 </Page>
 
@@ -54,10 +54,5 @@
     form {
         display: flex;
         flex-direction: row;
-    }
-
-    ul {
-        list-style-type: none;
-        padding-left: 0;
     }
 </style>

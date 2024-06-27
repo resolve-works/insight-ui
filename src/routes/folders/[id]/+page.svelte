@@ -1,11 +1,11 @@
 
 <script>
-    import { onMount } from 'svelte';
     import Section from '$lib/Section.svelte';
     import Page from '$lib/Page.svelte';
     import SideBar from '$lib/SideBar.svelte';
     import File from '$lib/File.svelte';
     import Folder from '$lib/Folder.svelte';
+    import Folders from '$lib/Folders.svelte';
     import Uploader from '$lib/Uploader.svelte';
     import Pagination from '$lib/Pagination.svelte';
     import { enhance } from '$app/forms';
@@ -13,6 +13,8 @@
 
     export let data;
     const { first_item, last_item, amount_of_items, page, amount_of_pages } = data;
+
+    $: parent = data.parents.at(-1)
 
     $: {
         breadcrumbs.set([
@@ -27,13 +29,15 @@
     <h2 slot="header">{data.name}</h2>
 
     <div>
-        <ul>
-            {#each data.children as folder (folder.id)}
-                <li>
-                    <Folder {...folder} />
-                </li>
-            {/each}
-        </ul>
+        <p>
+            {#if parent }
+                <Folder name="../" path="/folders/{parent.id}" icon="chevron-left" />
+            {:else}
+                <Folder name="../" path="/uploads" icon="chevron-left" />
+            {/if}
+        </p>
+
+        <Folders folders={data.children} />
     </div>
 
     <div>
@@ -62,11 +66,6 @@
     form {
         display: flex;
         flex-direction: row;
-    }
-
-    ul {
-        list-style-type: none;
-        padding-left: 0;
     }
 </style>
 
