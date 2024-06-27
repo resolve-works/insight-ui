@@ -4,10 +4,18 @@
     import Page from '$lib/Page.svelte';
     import PDFViewer from '$lib/PDFViewer.svelte';
     import { ssp, queryParam } from 'sveltekit-search-params';
+    import { breadcrumbs } from '$lib/stores';
 
     const page = queryParam('page', ssp.number(1), { pushHistory: false });
 
     export let data;
+
+    $: { 
+        breadcrumbs.set([ 
+            { name: 'Documents', path: '/documents' },
+            { name: data.name, path: `/documents/${data.id}` },
+        ]) 
+    }
 
     function increase() {
         if($page !== null && $page < data.number_of_pages) {

@@ -5,9 +5,12 @@
     import SideBar from '$lib/SideBar.svelte';
     import Section from '$lib/Section.svelte';
     import { page } from '$app/stores';
+    import { breadcrumbs } from '$lib/stores';
     const query = $page.url.searchParams.get('query') || ''
 
     export let data
+
+    $: { breadcrumbs.set([ { name: 'Documents', path: '/documents' }, ]) }
 </script>
 
 <SideBar>

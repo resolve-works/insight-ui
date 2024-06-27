@@ -8,9 +8,18 @@
     import Buttongroup from '$lib/Buttongroup.svelte'
     import ValidationErrors from '$lib/ValidationErrors.svelte';
     import Section from '$lib/Section.svelte';
+    import { breadcrumbs } from '$lib/stores';
 
     export let data;
     export let form;
+
+    // TODO add parent folders to crumbs
+    $: { 
+        breadcrumbs.set([ 
+            { name: 'Uploads', path: '/uploads' },
+            { name: data.name, path: `/uploads/${data.id}` },
+        ]) 
+    }
 </script>
 
 <Page>

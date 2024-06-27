@@ -1,16 +1,21 @@
 
-<script lang="ts">
-    import { page } from '$app/stores';
+<script lang="ts" context="module">
+    export type Breadcrumb = {
+        name: string,
+        path: string,
+    }
+</script>
 
-    const href = $page.url.pathname;
-    const title = href.slice(1).charAt(0).toUpperCase() + href.slice(2);
+<script lang="ts">
+    import { breadcrumbs } from './stores';
 </script>
 
 <ul>
     <li><a href="/">Home</a></li>
-    {#if href !== '/' }
-        <li><a {href}>{title}</a></li>
-    {/if}
+
+    {#each $breadcrumbs as crumb}
+        <li><a href={crumb.path}>{crumb.name}</a></li>
+    {/each}
 </ul>
 
 <style>

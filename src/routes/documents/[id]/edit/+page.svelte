@@ -7,9 +7,18 @@
     import Unnamed from '$lib/Unnamed.svelte';
     import ValidationErrors from '$lib/ValidationErrors.svelte';
     import Section from '$lib/Section.svelte';
+    import { breadcrumbs } from '$lib/stores';
 
     export let data;
     export let form;
+
+    $: { 
+        breadcrumbs.set([ 
+            { name: 'Documents', path: '/documents' },
+            { name: data.name, path: `/documents/${data.id}` },
+            { name: 'Edit', path: `/documents/${data.id}/edit` },
+        ]) 
+    }
 </script>
 
 <Page>

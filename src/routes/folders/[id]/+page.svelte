@@ -1,5 +1,6 @@
 
 <script>
+    import { onMount } from 'svelte';
     import Section from '$lib/Section.svelte';
     import Page from '$lib/Page.svelte';
     import SideBar from '$lib/SideBar.svelte';
@@ -8,8 +9,18 @@
     import Uploader from '$lib/Uploader.svelte';
     import Pagination from '$lib/Pagination.svelte';
     import { enhance } from '$app/forms';
+    import { breadcrumbs } from '$lib/stores';
 
     export let data;
+    const { first_item, last_item, amount_of_items, page, amount_of_pages } = data;
+
+    $: {
+        breadcrumbs.set([
+            { name: 'Uploads', path: '/uploads' },
+            ...data.parents.map(parent => ({ name: parent.name, path: `/folders/${parent.id}` })),
+            { name: data.name, path: `/folders/${data.id}` },
+        ])
+    }
 </script>
 
 <SideBar>
@@ -43,7 +54,7 @@
             <File {...file} />
         {/each}
 
-        <Pagination {...data} />
+        <Pagination {first_item} {last_item} {amount_of_items} {page} {amount_of_pages} />
     </Section>
 </Page>
 

@@ -4,8 +4,11 @@
     import Card from '$lib/Card.svelte'
     import Icon from '$lib/Icon.svelte'
     import { enhance } from '$app/forms';
+    import { breadcrumbs } from '$lib/stores';
 
     export let data;
+
+    $: { breadcrumbs.set([ { name: 'Conversations', path: '/conversations' }, ]) }
 </script>
 
 <Page>
