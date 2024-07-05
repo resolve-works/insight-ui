@@ -12,7 +12,7 @@
     import { breadcrumbs } from '$lib/stores';
 
     export let data;
-    const { first_item, last_item, amount_of_items, page, amount_of_pages } = data;
+    $: ({ first_item, last_item, amount_of_items, page, amount_of_pages } = data)
 
     $: { breadcrumbs.set([ { name: 'Uploads', path: '/uploads' }, ]) }
 </script>

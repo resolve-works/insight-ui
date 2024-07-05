@@ -3,20 +3,19 @@
     import Icon from "./Icon.svelte";
     import { page as page_store } from "$app/stores";
 
-    export let first_item: number;
-    export let last_item: number;
+    export let first_item: number | undefined;
+    export let last_item: number | undefined;
     export let amount_of_items: number;
     export let page: number;
     export let amount_of_pages: number;
 
     function url_for_page(page: number) {
-        $page_store.url.searchParams.set('page', page.toString())
+        $page_store.url.searchParams.set('page', (page + 1).toString())
         return  $page_store.url.toString()
     }
 
-    $: previous_page = page > 1 ? page - 1 : 1;
-    $: next_page = page < amount_of_pages ? page + 1 : amount_of_pages;
-
+    $: previous_page = page > 0 ? page - 1 : 0;
+    $: next_page = (page + 1) < amount_of_pages ? page + 1 : page;
 </script>
 
 <aside>

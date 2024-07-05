@@ -12,14 +12,14 @@ const PAGE_SIZE = 100
 export async function load_files({ fetch, url }: ServerLoadEvent, folder_id: string | undefined = undefined) {
     // Try to fetch requested page of items
     const param = url.searchParams.get('page')
-    const page = param ? parseInt(param) : 1;
+    const page = param ? parseInt(param) - 1 : 0;
 
     const headers = {
         'range-unit': 'items',
         // can be "exact" or "planned", planned uses postgres statistics table
         // and is not exact, it's fast though
         prefer: 'count=exact',
-        range: `${(page - 1) * PAGE_SIZE}-${page * PAGE_SIZE - 1}`
+        range: `${page * PAGE_SIZE}-${(page + 1) * PAGE_SIZE - 1}`
     }
     
     const api_url = `${env.API_ENDPOINT}/files`
