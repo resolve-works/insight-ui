@@ -1,25 +1,51 @@
 
 <script lang=ts>
+    import { enhance } from "$app/forms";
+    import Card from "./Card.svelte";
+    import Buttongroup from "./Buttongroup.svelte";
     import Icon from "$lib/Icon.svelte";
 
-    export let icon = 'folder'
-    export let path
+    export let id
     export let name
 </script>
 
-<a href="{path}">
-    <Icon class="gg-{icon}" />
+<Card>
+    <header>
+        <h3>
+            <a class="unstyled" href={`/uploads/folders/${id}`}>
+                <Icon class="gg-folder" />
 
-    {name}
-</a>
+                {name}
+            </a>
+        </h3>
+
+        <div class="actions">
+            <Buttongroup>
+                <form method="POST" action="?/remove" use:enhance>
+                    <input type="hidden" name="id" value={id} />
+                    <button><Icon class="gg-trash" /> Delete</button>
+                </form>
+            </Buttongroup>
+        </div>
+    </header>
+</Card>
 
 <style>
+    header {
+        display: grid;
+        grid-template-columns: auto auto;
+        align-items: center;
+        justify-content: space-between;
+    }
+
     a {
         display: flex;
-        flex-direction: row;
-        gap: 0.8rem;
-        margin-bottom: 0.6rem;
-        color: var(--text-color-white);
-        text-decoration: none;
+        gap: 1rem;
+    }
+
+    .actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
     }
 </style>

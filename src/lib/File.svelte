@@ -19,10 +19,14 @@
         <h3>
             {#if documents.length == 1 }
                 <a class="unstyled" href={`/documents/${documents[0].id}`}>
+                    <Icon class="gg-file-document" />
+
                     {name}
                 </a>
             {:else}
                 <a class="unstyled" href={`/uploads/${id}`}>
+                    <Icon class="gg-file-document" />
+
                     {name}
                 </a>
             {/if}
@@ -65,6 +69,11 @@
         grid-template-columns: auto auto;
         align-items: center;
         justify-content: space-between;
+    }
+
+    a {
+        display: flex;
+        gap: 1rem;
     }
 
     .actions {

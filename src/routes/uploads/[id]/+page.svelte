@@ -4,6 +4,7 @@
     import Page from '$lib/Page.svelte';
     import Card from '$lib/Card.svelte';
     import Icon from '$lib/Icon.svelte';
+    import Title from '$lib/Title.svelte';
     import Unnamed from '$lib/Unnamed.svelte';
     import Buttongroup from '$lib/Buttongroup.svelte'
     import ValidationErrors from '$lib/ValidationErrors.svelte';
@@ -24,16 +25,14 @@
 
 <Page>
     <Section>
-        <header>
-            <h2>
-                {data.name}
-            </h2>
+        <Title>
+            {data.name}
 
-            <a class="button" href="{data.url}" target="_blank">
+            <a class="button" href="{data.url}" target="_blank" slot="actions">
                 <Icon class="gg-software-download" />
                 Download original
             </a>
-        </header>
+        </Title>
 
         <table>
             <tr>
@@ -49,7 +48,7 @@
         {#each data.documents as document (document.id)}
             <Card>
                 <div class="document">
-                    <h3 class="no-text-overflow">
+                    <h3>
                         <a class="unstyled" href={`/documents/${document.id}`}>
                             {#if document.name}
                                 {document.name}
@@ -133,7 +132,6 @@
 </Page>
 
 <style>
-    header,
     .document {
         display: grid;
         grid-template-columns: 1fr auto;

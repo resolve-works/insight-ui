@@ -2,6 +2,7 @@
 <script lang=ts>
     import Icon from '$lib/Icon.svelte';
     import Page from '$lib/Page.svelte';
+    import Title from '$lib/Title.svelte';
     import PDFViewer from '$lib/PDFViewer.svelte';
     import { ssp, queryParam } from 'sveltekit-search-params';
     import { breadcrumbs } from '$lib/stores';
@@ -31,35 +32,35 @@
 </script>
 
 <Page>
-    <header>
-        <h2>
-            {data.name}
-        </h2>
+    <Title>
+        {data.name}
 
-        <div class="page">
-            <button on:click|preventDefault={decrease}>
-                <Icon class="gg-chevron-left" />
-            </button>
+        <div class="actions" slot="actions">
+            <div class="page">
+                <button on:click|preventDefault={decrease}>
+                    <Icon class="gg-chevron-left" />
+                </button>
 
-            <input min="1" max={data.number_of_pages} type="number" bind:value={$page}>
+                <input min="1" max={data.number_of_pages} type="number" bind:value={$page}>
 
-            <button on:click|preventDefault={increase}>
-                <Icon class="gg-chevron-right" />
-            </button>
+                <button on:click|preventDefault={increase}>
+                    <Icon class="gg-chevron-right" />
+                </button>
+            </div>
+
+            <div class="buttons">
+                <a class="button" href={`/documents/${data.id}/edit`}>
+                    <Icon class="gg-pen" />
+                    Edit
+                </a>
+
+                <a class="button" href={`/uploads/${data.file_id}`}>
+                    <Icon class="gg-copy" />
+                    Split
+                </a>
+            </div>
         </div>
-
-        <div class="buttons">
-            <a class="button" href={`/documents/${data.id}/edit`}>
-                <Icon class="gg-pen" />
-                Edit
-            </a>
-
-            <a class="button" href={`/uploads/${data.file_id}`}>
-                <Icon class="gg-copy" />
-                Split
-            </a>
-        </div>
-    </header>
+    </Title>
 
     <div class="container">
         <PDFViewer url={data.url} index={$page} />
@@ -73,17 +74,9 @@
 </Page>
 
 <style>
-    header {
-        display: grid;
+    .actions {
+        display: flex;
         gap: 1rem;
-        grid-template-columns: 1fr auto auto;
-        align-items: center;
-    }
-
-    h2 {
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        overflow-x: hidden;
     }
 
     .buttons,

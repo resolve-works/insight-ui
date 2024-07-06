@@ -8,6 +8,7 @@
     import ValidationErrors from '$lib/ValidationErrors.svelte';
     import Section from '$lib/Section.svelte';
     import { breadcrumbs } from '$lib/stores';
+    import Title from '$lib/Title.svelte';
 
     export let data;
     export let form;
@@ -23,15 +24,13 @@
 
 <Page>
     <Section>
-        <div class="grid">
-            <h2 class="no-text-overflow">
-                {#if data.name}
-                    Edit "{data.name}"
-                {:else}
-                    Edit "<Unnamed>Unnamed Document</Unnamed>"
-                {/if}
-            </h2>
-        </div>
+        <Title>
+            {#if data.name}
+                Edit "{data.name}"
+            {:else}
+                Edit "<Unnamed>Unnamed Document</Unnamed>"
+            {/if}
+        </Title>
 
         <Card>
             <form method="POST" action="?/update_name" use:enhance={() => async ({ update }) => update({ reset: false })}>
@@ -106,10 +105,6 @@
 </Page>
 
 <style>
-    .grid {
-        display: grid;
-    }
-
     .actions {
         display: flex;
         gap: 2rem;
