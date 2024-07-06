@@ -24,7 +24,7 @@ export async function load_files({ fetch, url }: ServerLoadEvent, folder_id: str
     
     const api_url = `${env.API_ENDPOINT}/files`
         + `?is_uploaded=eq.true` 
-        + (folder_id ? `&folder_id=eq.${folder_id}` : '')
+        + (folder_id ? `&folder_id=eq.${folder_id}` : '&folder_id=is.null')
         + `&select=id,name,number_of_pages,documents(id,name,is_ready)` 
         + `&order=created_at.desc`
 
@@ -77,7 +77,7 @@ export async function create_folder({ request, fetch, params }: RequestEvent) {
 }
 
 
-export async function upload({ request, fetch, cookies }: RequestEvent) {
+export async function upload({ request, fetch, params, cookies }: RequestEvent) {
     const data = await request.formData();
     const uploads: File[] = data.getAll('files') as File[]
 
@@ -85,7 +85,10 @@ export async function upload({ request, fetch, cookies }: RequestEvent) {
     for(const upload of uploads.filter(file => file.size > 0)) {
         const response = await fetch(`${env.API_ENDPOINT}/files`, {
             method: 'POST',
-            body: JSON.stringify({ name: upload.name }),
+            body: JSON.stringify({ 
+                name: upload.name,
+                folder_id: params.id,
+            }),
             headers: { 
                 'Content-Type': 'application/json',
                 'Prefer': 'return=representation',

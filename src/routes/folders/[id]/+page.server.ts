@@ -1,7 +1,7 @@
 
 import type { Actions } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private'
-import { load_files, create_folder } from '$lib/uploads';
+import { load_files, create_folder, upload } from '$lib/uploads';
 
 export async function load(event) {
     const { depends, fetch } = event
@@ -26,4 +26,5 @@ export async function load(event) {
 
 export const actions = {
     create_folder,
+    upload,
 } satisfies Actions;
