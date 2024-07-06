@@ -8,7 +8,7 @@
     {#if folders.length}
         {#each folders as folder (folder.id)}
             <li>
-                <Folder name={folder.name} path="/folders/{folder.id}" />
+                <Folder name={folder.name} path="/uploads/folders/{folder.id}" />
             </li>
         {/each}
     {:else}

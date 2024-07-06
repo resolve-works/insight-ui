@@ -31,7 +31,7 @@
     <div>
         <p>
             {#if parent }
-                <Folder name="../" path="/folders/{parent.id}" icon="chevron-left" />
+                <Folder name="../" path="/uploads/folders/{parent.id}" icon="chevron-left" />
             {:else}
                 <Folder name="../" path="/uploads" icon="chevron-left" />
             {/if}
