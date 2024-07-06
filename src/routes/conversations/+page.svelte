@@ -38,15 +38,19 @@
                         {#if prompt.response}
                             <p>{ prompt.response }</p>
 
-                            {#each prompt.sources as source}
-                                <a href="/documents/{source.id}?page={source.index - source.from_page + 1}">
-                                    <span>
-                                        <Icon class="gg-file" />
-                                        {source.index - source.from_page + 1}
-                                    </span>
-                                    {source.name}
-                                </a>
-                            {/each}
+                            {#if prompt.sources.length }
+                                <p>
+                                    {#each prompt.sources as source}
+                                        <a href="/documents/{source.id}?page={source.index - source.from_page + 1}">
+                                            <span>
+                                                <Icon class="gg-file" />
+                                                {source.index - source.from_page + 1}
+                                            </span>
+                                            {source.name}
+                                        </a>
+                                    {/each}
+                                </p>
+                            {/if}
                         {:else}
                             <Icon class="gg-loadbar" />
                         {/if}

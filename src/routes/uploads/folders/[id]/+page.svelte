@@ -19,7 +19,7 @@
     $: {
         breadcrumbs.set([
             { name: 'Uploads', path: '/uploads' },
-            ...data.parents.map(parent => ({ name: parent.name, path: `/folders/${parent.id}` })),
+            ...data.parents.map(parent => ({ name: parent.name, path: `/uploads/folders/${parent.id}` })),
             { name: data.name, path: `/folders/${data.id}` },
         ])
     }
@@ -50,10 +50,10 @@
 </SideBar>
 
 <Page class="with-sidebar-left">
-    <Uploader />
+    <!--<Uploader />-->
 
     <Section>
-        <h3>Previously uploaded files</h3>
+        <!--<h3>Previously uploaded files</h3>-->
         {#each data.files as file (file.id)}
             <File {...file} />
         {/each}

@@ -38,10 +38,10 @@
 </SideBar>
 
 <Page class="with-sidebar-left">
-    <Uploader />
+    <!--<Uploader />-->
 
     <Section>
-        <h3>Previously uploaded files</h3>
+        <!--<h3>Previously uploaded files</h3>-->
         {#each data.files as file (file.id)}
             <File {...file} />
         {/each}
