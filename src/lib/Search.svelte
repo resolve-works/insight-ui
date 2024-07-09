@@ -3,7 +3,7 @@
     export let value = '';
 </script>
 
-<form method="get" action="/documents">
+<form method="get" action="/search">
     <input name="query" type="text" placeholder="Search contents by keyword" value={value} />
 
     <button>

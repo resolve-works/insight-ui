@@ -9,11 +9,28 @@ import { fail } from '@sveltejs/kit';
 export async function load({ params, fetch, cookies, depends }) {
     depends('api:files')
 
-    const res = await fetch(`${env.API_ENDPOINT}/files?id=eq.${params.id}&select=name,path,number_of_pages,documents(id,name,path,from_page,to_page,is_ready)&documents.order=from_page.asc`)
+    const api_url = `${env.API_ENDPOINT}/files`
+        + `?id=eq.${params.id}`
+        + `&select=id,name,path,number_of_pages,documents(id,name,path,from_page,to_page,is_ready),folders(id,name,parents(id,name))`
+        + `&documents.order=from_page.asc`
+
+    const res = await fetch(api_url)
     const files = await res.json();
-    const { name, path, documents, number_of_pages } = files[0]
+    const file = files[0]
+    const { id, name, path, documents, number_of_pages } = file
+
+    // Create single parents array
+    const parents = [];
+    if(file.folders) {
+        if(file.folders.parents) {
+            parents.push(...file.folders.parents)
+        }
+
+        parents.push(file.folders)
+    }
 
     return { 
+        id,
         name,
         number_of_pages,
         // Humans index from 1
@@ -28,6 +45,7 @@ export async function load({ params, fetch, cookies, depends }) {
             }
         }),
         url: sign(path, cookies),
+        parents,
     }
 }
 

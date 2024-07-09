@@ -12,11 +12,17 @@
 
     export let data;
 
-    $: { 
-        breadcrumbs.set([ 
-            { name: 'Documents', path: '/documents' },
-            { name: data.name, path: `/documents/${data.id}` },
-        ]) 
+    $: {
+        breadcrumbs.set([
+            { name: 'Uploads', path: '/uploads' },
+            ...data.parents.map((parent: Record<string, string>) => {
+                return { 
+                    name: parent.name, 
+                    path: `/uploads/folders/${parent.id}` 
+                }
+            }),
+            { name: data.name, path: `/uploads/documents/${data.id}` },
+        ])
     }
 
     function increase() {
@@ -50,7 +56,7 @@
             </div>
 
             <div class="buttons">
-                <a class="button" href={`/documents/${data.id}/edit`}>
+                <a class="button" href={`/uploads/documents/${data.id}/edit`}>
                     <Icon class="gg-pen" />
                     Edit
                 </a>

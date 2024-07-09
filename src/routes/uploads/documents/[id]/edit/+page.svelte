@@ -16,9 +16,9 @@
 
     $: { 
         breadcrumbs.set([ 
-            { name: 'Documents', path: '/documents' },
-            { name: data.name, path: `/documents/${data.id}` },
-            { name: 'Edit', path: `/documents/${data.id}/edit` },
+            { name: 'Documents', path: '/uploads/documents' },
+            { name: data.name, path: `/uploads/documents/${data.id}` },
+            { name: 'Edit', path: `/uploads/documents/${data.id}/edit` },
         ]) 
     }
 </script>

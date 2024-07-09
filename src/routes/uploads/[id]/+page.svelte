@@ -19,6 +19,12 @@
     $: { 
         breadcrumbs.set([ 
             { name: 'Uploads', path: '/uploads' },
+            ...data.parents.map((parent: Record<string, string>) => {
+                return { 
+                    name: parent.name, 
+                    path: `/uploads/folders/${parent.id}` 
+                }
+            }),
             { name: data.name, path: `/uploads/${data.id}` },
         ]) 
     }
@@ -47,14 +53,14 @@
         <h2>Embedded documents</h2>
 
         {#each data.documents as document (document.id)}
-            <Actionable name={document.name} path={`/documents/${document.id}`} icon="gg-file-document">
+            <Actionable name={document.name} path={`/uploads/documents/${document.id}`} icon="gg-file-document">
                 <Actions slot="actions">
                     {#if ! document.is_ready }
                         <Icon class="gg-loadbar" />
                     {/if}
 
                     <Buttongroup>
-                        <a class='button' href={`/documents/${document.id}/edit`}>
+                        <a class='button' href={`/uploads/documents/${document.id}/edit`}>
                             <Icon class="gg-pen" /> Edit
                         </a>
 

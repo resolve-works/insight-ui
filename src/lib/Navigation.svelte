@@ -3,7 +3,7 @@
     import Icon from '$lib/Icon.svelte';
 
     const items = [
-        { href: "/documents", name: "Documents", class: "gg-file-document" },
+        { href: "/search", name: "Search", class: "gg-search" },
         { href: "/conversations", name: "Conversations", class: "gg-comment" },
         { href: "/uploads", name: "Uploads", class: "gg-folder"},
     ]

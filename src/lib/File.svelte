@@ -22,7 +22,7 @@
         }
     }
 
-    $: path = documents.length == 1 ? `/documents/${documents[0].id}` : `/uploads/${id}`
+    $: path = documents.length == 1 ? `/uploads/documents/${documents[0].id}` : `/uploads/${id}`
 
 
     // If number_of_pages is not set, file is being analyzed still
@@ -37,7 +37,7 @@
 
         <Buttongroup>
             {#if documents.length == 1 }
-                <a class="button" href={`/documents/${documents[0].id}/edit`}>
+                <a class="button" href={`/uploads/documents/${documents[0].id}/edit`}>
                     <Icon class="gg-pen" />
                     Edit
                 </a>
