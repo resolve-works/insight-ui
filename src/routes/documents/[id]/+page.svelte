@@ -3,6 +3,7 @@
     import Icon from '$lib/Icon.svelte';
     import Page from '$lib/Page.svelte';
     import Title from '$lib/Title.svelte';
+    import Actions from '$lib/Actions.svelte';
     import PDFViewer from '$lib/PDFViewer.svelte';
     import { ssp, queryParam } from 'sveltekit-search-params';
     import { breadcrumbs } from '$lib/stores';
@@ -35,7 +36,7 @@
     <Title>
         {data.name}
 
-        <div class="actions" slot="actions">
+        <Actions slot="actions">
             <div class="page">
                 <button on:click|preventDefault={decrease}>
                     <Icon class="gg-chevron-left" />
@@ -59,7 +60,7 @@
                     Split
                 </a>
             </div>
-        </div>
+        </Actions>
     </Title>
 
     <div class="container">
@@ -74,11 +75,6 @@
 </Page>
 
 <style>
-    .actions {
-        display: flex;
-        gap: 1rem;
-    }
-
     .buttons,
     .page {
         display: flex;

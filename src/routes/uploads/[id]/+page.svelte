@@ -1,11 +1,12 @@
 
 <script lang="ts">
+    import Actionable from '$lib/Actionable.svelte';
+    import Actions from '$lib/Actions.svelte';
     import { enhance } from '$app/forms';
     import Page from '$lib/Page.svelte';
     import Card from '$lib/Card.svelte';
     import Icon from '$lib/Icon.svelte';
     import Title from '$lib/Title.svelte';
-    import Unnamed from '$lib/Unnamed.svelte';
     import Buttongroup from '$lib/Buttongroup.svelte'
     import ValidationErrors from '$lib/ValidationErrors.svelte';
     import Section from '$lib/Section.svelte';
@@ -46,43 +47,31 @@
         <h2>Embedded documents</h2>
 
         {#each data.documents as document (document.id)}
-            <Card>
-                <div class="document">
-                    <h3>
-                        <a class="unstyled" href={`/documents/${document.id}`}>
-                            {#if document.name}
-                                {document.name}
-                            {:else}
-                                <Unnamed>Unnamed document</Unnamed>
-                            {/if}
+            <Actionable name={document.name} path={`/documents/${document.id}`} icon="gg-file-document">
+                <Actions slot="actions">
+                    {#if ! document.is_ready }
+                        <Icon class="gg-loadbar" />
+                    {/if}
+
+                    <Buttongroup>
+                        <a class='button' href={`/documents/${document.id}/edit`}>
+                            <Icon class="gg-pen" /> Edit
                         </a>
-                    </h3>
 
-                    <div class="actions">
-                        {#if ! document.is_ready }
-                            <Icon class="gg-loadbar" />
-                        {/if}
+                        <form method="POST" action="?/remove" use:enhance>
+                            <input type="hidden" name="id" value={document.id} />
+                            <button><Icon class="gg-trash" /> Delete</button>
+                        </form>
+                    </Buttongroup>
+                </Actions>
 
-                        <Buttongroup>
-                            <a class='button' href={`/documents/${document.id}/edit`}>
-                                <Icon class="gg-pen" /> Edit
-                            </a>
-
-                            <form method="POST" action="?/remove" use:enhance>
-                                <input type="hidden" name="id" value={document.id} />
-                                <button><Icon class="gg-trash" /> Delete</button>
-                            </form>
-                        </Buttongroup>
-                    </div>
-
-                    <div>
-                        from page 
-                        <span>{document.from_page}</span> 
-                        to page 
-                        <span>{document.to_page}</span>
-                    </div>
-                </div>
-            </Card>
+                <p>
+                    from page 
+                    <span>{document.from_page}</span> 
+                    to page 
+                    <span>{document.to_page}</span>
+                </p>
+            </Actionable>
         {/each}
 
         <Card>
@@ -144,12 +133,6 @@
 
     .document {
         padding-bottom: 1rem;
-    }
-
-    .actions {
-        display: flex;
-        gap: 1rem;
-        align-items: center;
     }
 
     span {

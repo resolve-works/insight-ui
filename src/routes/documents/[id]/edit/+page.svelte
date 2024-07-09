@@ -4,6 +4,7 @@
     import Page from '$lib/Page.svelte';
     import Icon from '$lib/Icon.svelte';
     import Card from '$lib/Card.svelte';
+    import Actions from '$lib/Actions.svelte';
     import Unnamed from '$lib/Unnamed.svelte';
     import ValidationErrors from '$lib/ValidationErrors.svelte';
     import Section from '$lib/Section.svelte';
@@ -28,7 +29,7 @@
             {#if data.name}
                 Edit "{data.name}"
             {:else}
-                Edit "<Unnamed>Unnamed Document</Unnamed>"
+                Edit "<Unnamed />"
             {/if}
         </Title>
 
@@ -91,7 +92,7 @@
                     />
             </div>
 
-            <div class="actions">
+            <Actions>
                 {#if ! data.is_ready }
                     <Icon class="gg-loadbar" />
                 {/if}
@@ -99,18 +100,12 @@
                 <button class="primary" disabled={ ! data.is_ready }>
                     <Icon class="gg-copy" /> Update split
                 </button>
-            </div>
+            </Actions>
         </form>
     </Card>
 </Page>
 
 <style>
-    .actions {
-        display: flex;
-        gap: 2rem;
-        align-items: center;
-    }
-
     form {
         display: grid;
         grid-template-columns: 1fr auto;

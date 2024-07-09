@@ -1,24 +1,13 @@
 
 <script lang="ts">
     import Icon from '$lib/Icon.svelte';
-    import Card from '$lib/Card.svelte';
-    import Unnamed from '$lib/Unnamed.svelte';
+    import Actionable from '$lib/Actionable.svelte';
     export let id: string;
     export let filename: string;
     export let pages: { index: number, highlights: string[] }[];
 </script>
 
-<Card>
-    <h3>
-        <a class="unstyled" href={`/documents/${id}`}>
-            {#if filename}
-                {filename}
-            {:else}
-                <Unnamed>Unnamed document</Unnamed>
-            {/if}
-        </a>
-    </h3>
-
+<Actionable name={filename} path={`/documents/${id}`} icon="gg-file-document">
     {#each pages as page}
         <a class="page" href={`/documents/${id}?page=${page.index}`}>
             <span class="index">
@@ -33,7 +22,7 @@
             </ul>
         </a>
     {/each}
-</Card>
+</Actionable>
 
 <style>
     .index {

@@ -8,13 +8,22 @@
 
 <script lang="ts">
     import { breadcrumbs } from './stores';
+    import Unnamed from './Unnamed.svelte';
 </script>
 
 <ul>
     <li><a href="/">Home</a></li>
 
     {#each $breadcrumbs as crumb}
-        <li><a href={crumb.path}>{crumb.name}</a></li>
+        <li>
+            <a href={crumb.path}>
+                {#if crumb.name}
+                    {crumb.name}
+                {:else}
+                    <Unnamed />
+                {/if}
+            </a>
+        </li>
     {/each}
 </ul>
 

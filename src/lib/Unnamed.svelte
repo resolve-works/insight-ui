@@ -1,8 +1,8 @@
 
-<span class="unnamed"><slot /></span>
+<span>Unnamed</span>
 
 <style>
-    .unnamed {
+    span {
         color: var(--text-color-page);
     }
 </style>
