@@ -2,6 +2,7 @@
 <script lang="ts" context="module">
     export class Upload extends EventTarget {
         id: string
+        folder_id: string | undefined
         file: File
         // https://github.com/whatwg/fetch/issues/607
         // Fetch doesn't allow tracking progress for now
@@ -12,9 +13,10 @@
 
         is_started = false;
 
-        constructor(file: File) {
+        constructor(file: File, folder_id: string | undefined) {
             super()
             this.id = self.crypto.randomUUID()
+            this.folder_id = folder_id
             this.file = file
             this.total = file.size
         }
@@ -34,8 +36,11 @@
 
             const data = new FormData();
             data.append('files', this.file)
+            if(this.folder_id) {
+                data.append('folder_id', this.folder_id)
+            }
 
-            this.xhr.open("POST", '?/upload', true);
+            this.xhr.open("POST", `/uploads?/upload`, true);
             this.xhr.send(data);
         }
     }

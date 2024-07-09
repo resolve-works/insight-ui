@@ -28,6 +28,10 @@
 
     li {
         margin-right: 1rem;
+        max-width: 16rem;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow-x: hidden;
     }
 
     li:after {
