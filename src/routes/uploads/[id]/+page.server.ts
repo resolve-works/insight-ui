@@ -11,15 +11,15 @@ export async function load({ params, fetch, cookies, depends }) {
 
     const api_url = `${env.API_ENDPOINT}/inodes`
         + `?id=eq.${params.id}`
-        + `&select=id,owner_id,name,storage_path,files(from_page,to_page),ancestors(id,name),inodes(id,name)`
+        + `&select=id,owner_id,name,storage_path,file_id,...files(from_page,to_page),ancestors(id,name),inodes(id,name)`
 
     const res = await fetch(api_url)
     const inodes = await res.json();
     const inode = inodes[0]
-    const { owner_id, storage_path, files } = inode
+    const { owner_id, storage_path, file_id } = inode
 
     return { 
-        url: files ? sign(`users/${owner_id}/${storage_path}`, cookies) : undefined,
+        url: file_id ? sign(`users/${owner_id}/${storage_path}`, cookies) : undefined,
         ...inode
     }
 }

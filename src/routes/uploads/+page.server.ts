@@ -22,16 +22,12 @@ export async function load(event) {
     const res = await fetch(api_url)
     const inodes = await res.json();
 
-    return {
-        //...await load_files(event),
-        inodes,
-    } 
+    return { inodes, } 
 }
 
-async function create_folder({ request, fetch, params }: RequestEvent) {
+async function create_folder({ request, fetch }: RequestEvent) {
     try {
         const data = await validate(request, schema)
-        console.log(data)
 
         const response = await fetch(`${env.API_ENDPOINT}/inodes`, {
             method: 'POST',

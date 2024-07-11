@@ -7,7 +7,7 @@
     import { Upload } from '$lib/Upload.svelte';
     import Folder from '$lib/Folder.svelte';
     import Title from '$lib/Title.svelte';
-    import Section from './Section.svelte';
+    import Section from '$lib/Section.svelte';
     import { uploads } from '$lib/stores.ts';
     import { enhance } from '$app/forms';
     import { page } from '$app/stores';

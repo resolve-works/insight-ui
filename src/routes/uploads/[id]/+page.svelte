@@ -1,6 +1,7 @@
 
 <script lang="ts">
-    import UploadsPage from `$lib/UploadsPage.svelte`;
+    import IndexPage from `../IndexPage.svelte`;
+    import ViewPage from `../ViewPage.svelte`;
     import Actionable from '$lib/Actionable.svelte';
     import Actions from '$lib/Actions.svelte';
     import { enhance } from '$app/forms';
@@ -31,7 +32,11 @@
     }
 </script>
 
-<UploadsPage {...data} />
+{#if data.file_id}
+    <ViewPage {...data} />
+{:else}
+    <IndexPage {...data} />
+{/if}
 
 <!--<Page>-->
     <!--<Section>-->
