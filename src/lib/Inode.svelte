@@ -8,8 +8,10 @@
 
     export let id: string;
     export let name: string;
-    export let number_of_pages: number | undefined;
-    export let documents: { id: string, name: string, is_ready: boolean }[] = []
+    export let files: Record<string, any> | undefined;
+
+    const is_ready = false
+    const children = [];
 
     function icon(amount: number) {
         switch(amount) {
@@ -22,31 +24,24 @@
         }
     }
 
-    $: path = documents.length == 1 ? `/uploads/documents/${documents[0].id}` : `/uploads/${id}`
-
-
-    // If number_of_pages is not set, file is being analyzed still
-    $: is_ready = number_of_pages !== undefined && documents.every(document => document.is_ready);
 </script>
 
-<Actionable {name} {path} icon={icon(documents.length)}>
+<Actionable {name} path={`/uploads/${id}`} icon={icon(children.length)}>
     <Actions slot="actions">
         {#if ! is_ready}
             <Icon class="gg-loadbar" />
         {/if}
 
         <Buttongroup>
-            {#if documents.length == 1 }
-                <a class="button" href={`/uploads/documents/${documents[0].id}/edit`}>
-                    <Icon class="gg-pen" />
-                    Edit
-                </a>
+            <a class="button" href={`/uploads/${id}/edit`}>
+                <Icon class="gg-pen" />
+                Edit
+            </a>
 
-                <a class="button" href={`/uploads/${id}`}>
-                    <Icon class="gg-copy" />
-                    Split
-                </a>
-            {/if}
+            <a class="button" href={`/uploads/${id}/split`}>
+                <Icon class="gg-copy" />
+                Split
+            </a>
 
             <form method="POST" action="?/remove" use:enhance>
                 <input type="hidden" name="id" value={id} />
@@ -55,7 +50,7 @@
         </Buttongroup>
     </Actions>
 
-    {#if documents.length > 1}
-        <p>{documents.length} embedded document{documents.length == 1 ? '' : 's'}</p>
+    {#if children.length > 1}
+        <p>{children.length} embedded document{children.length == 1 ? '' : 's'}</p>
     {/if}
 </Actionable>
