@@ -38,10 +38,12 @@
                 Edit
             </a>
 
-            <a class="button" href={`/uploads/${id}/split`}>
-                <Icon class="gg-copy" />
-                Split
-            </a>
+            {#if files}
+                <a class="button" href={`/uploads/${id}/split`}>
+                    <Icon class="gg-copy" />
+                    Split
+                </a>
+            {/if}
 
             <form method="POST" action="?/remove" use:enhance>
                 <input type="hidden" name="id" value={id} />

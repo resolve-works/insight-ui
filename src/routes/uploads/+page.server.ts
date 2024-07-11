@@ -31,19 +31,19 @@ export async function load(event) {
 async function create_folder({ request, fetch, params }: RequestEvent) {
     try {
         const data = await validate(request, schema)
+        console.log(data)
 
-        const response = await fetch(`${env.API_ENDPOINT}/folders`, {
+        const response = await fetch(`${env.API_ENDPOINT}/inodes`, {
             method: 'POST',
-            body: JSON.stringify({
-                ...data,
-                parent_id: params.id,
-            }),
+            body: JSON.stringify(data),
             headers: { 
                 'Content-Type': 'application/json',
                 'Prefer': 'return=representation',
             }
         })
-        // TODO error handling
+        if(response.status != 201) {
+            throw new Error(`Error creating folder: "${await response.text()}"`)
+        }
     } catch(err) {
         if(err instanceof ValidationError) {
             return fail(400, err.format())
@@ -70,7 +70,7 @@ async function upload({ request, fetch, params, cookies }: RequestEvent) {
             }
         })
         if(response.status !== 200) {
-            throw new Error(`Error creating file record: "${await response.text()}"`)
+            throw new Error(`Error creating file: "${await response.text()}"`)
         }
         const inodes = await response.json()
         const inode = inodes[0]

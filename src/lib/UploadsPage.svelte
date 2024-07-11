@@ -81,11 +81,12 @@
     {/if}
 
 
-    <!--<form method="POST" action="?/create_folder" use:enhance>-->
-        <!--<input name="name" />-->
+    <form method="POST" action="/uploads?/create_folder" use:enhance>
+        <input name="name" />
+        <input name="parent_id" type="hidden" value="{ $page.params.id }" />
 
-        <!--<button>Create</button>-->
-    <!--</form>-->
+        <button>Create</button>
+    </form>
 
     <Title>
         {name}

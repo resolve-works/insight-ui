@@ -9,43 +9,18 @@ import { fail } from '@sveltejs/kit';
 export async function load({ params, fetch, cookies, depends }) {
     depends('api:files')
 
-    const api_url = `${env.API_ENDPOINT}/files`
+    const api_url = `${env.API_ENDPOINT}/inodes`
         + `?id=eq.${params.id}`
-        + `&select=id,name,path,number_of_pages,documents(id,name,path,from_page,to_page,is_ready),folders(id,name,parents(id,name))`
-        + `&documents.order=from_page.asc`
+        + `&select=id,owner_id,name,storage_path,files(from_page,to_page),ancestors(id,name),inodes(id,name)`
 
     const res = await fetch(api_url)
-    const files = await res.json();
-    const file = files[0]
-    const { id, name, path, documents, number_of_pages } = file
-
-    // Create single parents array
-    const parents = [];
-    if(file.folders) {
-        if(file.folders.parents) {
-            parents.push(...file.folders.parents)
-        }
-
-        parents.push(file.folders)
-    }
+    const inodes = await res.json();
+    const inode = inodes[0]
+    const { owner_id, storage_path, files } = inode
 
     return { 
-        id,
-        name,
-        number_of_pages,
-        // Humans index from 1
-        //
-        // When you say "to 137" to a human, they expect 137 to be in the
-        // range. We are counting to document.length, which is not in the
-        // range. Therefore we don't have to increment to_page with 1
-        documents: documents.map((document: Record<string, any>) => {
-            return { 
-                ...document, 
-                from_page: document.from_page + 1,
-            }
-        }),
-        url: sign(path, cookies),
-        parents,
+        url: files ? sign(`users/${owner_id}/${storage_path}`, cookies) : undefined,
+        ...inode
     }
 }
 

@@ -1,5 +1,6 @@
 
 <script lang="ts">
+    import UploadsPage from `$lib/UploadsPage.svelte`;
     import Actionable from '$lib/Actionable.svelte';
     import Actions from '$lib/Actions.svelte';
     import { enhance } from '$app/forms';
@@ -19,10 +20,10 @@
     $: { 
         breadcrumbs.set([ 
             { name: 'Uploads', path: '/uploads' },
-            ...data.parents.map((parent: Record<string, string>) => {
+            ...data.ancestors.map((ancestor: Record<string, string>) => {
                 return { 
-                    name: parent.name, 
-                    path: `/uploads/folders/${parent.id}` 
+                    name: ancestor.name, 
+                    path: `/uploads/${ancestor.id}` 
                 }
             }),
             { name: data.name, path: `/uploads/${data.id}` },
@@ -30,129 +31,131 @@
     }
 </script>
 
-<Page>
-    <Section>
-        <Title>
-            {data.name}
+<UploadsPage {...data} />
 
-            <a class="button" href="{data.url}" target="_blank" slot="actions">
-                <Icon class="gg-software-download" />
-                Download original
-            </a>
-        </Title>
+<!--<Page>-->
+    <!--<Section>-->
+        <!--<Title>-->
+            <!--{data.name}-->
 
-        <table>
-            <tr>
-                <td><b>Number of pages</b></td>
-                <td>{data.number_of_pages}</td>
-            </tr>
-        </table>
-    </Section>
+            <!--<a class="button" href="{data.url}" target="_blank" slot="actions">-->
+                <!--<Icon class="gg-software-download" />-->
+                <!--Download original-->
+            <!--</a>-->
+        <!--</Title>-->
 
-    <Section>
-        <h2>Embedded documents</h2>
+        <!--<table>-->
+            <!--<tr>-->
+                <!--<td><b>Number of pages</b></td>-->
+                <!--<td>{data.number_of_pages}</td>-->
+            <!--</tr>-->
+        <!--</table>-->
+    <!--</Section>-->
 
-        {#each data.documents as document (document.id)}
-            <Actionable name={document.name} path={`/uploads/documents/${document.id}`} icon="gg-file-document">
-                <Actions slot="actions">
-                    {#if ! document.is_ready }
-                        <Icon class="gg-loadbar" />
-                    {/if}
+    <!--<Section>-->
+        <!--<h2>Embedded documents</h2>-->
 
-                    <Buttongroup>
-                        <a class='button' href={`/uploads/documents/${document.id}/edit`}>
-                            <Icon class="gg-pen" /> Edit
-                        </a>
+        <!--{#each data.documents as document (document.id)}-->
+            <!--<Actionable name={document.name} path={`/uploads/documents/${document.id}`} icon="gg-file-document">-->
+                <!--<Actions slot="actions">-->
+                    <!--{#if ! document.is_ready }-->
+                        <!--<Icon class="gg-loadbar" />-->
+                    <!--{/if}-->
 
-                        <form method="POST" action="?/remove" use:enhance>
-                            <input type="hidden" name="id" value={document.id} />
-                            <button><Icon class="gg-trash" /> Delete</button>
-                        </form>
-                    </Buttongroup>
-                </Actions>
+                    <!--<Buttongroup>-->
+                        <!--<a class='button' href={`/uploads/documents/${document.id}/edit`}>-->
+                            <!--<Icon class="gg-pen" /> Edit-->
+                        <!--</a>-->
 
-                <p>
-                    from page 
-                    <span>{document.from_page}</span> 
-                    to page 
-                    <span>{document.to_page}</span>
-                </p>
-            </Actionable>
-        {/each}
+                        <!--<form method="POST" action="?/remove" use:enhance>-->
+                            <!--<input type="hidden" name="id" value={document.id} />-->
+                            <!--<button><Icon class="gg-trash" /> Delete</button>-->
+                        <!--</form>-->
+                    <!--</Buttongroup>-->
+                <!--</Actions>-->
 
-        <Card>
-            <form method="POST" action="?/create" use:enhance>
-                {#if form?.errors?.from_page?._errors}
-                    <ValidationErrors title="From page" errors={form?.errors.from_page?._errors} />
-                {/if}
-                {#if form?.errors?.to_page?._errors}
-                    <ValidationErrors title="To page" errors={form?.errors.to_page?._errors} />
-                {/if}
+                <!--<p>-->
+                    <!--from page -->
+                    <!--<span>{document.from_page}</span> -->
+                    <!--to page -->
+                    <!--<span>{document.to_page}</span>-->
+                <!--</p>-->
+            <!--</Actionable>-->
+        <!--{/each}-->
 
-                <div class="document">
-                    <input 
-                        type="text" 
-                        name="name" 
-                        placeholder="Document name" 
-                        />
+        <!--<Card>-->
+            <!--<form method="POST" action="?/create" use:enhance>-->
+                <!--{#if form?.errors?.from_page?._errors}-->
+                    <!--<ValidationErrors title="From page" errors={form?.errors.from_page?._errors} />-->
+                <!--{/if}-->
+                <!--{#if form?.errors?.to_page?._errors}-->
+                    <!--<ValidationErrors title="To page" errors={form?.errors.to_page?._errors} />-->
+                <!--{/if}-->
 
-                    <div>
-                        from page 
-                        <input 
-                            type="number" 
-                            name="from_page" 
-                            placeholder="1"
-                            min="1"
-                            max={data.number_of_pages}
-                            class:invalid={form?.errors && "from_page" in form?.errors}
-                            value={form?.data?.from_page}
-                            /> 
-                        to page 
-                        <input 
-                            type="number" 
-                            name="to_page" 
-                            class:invalid={form?.errors && "to_page" in form?.errors}
-                            placeholder="{data.number_of_pages}"
-                            min="1"
-                            max={data.number_of_pages}
-                            value={form?.data?.to_page}
-                            />
-                    </div>
+                <!--<div class="document">-->
+                    <!--<input -->
+                        <!--type="text" -->
+                        <!--name="name" -->
+                        <!--placeholder="Document name" -->
+                        <!--/>-->
 
-                    <button class="primary"><Icon class="gg-add" /> Create</button>
-                </div>
-            </form>
-        </Card>
-    </Section>
-</Page>
+                    <!--<div>-->
+                        <!--from page -->
+                        <!--<input -->
+                            <!--type="number" -->
+                            <!--name="from_page" -->
+                            <!--placeholder="1"-->
+                            <!--min="1"-->
+                            <!--max={data.number_of_pages}-->
+                            <!--class:invalid={form?.errors && "from_page" in form?.errors}-->
+                            <!--value={form?.data?.from_page}-->
+                            <!--/> -->
+                        <!--to page -->
+                        <!--<input -->
+                            <!--type="number" -->
+                            <!--name="to_page" -->
+                            <!--class:invalid={form?.errors && "to_page" in form?.errors}-->
+                            <!--placeholder="{data.number_of_pages}"-->
+                            <!--min="1"-->
+                            <!--max={data.number_of_pages}-->
+                            <!--value={form?.data?.to_page}-->
+                            <!--/>-->
+                    <!--</div>-->
 
-<style>
-    .document {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        align-items: center;
-    }
+                    <!--<button class="primary"><Icon class="gg-add" /> Create</button>-->
+                <!--</div>-->
+            <!--</form>-->
+        <!--</Card>-->
+    <!--</Section>-->
+<!--</Page>-->
 
-    .document input[type=text] {
-        grid-column: 1 / 3;
-    }
+<!--<style>-->
+    <!--.document {-->
+        <!--display: grid;-->
+        <!--grid-template-columns: 1fr auto;-->
+        <!--align-items: center;-->
+    <!--}-->
 
-    .document {
-        padding-bottom: 1rem;
-    }
+    <!--.document input[type=text] {-->
+        <!--grid-column: 1 / 3;-->
+    <!--}-->
 
-    span {
-        font-weight: bold;
-    }
+    <!--.document {-->
+        <!--padding-bottom: 1rem;-->
+    <!--}-->
 
-    input[type=text] {
-        width: 100%;
-        max-width: 50rem;
-        margin: 1rem 0;
-    }
+    <!--span {-->
+        <!--font-weight: bold;-->
+    <!--}-->
 
-    input[type=number] {
-        max-width: 8rem;
-        margin: 0 0.5rem;
-    }
-</style>
+    <!--input[type=text] {-->
+        <!--width: 100%;-->
+        <!--max-width: 50rem;-->
+        <!--margin: 1rem 0;-->
+    <!--}-->
+
+    <!--input[type=number] {-->
+        <!--max-width: 8rem;-->
+        <!--margin: 0 0.5rem;-->
+    <!--}-->
+<!--</style>-->
