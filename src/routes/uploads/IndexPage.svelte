@@ -83,7 +83,9 @@
 
     <form method="POST" action="/uploads?/create_folder" use:enhance>
         <input name="name" />
-        <input name="parent_id" type="hidden" value="{ $page.params.id }" />
+        {#if $page.params.id} 
+            <input name="parent_id" type="hidden" value="{ $page.params.id }" />
+        {/if}
 
         <button>Create</button>
     </form>
@@ -94,7 +96,9 @@
         <div class="buttons" slot="actions">
             <form method="POST" action="?/upload" enctype="multipart/form-data" bind:this={form} use:enhance={submit}>
                 <input name="files" type="file" accept=".pdf" multiple bind:this={input} on:change={() => form.requestSubmit()} />
-                <input name="parent_id" type="hidden" value="{ $page.params.id }" />
+                {#if $page.params.id} 
+                    <input name="parent_id" type="hidden" value="{ $page.params.id }" />
+                {/if}
                 <button 
                     on:click|preventDefault={() => input.click()} 
                     on:drop|preventDefault={drop}

@@ -48,7 +48,7 @@ async function create_folder({ request, fetch }: RequestEvent) {
     }
 }
 
-async function upload({ request, fetch, params, cookies }: RequestEvent) {
+async function upload({ request, fetch, cookies }: RequestEvent) {
     const data = await request.formData();
     const uploads: File[] = data.getAll('files') as File[]
 
@@ -72,7 +72,7 @@ async function upload({ request, fetch, params, cookies }: RequestEvent) {
         const inode = inodes[0]
 
         // Stream the file to S3 backend
-        const url = sign(`users/${inode.owner_id}/${inode.path}`, cookies, 'PUT')
+        const url = sign(`users/${inode.owner_id}/${inode.path}/original`, cookies, 'PUT')
         const storage_response = await fetch(url, { 
             method: 'PUT', 
             body: upload.stream(), 
@@ -95,7 +95,7 @@ async function upload({ request, fetch, params, cookies }: RequestEvent) {
         // TODO error handling
 
         const channel = await Channel.connect(cookies)
-        channel.publish('analyze_file', { id: inode.id });
+        channel.publish('ingest_file', { id: inode.id });
         await channel.close()
     }
 }

@@ -4,7 +4,7 @@ import { env } from '$env/dynamic/private'
 export async function load({ url, fetch }) {
     const query = url.searchParams.get('query');
 
-    const res = await fetch(`${env.OPENSEARCH_ENDPOINT}/documents/_search`, {
+    const res = await fetch(`${env.OPENSEARCH_ENDPOINT}/inodes/_search`, {
         method: 'post',
         headers: { 
             'Content-Type': 'application/json', 
