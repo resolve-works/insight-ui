@@ -6,7 +6,9 @@ import { Channel } from '$lib/amqp';
 export async function load({ fetch, depends }) {
     depends('api:conversations')
 
-    const res = await fetch(`${env.API_ENDPOINT}/prompts?select=query,response,sources(similarity,...pages(index,...document(id,name,from_page)))&order=created_at.desc&sources.order=similarity.desc&limit=1`)
+    const res = await fetch(`${env.API_ENDPOINT}/prompts`
+        + `?select=query,response,sources(similarity,...pages(index,...files(from_page,inodes(id,name))))`
+        + `&order=created_at.desc&sources.order=similarity.desc&limit=1`)
     const prompts = await res.json()
     return { prompts }
 }

@@ -27,13 +27,6 @@
                 Edit
             </a>
 
-            {#if files}
-                <a class="button" href={`/files/${id}/split`}>
-                    <Icon class="gg-copy" />
-                    Split
-                </a>
-            {/if}
-
             <form method="POST" action="?/remove" use:enhance>
                 <input type="hidden" name="id" value={id} />
                 <button><Icon class="gg-trash" /> Delete</button>

@@ -52,11 +52,6 @@
                     <Icon class="gg-pen" />
                     Edit
                 </a>
-
-                <a class="button" href={`/files/${id}/split`}>
-                    <Icon class="gg-copy" />
-                    Split
-                </a>
             </div>
         </Actions>
     </Title>

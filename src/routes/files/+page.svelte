@@ -5,7 +5,7 @@
 
     export let data;
 
-    $: { breadcrumbs.set([ { name: 'Uploads', path: '/files' }, ]) }
+    $: { breadcrumbs.set([ { name: 'Files', path: '/files' }, ]) }
 </script>
 
-<IndexPage name="Uploads" {...data} />
+<IndexPage name="Files" {...data} />

@@ -5,7 +5,7 @@ import type { RequestEvent } from '@sveltejs/kit';
 import { fail } from '@sveltejs/kit';
 import { sign } from '$lib/sign';
 import { Channel } from '$lib/amqp.js';
-import { schema } from '$lib/validation/folder';
+import { schema } from '$lib/validation/inode';
 import { validate, ValidationError } from '$lib/validation';
 
 export async function load(event) {

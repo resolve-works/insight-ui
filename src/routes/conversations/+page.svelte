@@ -41,12 +41,12 @@
                             {#if prompt.sources.length }
                                 <p>
                                     {#each prompt.sources as source}
-                                        <a href="/files/documents/{source.id}?page={source.index - source.from_page + 1}">
+                                        <a href="/files/{source.inodes[0].id}?page={source.index - source.from_page + 1}">
                                             <span>
                                                 <Icon class="gg-file" />
                                                 {source.index - source.from_page + 1}
                                             </span>
-                                            {source.name}
+                                            {source.inodes[0].name}
                                         </a>
                                     {/each}
                                 </p>
