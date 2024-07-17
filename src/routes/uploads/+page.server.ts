@@ -15,7 +15,7 @@ export async function load(event) {
     depends('api:folders')
 
     const api_url = `${env.API_ENDPOINT}/inodes`
-        + `?select=id,name,files(id)` 
+        + `?select=id,name,files(id,is_ready)` 
         + `&parent_id=is.null`
         + `&order=created_at.desc`
 

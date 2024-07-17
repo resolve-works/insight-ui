@@ -10,25 +10,14 @@
     export let name: string;
     export let files: Record<string, any> | undefined;
 
-    const is_ready = false
     const children = [];
 
-    function icon(amount: number) {
-        switch(amount) {
-            case 0: 
-                return 'gg-loadbar';
-            case 1:
-                return 'gg-file-document';
-            default:
-                return 'gg-box';
-        }
-    }
-
+    let icon = files ? 'gg-file-document': 'gg-folder';
 </script>
 
-<Actionable {name} path={`/uploads/${id}`} icon={icon(children.length)}>
+<Actionable {name} path={`/uploads/${id}`} icon={icon}>
     <Actions slot="actions">
-        {#if ! is_ready}
+        {#if files && ! files.is_ready}
             <Icon class="gg-loadbar" />
         {/if}
 
