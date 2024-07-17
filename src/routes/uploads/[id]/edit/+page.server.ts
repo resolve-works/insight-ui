@@ -7,17 +7,16 @@ import { name_schema, pagerange_schema, pagerange_refinement } from '$lib/valida
 import { validate, ValidationError } from '$lib/validation';
 
 export async function load({ params, fetch, depends }) {
-    depends('api:documents')
+    depends('api:inodes')
 
-    const res = await fetch(`${env.API_ENDPOINT}/documents?id=eq.${params.id}&select=id,name,from_page,to_page,is_ready,file_id,files(number_of_pages,name)`)
-    const documents = await res.json();
-    const document = documents[0]
+    const res = await fetch(`${env.API_ENDPOINT}/inodes`
+        + `?id=eq.${params.id}`
+        + `&select=id,name,files(id,from_page,to_page,is_ready),ancestors(id,name)`)
+    const inodes = await res.json();
+    const inode = inodes[0]
 
     return {
-        ...document,
-        // Humans index from 1
-        from_page: document.from_page + 1,
-        is_whole_document: document.from_page == 0 && document.to_page == document.files.number_of_pages,
+        ...inode,
     }
 }
 
@@ -26,7 +25,7 @@ export const actions = {
         try {
             const data = await validate(request, name_schema);
 
-            const response = await fetch(`${env.API_ENDPOINT}/documents?id=eq.${params.id}`, {
+            const response = await fetch(`${env.API_ENDPOINT}/inodes?id=eq.${params.id}`, {
                 method: 'PATCH',
                 body: JSON.stringify(data),
                 headers: { 'Content-Type': 'application/json' }
@@ -34,7 +33,7 @@ export const actions = {
             // TODO - handle error
 
             const channel = await Channel.connect(cookies)
-            channel.publish('index_document', { id: params.id });
+            channel.publish('index_inode', { id: params.id });
             await channel.close();
         } catch(err) {
             if(err instanceof ValidationError) {

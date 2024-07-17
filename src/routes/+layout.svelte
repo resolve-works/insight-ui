@@ -32,11 +32,9 @@
                     const body = JSON.parse(message);
 
                     const mapping = {
-                        upload_file: ['api:files'],
-                        analyze_file: ['api:files'],
-                        ingest_document: ['api:files', 'api:documents'],
-                        index_document: ['api:files', 'api:documents'],
-                        embed_document: ['api:files', 'api:documents'],
+                        ingest_file: ['api:inodes'],
+                        index_inode: ['api:inodes'],
+                        embed_file: ['api:inodes'],
                         answer_prompt: ['api:conversations'],
                     }
 

@@ -9,6 +9,7 @@
 
     const page = queryParam('page', ssp.number(1), { pushHistory: false });
 
+    export let id;
     export let name;
     export let url;
     export let from_page;
@@ -47,12 +48,12 @@
             </div>
 
             <div class="buttons">
-                <a class="button" href="./edit">
+                <a class="button" href={`/uploads/${id}/edit`}>
                     <Icon class="gg-pen" />
                     Edit
                 </a>
 
-                <a class="button" href="./split">
+                <a class="button" href={`/uploads/${id}/split`}>
                     <Icon class="gg-copy" />
                     Split
                 </a>

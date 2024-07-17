@@ -11,8 +11,7 @@ import { load_files } from '$lib/uploads';
 
 export async function load(event) {
     const { depends, fetch } = event
-    depends('api:files')
-    depends('api:folders')
+    depends('api:inodes')
 
     const api_url = `${env.API_ENDPOINT}/inodes`
         + `?select=id,name,files(id,is_ready)` 

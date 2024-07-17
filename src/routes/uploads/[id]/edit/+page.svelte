@@ -16,9 +16,15 @@
 
     $: { 
         breadcrumbs.set([ 
-            { name: 'Documents', path: '/uploads/documents' },
-            { name: data.name, path: `/uploads/documents/${data.id}` },
-            { name: 'Edit', path: `/uploads/documents/${data.id}/edit` },
+            { name: 'Uploads', path: '/uploads' },
+            ...data.ancestors.map((ancestor: Record<string, string>) => {
+                return { 
+                    name: ancestor.name, 
+                    path: `/uploads/${ancestor.id}` 
+                }
+            }),
+            { name: data.name, path: `/uploads/${data.id}` },
+            { name: 'Edit', path: `/uploads/${data.id}/edit` },
         ]) 
     }
 </script>
@@ -37,7 +43,7 @@
             <form method="POST" action="?/update_name" use:enhance={() => async ({ update }) => update({ reset: false })}>
                 <input type="text" name="name" placeholder="Document name" value={data.name} />
 
-                <button class="primary" disabled={ ! data.is_ready }>
+                <button class="primary" disabled={ ! data.files.is_ready }>
                     <Icon class="gg-pen" /> Change name
                 </button>
             </form>
@@ -45,19 +51,10 @@
     </Section>
 
     <h2>
-        {#if data.is_whole_document }
-            Complete file
-        {:else}
-            Split file
-        {/if}
+        File
     </h2>
     <p>
-        {#if data.is_whole_document }
-            This document is the complete uploaded file 
-        {:else}
-            This document is a part of the uploaded file 
-        {/if}
-        <a href={`/uploads/${data.file_id}`}>{data.files.name}</a>. Uploads can be split into different documents.
+        <a href={`/uploads/${data.files.id}`}>{data.name}</a>. Uploads can be split into different documents.
     </p>
 
     <Card>
@@ -93,11 +90,11 @@
             </div>
 
             <Actions>
-                {#if ! data.is_ready }
+                {#if ! data.files.is_ready }
                     <Icon class="gg-loadbar" />
                 {/if}
 
-                <button class="primary" disabled={ ! data.is_ready }>
+                <button class="primary" disabled={ ! data.files.is_ready }>
                     <Icon class="gg-copy" /> Update split
                 </button>
             </Actions>

@@ -28,7 +28,7 @@
             if( ! upload.is_started) {
                 // Remove uploads from store on completion
                 upload.addEventListener('upload_finished', () => {
-                    invalidate('api:files')
+                    invalidate('api:inodes')
                     uploads.update(uploads => uploads.filter(u => u != upload))
                 })
 
