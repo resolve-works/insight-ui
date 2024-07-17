@@ -7,9 +7,9 @@
     export let pages: { index: number, highlights: string[] }[];
 </script>
 
-<Actionable name={filename} path={`/uploads/documents/${id}`} icon="gg-file-document">
+<Actionable name={filename} path={`/files/documents/${id}`} icon="gg-file-document">
     {#each pages as page}
-        <a class="page" href={`/uploads/documents/${id}?page=${page.index}`}>
+        <a class="page" href={`/files/documents/${id}?page=${page.index}`}>
             <span class="index">
                 <Icon class="gg-file" />
                 {page.index}

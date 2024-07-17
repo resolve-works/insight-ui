@@ -16,15 +16,15 @@
 
     $: { 
         breadcrumbs.set([ 
-            { name: 'Uploads', path: '/uploads' },
+            { name: 'Uploads', path: '/files' },
             ...data.ancestors.map((ancestor: Record<string, string>) => {
                 return { 
                     name: ancestor.name, 
-                    path: `/uploads/${ancestor.id}` 
+                    path: `/files/${ancestor.id}` 
                 }
             }),
-            { name: data.name, path: `/uploads/${data.id}` },
-            { name: 'Edit', path: `/uploads/${data.id}/edit` },
+            { name: data.name, path: `/files/${data.id}` },
+            { name: 'Edit', path: `/files/${data.id}/edit` },
         ]) 
     }
 </script>
@@ -54,7 +54,7 @@
         File
     </h2>
     <p>
-        <a href={`/uploads/${data.files.id}`}>{data.name}</a>. Uploads can be split into different documents.
+        <a href={`/files/${data.files.id}`}>{data.name}</a>. Uploads can be split into different documents.
     </p>
 
     <Card>

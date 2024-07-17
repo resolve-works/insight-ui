@@ -7,7 +7,6 @@ import { sign } from '$lib/sign';
 import { Channel } from '$lib/amqp.js';
 import { schema } from '$lib/validation/folder';
 import { validate, ValidationError } from '$lib/validation';
-import { load_files } from '$lib/uploads';
 
 export async function load(event) {
     const { depends, fetch } = event

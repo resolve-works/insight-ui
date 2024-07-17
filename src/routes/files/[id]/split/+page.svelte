@@ -17,14 +17,14 @@
     // TODO add parent folders to crumbs
     $: { 
         breadcrumbs.set([ 
-            { name: 'Uploads', path: '/uploads' },
+            { name: 'Uploads', path: '/files' },
             ...data.ancestors.map((ancestor: Record<string, string>) => {
                 return { 
                     name: ancestor.name, 
-                    path: `/uploads/${ancestor.id}` 
+                    path: `/files/${ancestor.id}` 
                 }
             }),
-            { name: data.name, path: `/uploads/${data.id}` },
+            { name: data.name, path: `/files/${data.id}` },
         ]) 
     }
 </script>
@@ -52,14 +52,14 @@
         <h2>Embedded documents</h2>
 
         {#each data.documents as document (document.id)}
-            <Actionable name={document.name} path={`/uploads/documents/${document.id}`} icon="gg-file-document">
+            <Actionable name={document.name} path={`/files/documents/${document.id}`} icon="gg-file-document">
                 <Actions slot="actions">
                     {#if ! document.is_ready }
                         <Icon class="gg-loadbar" />
                     {/if}
 
                     <Buttongroup>
-                        <a class='button' href={`/uploads/documents/${document.id}/edit`}>
+                        <a class='button' href={`/files/documents/${document.id}/edit`}>
                             <Icon class="gg-pen" /> Edit
                         </a>
 

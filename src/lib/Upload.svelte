@@ -40,7 +40,7 @@
                 data.append('parent_id', this.parent_id)
             }
 
-            this.xhr.open("POST", `/uploads?/upload`, true);
+            this.xhr.open("POST", `/files?/upload`, true);
             this.xhr.send(data);
         }
     }

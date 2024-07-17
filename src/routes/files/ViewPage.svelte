@@ -48,12 +48,12 @@
             </div>
 
             <div class="buttons">
-                <a class="button" href={`/uploads/${id}/edit`}>
+                <a class="button" href={`/files/${id}/edit`}>
                     <Icon class="gg-pen" />
                     Edit
                 </a>
 
-                <a class="button" href={`/uploads/${id}/split`}>
+                <a class="button" href={`/files/${id}/split`}>
                     <Icon class="gg-copy" />
                     Split
                 </a>

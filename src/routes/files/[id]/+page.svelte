@@ -9,14 +9,14 @@
 
     $: { 
         breadcrumbs.set([ 
-            { name: 'Uploads', path: '/uploads' },
+            { name: 'Uploads', path: '/files' },
             ...data.ancestors.map((ancestor: Record<string, string>) => {
                 return { 
                     name: ancestor.name, 
-                    path: `/uploads/${ancestor.id}` 
+                    path: `/files/${ancestor.id}` 
                 }
             }),
-            { name: data.name, path: `/uploads/${data.id}` },
+            { name: data.name, path: `/files/${data.id}` },
         ]) 
     }
 </script>

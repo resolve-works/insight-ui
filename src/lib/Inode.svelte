@@ -15,20 +15,20 @@
     let icon = files ? 'gg-file-document': 'gg-folder';
 </script>
 
-<Actionable {name} path={`/uploads/${id}`} icon={icon}>
+<Actionable {name} path={`/files/${id}`} icon={icon}>
     <Actions slot="actions">
         {#if files && ! files.is_ready}
             <Icon class="gg-loadbar" />
         {/if}
 
         <Buttongroup>
-            <a class="button" href={`/uploads/${id}/edit`}>
+            <a class="button" href={`/files/${id}/edit`}>
                 <Icon class="gg-pen" />
                 Edit
             </a>
 
             {#if files}
-                <a class="button" href={`/uploads/${id}/split`}>
+                <a class="button" href={`/files/${id}/split`}>
                     <Icon class="gg-copy" />
                     Split
                 </a>

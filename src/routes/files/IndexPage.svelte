@@ -5,7 +5,6 @@
     import Inode from '$lib/Inode.svelte';
     import UploadComponent from '$lib/Upload.svelte';
     import { Upload } from '$lib/Upload.svelte';
-    import Folder from '$lib/Folder.svelte';
     import Title from '$lib/Title.svelte';
     import Section from '$lib/Section.svelte';
     import { uploads } from '$lib/stores.ts';
@@ -81,7 +80,7 @@
     {/if}
 
 
-    <form method="POST" action="/uploads?/create_folder" use:enhance>
+    <form method="POST" action="/files?/create_folder" use:enhance>
         <input name="name" />
         {#if $page.params.id} 
             <input name="parent_id" type="hidden" value="{ $page.params.id }" />
