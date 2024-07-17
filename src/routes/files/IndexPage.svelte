@@ -4,6 +4,7 @@
     import Page from '$lib/Page.svelte';
     import Inode from '$lib/Inode.svelte';
     import UploadComponent from '$lib/Upload.svelte';
+    import Unnamed from '$lib/Unnamed.svelte';
     import { Upload } from '$lib/Upload.svelte';
     import Title from '$lib/Title.svelte';
     import Section from '$lib/Section.svelte';
@@ -90,7 +91,11 @@
     </form>
 
     <Title>
-        {name}
+        {#if name}
+            {name}
+        {:else}
+            <Unnamed />
+        {/if}
 
         <div class="buttons" slot="actions">
             <form method="POST" action="?/upload" enctype="multipart/form-data" bind:this={form} use:enhance={submit}>

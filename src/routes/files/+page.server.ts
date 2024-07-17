@@ -100,14 +100,15 @@ async function upload({ request, fetch, cookies }: RequestEvent) {
 
 async function remove({ request, fetch, cookies }: RequestEvent) {
     const data = await request.formData();
-    await fetch(`${env.API_ENDPOINT}/files?id=eq.${data.get('id')}`, { 
+
+    await fetch(`${env.API_ENDPOINT}/inodes?id=eq.${data.get('id')}`, { 
         method: 'PATCH', 
         body: JSON.stringify({ is_deleted: true }),
         headers: { 'Content-Type': 'application/json' }
     })
 
     const channel = await Channel.connect(cookies)
-    channel.publish('delete_file', { id:`${data.get('id')}` });
+    channel.publish('delete_inode', { id:`${data.get('id')}` });
     await channel.close()
 }
 

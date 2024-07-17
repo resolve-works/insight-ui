@@ -27,7 +27,7 @@
                 Edit
             </a>
 
-            <form method="POST" action="?/remove" use:enhance>
+            <form method="POST" action="/files?/remove" use:enhance>
                 <input type="hidden" name="id" value={id} />
                 <button><Icon class="gg-trash" /> Delete</button>
             </form>
