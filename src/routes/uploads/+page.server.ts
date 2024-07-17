@@ -54,7 +54,7 @@ async function upload({ request, fetch, cookies }: RequestEvent) {
 
     // Filter for 0 size files as submitting empty file input results in single 0 size file?
     for(const upload of uploads.filter(file => file.size > 0)) {
-        const response = await fetch(`${env.API_ENDPOINT}/rpc/create_file?select=id,owner_id,file_id,storage_path`, {
+        const response = await fetch(`${env.API_ENDPOINT}/rpc/create_file?select=id,owner_id,parent_id,file_id,path`, {
             method: 'POST',
             body: JSON.stringify({ 
                 name: upload.name,
