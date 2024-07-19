@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import Icon from '$lib/Icon.svelte';
 	import Page from '$lib/Page.svelte';
 	import Inode from '$lib/Inode.svelte';
@@ -17,30 +18,28 @@
 
 	const PARALLEL_UPLOADS = 3;
 
-	let is_dragover = false;
+	// Dragevents trigger on every element. Keep track of how many bubbled up to stop drag on window leave
+	let counter = 0;
 	let input: HTMLInputElement;
 	let form: HTMLFormElement;
 
-	$: {
-		for (const upload of $uploads.slice(0, PARALLEL_UPLOADS)) {
-			// Start active uploads that have not been started yet.
-			if (!upload.is_started) {
-				// Remove uploads from store on completion
-				upload.addEventListener('upload_finished', () => {
-					invalidate('api:inodes');
-					uploads.update((uploads) => uploads.filter((u) => u != upload));
-				});
-
-				upload.start();
-			}
-		}
+	function dragover(e: DragEvent) {
+		e.preventDefault();
 	}
 
-	$: started = $uploads.filter((upload) => upload.is_started);
-	$: pending = $uploads.filter((upload) => !upload.is_started);
+	function dragenter(e: DragEvent) {
+		e.preventDefault();
+		counter++;
+	}
+
+	function dragleave(e: DragEvent) {
+		e.preventDefault();
+		counter--;
+	}
 
 	function drop(e: DragEvent) {
-		is_dragover = false;
+		e.preventDefault();
+		counter = 0;
 
 		if (!e.dataTransfer) {
 			return;
@@ -60,6 +59,38 @@
 		cancel();
 		return {};
 	}
+
+	onMount(() => {
+		window.addEventListener('dragover', dragover);
+		window.addEventListener('dragenter', dragenter);
+		window.addEventListener('dragleave', dragleave);
+		window.addEventListener('drop', drop);
+
+		return () => {
+			window.removeEventListener('dragover', dragover);
+			window.removeEventListener('dragenter', dragenter);
+			window.removeEventListener('dragleave', dragleave);
+			window.removeEventListener('drop', drop);
+		};
+	});
+
+	$: {
+		for (const upload of $uploads.slice(0, PARALLEL_UPLOADS)) {
+			// Start active uploads that have not been started yet.
+			if (!upload.is_started) {
+				// Remove uploads from store on completion
+				upload.addEventListener('upload_finished', () => {
+					invalidate('api:inodes');
+					uploads.update((uploads) => uploads.filter((u) => u != upload));
+				});
+
+				upload.start();
+			}
+		}
+	}
+
+	$: started = $uploads.filter((upload) => upload.is_started);
+	$: pending = $uploads.filter((upload) => !upload.is_started);
 </script>
 
 <Page>
@@ -111,14 +142,7 @@
 				{#if $page.params.id}
 					<input name="parent_id" type="hidden" value={$page.params.id} />
 				{/if}
-				<button
-					on:click|preventDefault={() => input.click()}
-					on:drop|preventDefault={drop}
-					on:dragover|preventDefault
-					on:dragenter|preventDefault={() => (is_dragover = true)}
-					on:dragexit|preventDefault={() => (is_dragover = false)}
-					class:dragover={is_dragover}
-				>
+				<button on:click|preventDefault={() => input.click()}>
 					<Icon class="gg-software-upload" />
 					Upload PDFs
 				</button>
@@ -130,6 +154,11 @@
 			</button>
 		</div>
 	</Title>
+
+	<h2 class="drop-message" class:dragover={counter > 0}>
+		<Icon class="gg-software-upload" />
+		Drop PDF files to upload
+	</h2>
 
 	{#each inodes as inode (inode.id)}
 		<Inode {...inode} />
@@ -146,13 +175,23 @@
 		gap: 0.5rem;
 	}
 
-	input[name='files'] {
+	.drop-message {
+		padding: 3rem;
+		border: 3px dashed var(--color-primary);
 		display: none;
+		align-items: center;
+		justify-content: center;
+		gap: 1rem;
+		color: var(--color-primary);
+	}
+	.drop-message :global(.gg-software-upload) {
+		--ggs: 1.5;
+	}
+	.drop-message.dragover {
+		display: flex;
 	}
 
-	:global(button.dragover) {
-		color: var(--color-primary);
-		border-color: var(--color-primary);
-		cursor: pointer;
+	input[name='files'] {
+		display: none;
 	}
 </style>
