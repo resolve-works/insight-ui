@@ -1,4 +1,3 @@
-
 <script lang="ts">
     import IndexPage from `../IndexPage.svelte`;
     import ViewPage from `../ViewPage.svelte`;
@@ -9,7 +8,7 @@
 
     $: { 
         breadcrumbs.set([ 
-            { name: 'Uploads', path: '/files' },
+            { name: 'Files', path: '/files' },
             ...data.ancestors.map((ancestor: Record<string, string>) => {
                 return { 
                     name: ancestor.name, 
@@ -21,9 +20,8 @@
     }
 </script>
 
-{#if data.file_id}
-    <ViewPage {...data} />
+{#if data.files}
+	<ViewPage {...data} />
 {:else}
-    <IndexPage {...data} />
+	<IndexPage {...data} />
 {/if}
-

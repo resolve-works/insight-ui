@@ -1,16 +1,23 @@
 
-import { env } from '$env/dynamic/private'
+import {env} from '$env/dynamic/private'
 
-export async function load({ url, fetch }) {
+export async function load({url, fetch}) {
     const query = url.searchParams.get('query');
 
     const res = await fetch(`${env.OPENSEARCH_ENDPOINT}/inodes/_search`, {
         method: 'post',
-        headers: { 
-            'Content-Type': 'application/json', 
+        headers: {
+            'Content-Type': 'application/json',
         },
         body: JSON.stringify({
             "_source": {"excludes": ["pages"]},
+            "aggs": {
+                "folder": {
+                    "terms": {
+                        "field": "folder"
+                    }
+                }
+            },
             "query": {
                 "nested": {
                     "path": "pages",
@@ -35,6 +42,7 @@ export async function load({ url, fetch }) {
     })
 
     const body = await res.json()
+    console.log(body.aggregations.folder.buckets)
     return {
         query,
         total: body['hits']['total']['value'],
