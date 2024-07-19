@@ -18,6 +18,7 @@
 
 	export let name;
 	export let inodes;
+	export let form;
 
 	const PARALLEL_UPLOADS = 3;
 
@@ -172,7 +173,6 @@
 				action="/files?/create_folder"
 				use:enhance
 				bind:this={folder_form}
-				on:submit={() => (show_folder_form = false)}
 			>
 				{#if $page.params.id}
 					<input name="parent_id" type="hidden" value={$page.params.id} />
@@ -193,6 +193,10 @@
 					>
 				</InputGroup>
 			</form>
+
+			{#if form?.error}
+				<p class="error">{form.error}</p>
+			{/if}
 		</Card>
 	</div>
 

@@ -5,7 +5,6 @@
 
     export let data;
     export let form;
-
     $: { 
         breadcrumbs.set([ 
             { name: 'Files', path: '/files' },
