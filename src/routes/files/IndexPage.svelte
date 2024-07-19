@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { tick } from 'svelte';
+	import InputGroup from '$lib/InputGroup.svelte';
+	import Card from '$lib/Card.svelte';
 	import { onMount } from 'svelte';
 	import Icon from '$lib/Icon.svelte';
 	import Page from '$lib/Page.svelte';
@@ -20,8 +23,12 @@
 
 	// Dragevents trigger on every element. Keep track of how many bubbled up to stop drag on window leave
 	let counter = 0;
-	let input: HTMLInputElement;
-	let form: HTMLFormElement;
+	let files_input: HTMLInputElement;
+	let files_form: HTMLFormElement;
+
+	let folder_input: HTMLInputElement;
+	let folder_form: HTMLFormElement;
+	let show_folder_form = false;
 
 	function dragover(e: DragEvent) {
 		e.preventDefault();
@@ -45,8 +52,8 @@
 			return;
 		}
 
-		input.files = e.dataTransfer.files;
-		input.dispatchEvent(new Event('change'));
+		files_input.files = e.dataTransfer.files;
+		files_input.dispatchEvent(new Event('change'));
 	}
 
 	// Add files to the uploads store to show nice progress objects to user
@@ -107,15 +114,6 @@
 		</Section>
 	{/if}
 
-	<form method="POST" action="/files?/create_folder" use:enhance>
-		<input name="name" />
-		{#if $page.params.id}
-			<input name="parent_id" type="hidden" value={$page.params.id} />
-		{/if}
-
-		<button>Create</button>
-	</form>
-
 	<Title>
 		{#if name}
 			{name}
@@ -123,12 +121,12 @@
 			<Unnamed />
 		{/if}
 
-		<div class="buttons" slot="actions">
+		<InputGroup slot="actions">
 			<form
 				method="POST"
 				action="?/upload"
 				enctype="multipart/form-data"
-				bind:this={form}
+				bind:this={files_form}
 				use:enhance={submit}
 			>
 				<input
@@ -136,29 +134,67 @@
 					type="file"
 					accept=".pdf"
 					multiple
-					bind:this={input}
-					on:change={() => form.requestSubmit()}
+					bind:this={files_input}
+					on:change={() => files_form.requestSubmit()}
 				/>
 				{#if $page.params.id}
 					<input name="parent_id" type="hidden" value={$page.params.id} />
 				{/if}
-				<button on:click|preventDefault={() => input.click()}>
+				<button on:click|preventDefault={() => files_input.click()}>
 					<Icon class="gg-software-upload" />
 					Upload PDFs
 				</button>
 			</form>
 
-			<button>
+			<button
+				on:click|preventDefault={async () => {
+					show_folder_form = true;
+					await tick();
+					folder_input.focus();
+				}}
+			>
 				<Icon class="gg-folder-add" />
 				Create Folder
 			</button>
-		</div>
+		</InputGroup>
 	</Title>
 
 	<h2 class="drop-message" class:dragover={counter > 0}>
 		<Icon class="gg-software-upload" />
 		Drop PDF files to upload
 	</h2>
+
+	<div class="create-folder" class:visible={show_folder_form}>
+		<Card>
+			<form
+				class="create-folder-form"
+				method="POST"
+				action="/files?/create_folder"
+				use:enhance
+				bind:this={folder_form}
+				on:submit={() => (show_folder_form = false)}
+			>
+				{#if $page.params.id}
+					<input name="parent_id" type="hidden" value={$page.params.id} />
+				{/if}
+
+				<Icon class="gg-folder" />
+
+				<input name="name" placeholder="Folder name" bind:this={folder_input} />
+
+				<InputGroup>
+					<button class="primary">Create</button>
+
+					<button
+						on:click|preventDefault={() => {
+							folder_form.reset();
+							show_folder_form = false;
+						}}>Cancel</button
+					>
+				</InputGroup>
+			</form>
+		</Card>
+	</div>
 
 	{#each inodes as inode (inode.id)}
 		<Inode {...inode} />
@@ -170,11 +206,6 @@
 </Page>
 
 <style>
-	.buttons {
-		display: flex;
-		gap: 0.5rem;
-	}
-
 	.drop-message {
 		padding: 3rem;
 		border: 3px dashed var(--color-primary);
@@ -193,5 +224,25 @@
 
 	input[name='files'] {
 		display: none;
+	}
+
+	.create-folder {
+		display: none;
+	}
+
+	.create-folder.visible {
+		display: block;
+	}
+
+	.create-folder form {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		margin: 0.5rem 0;
+	}
+
+	.create-folder form input {
+		flex-grow: 1;
 	}
 </style>
