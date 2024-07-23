@@ -7,7 +7,7 @@ import {Channel} from '$lib/amqp.js';
 import {schema} from '$lib/validation/inode';
 import {validate, ValidationError} from '$lib/validation';
 
-export async function create_folder({request, fetch}: RequestEvent) {
+export async function create_folder({request, fetch, cookies}: RequestEvent) {
     try {
         const data = await validate(request, schema)
 
@@ -27,6 +27,13 @@ export async function create_folder({request, fetch}: RequestEvent) {
 
             throw new Error(`Error creating folder: "${details.message}"`)
         }
+
+        const inodes = await response.json();
+        const inode = inodes[0]
+
+        const channel = await Channel.connect(cookies)
+        channel.publish('index_inode', {id: inode.id});
+        await channel.close()
     } catch (err) {
         if (err instanceof ValidationError) {
             return fail(400, err.format())
