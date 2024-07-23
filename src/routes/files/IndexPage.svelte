@@ -170,8 +170,10 @@
 			<form
 				class="create-folder-form"
 				method="POST"
-				action="/files?/create_folder"
-				use:enhance
+				action="?/create_folder"
+				use:enhance={() => {
+					show_folder_form = false;
+				}}
 				bind:this={folder_form}
 			>
 				{#if $page.params.id}

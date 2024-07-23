@@ -1,5 +1,7 @@
+import type {Actions} from './$types';
 import {env} from '$env/dynamic/private'
 import {sign} from '$lib/sign';
+import {create_folder, upload, remove} from '../';
 
 export async function load({params, fetch, cookies, depends}) {
     depends('api:inodes')
@@ -19,3 +21,9 @@ export async function load({params, fetch, cookies, depends}) {
         ...inode
     }
 }
+
+export const actions = {
+    create_folder,
+    upload,
+    remove,
+} satisfies Actions;

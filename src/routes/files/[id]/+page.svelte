@@ -5,6 +5,7 @@
 
     export let data;
     export let form;
+
     $: { 
         breadcrumbs.set([ 
             { name: 'Files', path: '/files' },
@@ -22,5 +23,5 @@
 {#if data.files}
 	<ViewPage {...data} />
 {:else}
-	<IndexPage {...data} />
+	<IndexPage {...data} {form} />
 {/if}
