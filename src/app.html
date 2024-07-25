@@ -44,13 +44,29 @@
         --color-subnavigation-lighter: #E26352;
         --color-subnavigation-darker: #9C4438;
 
+        --input-padding: 0.75rem 1rem;
         --input-border-size: 0.125rem;
         --input-border-radius: 0.4rem;
         --input-border-color: #D0D5DC;
+        --input-background-color: var(--color-white);
+        --input-text-color: var(--text-color-dark);
+        --input-placeholder-color: var(--text-color-dark);
+        --input-placeholder-opacity: 0.5;
         --invalid-input-border-color: var(--color-primary);
 
         --font-body: 'Rubik Variable', sans-serif;
         --font-heading: 'Roboto Slab Variable', sans-serif;
+
+        --sms-font-size: 1rem;
+        --sms-padding: var(--input-padding);
+        --sms-border: var(--input-border-size) solid var(--input-border-color);
+        --sms-border-radius: var(--input-border-radius);
+        --sms-bg: var(--input-background-color);
+        --sms-text-color: var(--input-text-color);
+        --sms-options-bg: var(--input-background-color);
+        --sms-options-border-radius: var(--input-border-radius);
+        --sms-placeholder-color: var(--input-placeholder-color);
+        --sms-placeholder-opacity: var(--input-placeholder-opacity);
     }
 
     *,
@@ -101,13 +117,13 @@
         align-items: center;
         font-size: 1rem;
         font-weight: normal;
-        padding: 0.75rem 1rem;
+        padding: var(--input-padding);
         border-radius: var(--input-border-radius);
         border: var(--input-border-size) solid var(--input-border-color);
         text-decoration: none;
         text-align: center;
-        background: var(--color-white);
-        color: var(--text-color-dark);
+        background: var(--input-background-color);
+        color: var(--input-text-color);
         cursor: pointer;
     }
 
@@ -135,11 +151,12 @@
 
     textarea,
     input {
-        padding: 0.75rem 1rem;
+        padding: var(--input-padding);
         font-size: 1rem;
         border-radius: var(--input-border-radius);
         border: var(--input-border-size) solid var(--input-border-color);
-        background: var(--text-color-light);
+        background: var(--input-background-color);
+        color: var(--input-text-color);
     }
 
     textarea.invalid,
@@ -151,6 +168,12 @@
     input:disabled,
     button:disabled {
         opacity: 0.5;
+    }
+
+    textarea::placeholder,
+    input::placeholder {
+        color: var(--input-placeholder-color);
+        opacity: var(--input-placeholder-opacity);
     }
 
     label {

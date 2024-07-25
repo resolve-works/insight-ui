@@ -3,9 +3,7 @@
 	import Page from '$lib/Page.svelte';
 	import Icon from '$lib/Icon.svelte';
 	import Card from '$lib/Card.svelte';
-	import Actions from '$lib/Actions.svelte';
 	import Unnamed from '$lib/Unnamed.svelte';
-	import ValidationErrors from '$lib/ValidationErrors.svelte';
 	import Section from '$lib/Section.svelte';
 	import { breadcrumbs } from '$lib/stores';
 	import Title from '$lib/Title.svelte';
@@ -46,6 +44,8 @@
 					async ({ update }) =>
 						update({ reset: false })}
 			>
+				<Icon class={data.files ? 'gg-file-document' : 'gg-folder'} />
+
 				<input type="text" name="name" placeholder="Document name" value={data.name} />
 
 				<button class="primary">
@@ -58,18 +58,13 @@
 
 <style>
 	form {
-		display: grid;
-		grid-template-columns: 1fr auto;
+		display: flex;
 		align-items: center;
+		gap: 1rem;
+		margin: 0.5rem 0;
 	}
 
-	input,
-	button {
-		margin: 1rem 0;
-	}
-
-	input[type='text'] {
-		width: 100%;
-		max-width: 50rem;
+	input {
+		flex-grow: 1;
 	}
 </style>

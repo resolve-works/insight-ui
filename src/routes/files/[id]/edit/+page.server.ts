@@ -9,9 +9,11 @@ import {validate, ValidationError} from '$lib/validation';
 export async function load({params, fetch, depends}) {
     depends('api:inodes')
 
-    const res = await fetch(`${env.API_ENDPOINT}/inodes`
+    const api_url = `${env.API_ENDPOINT}/inodes`
         + `?id=eq.${params.id}`
-        + `&select=id,name,ancestors(id,name)`)
+        + `&select=id,name,files(from_page,to_page),ancestors(id,name)`
+
+    const res = await fetch(api_url)
     const inodes = await res.json();
     const inode = inodes[0]
 

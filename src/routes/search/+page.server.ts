@@ -4,6 +4,8 @@ import {env} from '$env/dynamic/private'
 export async function load({url, fetch}) {
     const query = url.searchParams.get('query');
 
+    const folders = url.searchParams.getAll('folder')
+
     const res = await fetch(`${env.OPENSEARCH_ENDPOINT}/inodes/_search`, {
         method: 'post',
         headers: {
@@ -19,38 +21,59 @@ export async function load({url, fetch}) {
                 }
             },
             "query": {
-                "nested": {
-                    "path": "pages",
-                    "query": {
-                        "query_string": {
-                            "query": `${query ? query : '*'}`,
-                            "default_field": "pages.contents"
-                        }
-                    },
-                    "inner_hits": {
-                        "highlight": {
-                            "fields": {
-                                "pages.contents": {
-                                    fragment_size: 200,
-                                }
+                "bool": {
+                    "must": [
+                        {
+                            "bool": {
+                                "should": folders.map(folder => {
+                                    return {
+                                        "term": {
+                                            "folder": `${folder}`,
+                                        }
+                                    }
+                                })
                             },
                         },
-                    },
-                },
+                        {
+                            "nested": {
+                                "path": "pages",
+                                "query": {
+                                    "query_string": {
+                                        "query": `${query ? query : '*'}`,
+                                        "default_field": "pages.contents"
+                                    }
+                                },
+                                "inner_hits": {
+                                    "highlight": {
+                                        "fields": {
+                                            "pages.contents": {
+                                                fragment_size: 200,
+                                            }
+                                        },
+                                    },
+                                },
+                            },
+                        }
+                    ]
+                }
             },
         }),
     })
 
     const body = await res.json()
-    console.log(body.aggregations.folder.buckets)
+
     return {
         query,
-        total: body['hits']['total']['value'],
-        documents: body['hits']['hits'].map(hit => {
+        total: body.hits.total.value,
+        options: body.aggregations.folder.buckets.map((bucket: Record<string, any>) => ({
+            label: bucket.key,
+            ...bucket
+        })),
+        documents: body.hits.hits.map(hit => {
             return {
-                id: hit['_id'],
-                filename: hit['_source']['filename'],
-                pages: hit["inner_hits"]["pages"]["hits"]["hits"]
+                id: hit._id,
+                filename: hit._source.filename,
+                pages: hit.inner_hits.pages.hits.hits
                     .filter(page => "highlight" in page)
                     .map(page => {
                         return {
