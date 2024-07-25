@@ -13,12 +13,20 @@
 	import Section from '$lib/Section.svelte';
 	import { uploads } from '$lib/stores.ts';
 	import { enhance } from '$app/forms';
-	import { page } from '$app/stores';
 	import { invalidate } from '$app/navigation';
+	import Pagination from '$lib/Pagination.svelte';
 
 	export let name;
 	export let inodes;
 	export let form;
+
+	export let parent_id: number | undefined;
+
+	export let page;
+	export let first_item;
+	export let last_item;
+	export let amount_of_items;
+	export let amount_of_pages;
 
 	const PARALLEL_UPLOADS = 3;
 
@@ -138,9 +146,10 @@
 					bind:this={files_input}
 					on:change={() => files_form.requestSubmit()}
 				/>
-				{#if $page.params.id}
-					<input name="parent_id" type="hidden" value={$page.params.id} />
+				{#if parent_id}
+					<input name="parent_id" type="hidden" value={parent_id} />
 				{/if}
+
 				<button on:click|preventDefault={() => files_input.click()}>
 					<Icon class="gg-software-upload" />
 					Upload PDFs
@@ -176,8 +185,8 @@
 				}}
 				bind:this={folder_form}
 			>
-				{#if $page.params.id}
-					<input name="parent_id" type="hidden" value={$page.params.id} />
+				{#if parent_id}
+					<input name="parent_id" type="hidden" value={parent_id} />
 				{/if}
 
 				<Icon class="gg-folder" />
@@ -209,6 +218,8 @@
 	{#if !inodes.length}
 		<p>empty</p>
 	{/if}
+
+	<Pagination {page} {first_item} {last_item} {amount_of_items} {amount_of_pages} />
 </Page>
 
 <style>
