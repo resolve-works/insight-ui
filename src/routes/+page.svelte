@@ -7,6 +7,6 @@
 </script>
 
 <Page>
-	<h1>Search documents</h1>
+	<h1>Search files</h1>
 	<Search />
 </Page>

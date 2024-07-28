@@ -33,8 +33,4 @@
 			</form>
 		</Buttongroup>
 	</Actions>
-
-	{#if children.length > 1}
-		<p>{children.length} embedded document{children.length == 1 ? '' : 's'}</p>
-	{/if}
 </Actionable>

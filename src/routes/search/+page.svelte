@@ -1,6 +1,6 @@
 <script lang="ts">
 	import MultiSelect from 'svelte-multiselect';
-	import Document from './Document.svelte';
+	import File from './File.svelte';
 	import Search from '$lib/Search.svelte';
 	import Page from '$lib/Page.svelte';
 	import SideBar from '$lib/SideBar.svelte';
@@ -36,7 +36,7 @@
 
 	<nav>
 		<Section>
-			<h2>{data.total} document{data.total == 1 ? '' : 's'} found</h2>
+			<h2>{data.total} file{data.total == 1 ? '' : 's'} found</h2>
 		</Section>
 
 		<p>Filter by folder</p>
@@ -59,8 +59,8 @@
 </SideBar>
 
 <Page class="with-sidebar-left">
-	{#each data.documents as document}
-		<Document {...document} />
+	{#each data.files as file}
+		<File {...file} />
 	{/each}
 </Page>
 

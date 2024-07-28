@@ -46,7 +46,7 @@
 			>
 				<Icon class={data.files ? 'gg-file-document' : 'gg-folder'} />
 
-				<input type="text" name="name" placeholder="Document name" value={data.name} />
+				<input type="text" name="name" placeholder="File name" value={data.name} />
 
 				<button class="primary">
 					<Icon class="gg-pen" /> Change name

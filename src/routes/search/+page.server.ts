@@ -68,7 +68,7 @@ export async function load({url, fetch}) {
             label: bucket.key,
             ...bucket
         })),
-        documents: body.hits.hits.map(hit => {
+        files: body.hits.hits.map(hit => {
             return {
                 id: hit._id,
                 filename: hit._source.filename,

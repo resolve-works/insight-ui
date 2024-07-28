@@ -57,9 +57,13 @@
 	<div class="container">
 		<PDFViewer {url} index={$page ?? 0} />
 
-		<button class="cover-button" on:click|preventDefault={decrease}> </button>
+		<button class="cover-button" on:click|preventDefault={decrease}>
+			<Icon class="gg-chevron-left" />
+		</button>
 
-		<button class="cover-button" on:click|preventDefault={increase}> </button>
+		<button class="cover-button" on:click|preventDefault={increase}>
+			<Icon class="gg-chevron-right" />
+		</button>
 	</div>
 </Page>
 
@@ -72,13 +76,26 @@
 		position: relative;
 	}
 
+	:global(.cover-button span) {
+		--ggs: 4;
+	}
+
 	.cover-button {
+		border: none;
+		background: transparent;
+		justify-content: center;
 		position: absolute;
 		opacity: 0;
-		width: 50%;
+		width: 10rem;
 		top: 0;
 		bottom: 0;
+		color: var(--color-page);
+		animation: 3s infinite alternate slidein;
 	}
+	.cover-button:hover {
+		opacity: 1;
+	}
+
 	.cover-button:last-child {
 		right: 0;
 	}
