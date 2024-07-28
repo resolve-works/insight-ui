@@ -1,16 +1,14 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
 	import Icon from '$lib/Icon.svelte';
 	import Actions from '$lib/Actions.svelte';
 	import Actionable from './Actionable.svelte';
-	import Buttongroup from '$lib/Buttongroup.svelte';
+	import { enhance } from '$app/forms';
+	import Buttongroup from './Buttongroup.svelte';
 
 	export let id: string;
 	export let name: string;
 	export let is_indexed;
 	export let files: Record<string, any> | undefined;
-
-	const children = [];
 
 	let icon = files ? 'gg-file-document' : 'gg-folder';
 </script>

@@ -2,12 +2,22 @@
 	import { page } from '$app/stores';
 	import Icon from '$lib/Icon.svelte';
 
-	const value = $page.url.searchParams.get('query') || '';
+	$: value = $page.url.searchParams.get('query') || '';
+	$: page_index = $page.url.searchParams.get('page');
 
 	let is_focused = false;
+	export let action = '';
 </script>
 
-<form method="get" action="/search">
+<form method="get" {action}>
+	{#each $page.url.searchParams.getAll('folder') as folder}
+		<input type="hidden" name="folder" value={folder} />
+	{/each}
+
+	{#if page_index}
+		<input type="hidden" name="page" value={page_index} />
+	{/if}
+
 	<input
 		name="query"
 		type="text"
@@ -16,10 +26,6 @@
 		on:focus={() => (is_focused = true)}
 		on:blur={() => (is_focused = false)}
 	/>
-
-	{#each $page.url.searchParams.getAll('folder') as folder}
-		<input type="hidden" name="folder" value={folder} />
-	{/each}
 
 	<button class:focus={is_focused}>
 		<Icon class="gg-search" />

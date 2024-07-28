@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Search from '$lib/Search.svelte';
 	import InputGroup from '$lib/InputGroup.svelte';
 	import Icon from '$lib/Icon.svelte';
 	import Page from '$lib/Page.svelte';
@@ -31,10 +32,17 @@
 </script>
 
 <Page>
+	<Search slot="header" />
+
 	<Title>
 		{name}
 
 		<Actions slot="actions">
+			<a class="button" href={`/files/${id}/edit`}>
+				<Icon class="gg-pen" />
+				Edit
+			</a>
+
 			<InputGroup>
 				<button on:click|preventDefault={decrease}>
 					<Icon class="gg-chevron-left" />
@@ -46,11 +54,6 @@
 					<Icon class="gg-chevron-right" />
 				</button>
 			</InputGroup>
-
-			<a class="button" href={`/files/${id}/edit`}>
-				<Icon class="gg-pen" />
-				Edit
-			</a>
 		</Actions>
 	</Title>
 

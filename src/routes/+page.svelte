@@ -8,5 +8,5 @@
 
 <Page>
 	<h1>Search files</h1>
-	<Search />
+	<Search action="/search" />
 </Page>

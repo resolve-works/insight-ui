@@ -1,14 +1,18 @@
 <script lang="ts">
 	import Icon from '$lib/Icon.svelte';
 	import Actionable from '$lib/Actionable.svelte';
+	import { page } from '$app/stores';
+
 	export let id: string;
 	export let filename: string;
 	export let pages: { index: number; highlights: string[] }[];
+
+	$: query = $page.url.searchParams.get('query');
 </script>
 
 <Actionable name={filename} path={`/files/${id}`} icon="gg-file-document">
 	{#each pages as page}
-		<a class="page" href={`/files/${id}?page=${page.index}`}>
+		<a class="page" href={`/files/${id}?query=${query}&page=${page.index}`}>
 			<span class="index">
 				<Icon class="gg-file" />
 				{page.index}

@@ -3,6 +3,10 @@ import {env} from '$env/dynamic/private'
 import {sign} from '$lib/sign';
 import {create_folder, upload, remove} from '../';
 
+async function get_hits({owner_id}) {
+
+}
+
 export async function load({params, fetch, cookies, depends}) {
     depends('api:inodes')
 
@@ -13,10 +17,17 @@ export async function load({params, fetch, cookies, depends}) {
     const res = await fetch(api_url)
     const inodes = await res.json();
     const inode = inodes[0]
-
     const {owner_id, path, files} = inode
+
+    // This is a folder, there is no extra information we need
+    if (!files) {
+        return inode
+    }
+
+    const hits = get_hits(inode)
+
     return {
-        url: files ? sign(`users/${owner_id}/${path}/optimized`, cookies) : undefined,
+        url: sign(`users/${owner_id}/${path}/optimized`, cookies),
         ...inode,
     }
 }

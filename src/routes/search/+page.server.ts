@@ -1,11 +1,49 @@
 
 import {env} from '$env/dynamic/private'
 
-export async function load({url, fetch}) {
+function post_filter(url: URL) {
     const query = url.searchParams.get('query');
-
     const folders = url.searchParams.getAll('folder')
 
+    const folder_filter: Record<string, any>[] = [
+        {
+            "bool": {
+                "should": folders.map(folder => ({"term": {"folder": folder, }}))
+            },
+        },
+    ]
+
+    if (!query) {
+        return folder_filter
+    }
+
+    // Search for pages when we have a query
+    return [
+        ...folder_filter,
+        {
+            "nested": {
+                "path": "pages",
+                "query": {
+                    "query_string": {
+                        "query": `${query ? query : '*'}`,
+                        "default_field": "pages.contents"
+                    }
+                },
+                "inner_hits": {
+                    "highlight": {
+                        "fields": {
+                            "pages.contents": {
+                                fragment_size: 200,
+                            }
+                        },
+                    },
+                },
+            },
+        }
+    ]
+}
+
+export async function load({url, fetch}) {
     const res = await fetch(`${env.OPENSEARCH_ENDPOINT}/inodes/_search`, {
         method: 'post',
         headers: {
@@ -27,33 +65,7 @@ export async function load({url, fetch}) {
             },
             "post_filter": {
                 "bool": {
-                    "must": [
-                        {
-                            "bool": {
-                                "should": folders.map(folder => ({"term": {"folder": folder, }}))
-                            },
-                        },
-                        {
-                            "nested": {
-                                "path": "pages",
-                                "query": {
-                                    "query_string": {
-                                        "query": `${query ? query : '*'}`,
-                                        "default_field": "pages.contents"
-                                    }
-                                },
-                                "inner_hits": {
-                                    "highlight": {
-                                        "fields": {
-                                            "pages.contents": {
-                                                fragment_size: 200,
-                                            }
-                                        },
-                                    },
-                                },
-                            },
-                        }
-                    ]
+                    "must": post_filter(url),
                 }
             }
         }),
@@ -65,7 +77,6 @@ export async function load({url, fetch}) {
     }
 
     return {
-        query,
         total: body.hits.total.value,
         options: body.aggregations.folder.buckets.map((bucket: Record<string, any>) => ({
             label: bucket.key,
@@ -75,15 +86,17 @@ export async function load({url, fetch}) {
             return {
                 id: hit._id,
                 filename: hit._source.filename,
-                pages: hit.inner_hits.pages.hits.hits
-                    .filter(page => "highlight" in page)
-                    .map(page => {
-                        return {
-                            // Humans index from 1
-                            index: page['_source']['index'] + 1,
-                            highlights: page["highlight"]["pages.contents"],
-                        }
-                    })
+                pages: 'inner_hits' in hit
+                    ? hit.inner_hits.pages.hits.hits
+                        .filter(page => "highlight" in page)
+                        .map(page => {
+                            return {
+                                // Humans index from 1
+                                index: page['_source']['index'] + 1,
+                                highlights: page["highlight"]["pages.contents"],
+                            }
+                        })
+                    : []
             }
         }),
     }
