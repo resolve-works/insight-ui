@@ -27,7 +27,7 @@
 	}
 
 	$: {
-		breadcrumbs.set([{ name: 'Documents', path: '/documents' }]);
+		breadcrumbs.set([{ name: 'Search', path: '/search' }]);
 	}
 </script>
 

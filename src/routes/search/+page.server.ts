@@ -20,18 +20,12 @@ export async function load({url, fetch}) {
                     }
                 }
             },
-            "query": {
+            "post_filter": {
                 "bool": {
                     "must": [
                         {
                             "bool": {
-                                "should": folders.map(folder => {
-                                    return {
-                                        "term": {
-                                            "folder": `${folder}`,
-                                        }
-                                    }
-                                })
+                                "should": folders.map(folder => ({"match": {"folder": folder, }}))
                             },
                         },
                         {
@@ -56,7 +50,7 @@ export async function load({url, fetch}) {
                         }
                     ]
                 }
-            },
+            }
         }),
     })
 
