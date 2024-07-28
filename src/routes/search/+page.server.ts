@@ -19,7 +19,7 @@ export async function load({url, fetch}) {
                 path: "pages",
                 query: {
                     query_string: {
-                        query: `${query ? query : '*'}`,
+                        query,
                         default_field: "pages.contents"
                     }
                 },

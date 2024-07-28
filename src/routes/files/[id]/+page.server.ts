@@ -31,7 +31,7 @@ async function get_highlights({params, fetch, url}: ServerLoadEvent) {
                                         must: [
                                             {
                                                 query_string: {
-                                                    query: `${query}`,
+                                                    query,
                                                     default_field: "pages.contents"
                                                 }
                                             },
@@ -51,7 +51,7 @@ async function get_highlights({params, fetch, url}: ServerLoadEvent) {
                                         fields: {
                                             "pages.contents": {
                                                 fragment_size: 1,
-                                                number_of_fragments: 10,
+                                                number_of_fragments: 100,
                                             }
                                         },
                                     },
@@ -69,7 +69,12 @@ async function get_highlights({params, fetch, url}: ServerLoadEvent) {
         throw new Error(`Invalid response from opensearch. ${body.error.type}: ${body.error.reason}`)
     }
 
-    return body.hits.hits[0].inner_hits.pages.hits.hits[0].highlight["pages.contents"]
+    try {
+        return body.hits.hits[0].inner_hits.pages.hits.hits[0].highlight["pages.contents"]
+    } catch (e) {
+        console.error(e)
+        return []
+    }
 }
 
 export async function load(event: ServerLoadEvent) {

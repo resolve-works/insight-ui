@@ -7,7 +7,6 @@
 	export let url: string;
 	export let index: number;
 	export let highlights: string[];
-	console.log(highlights);
 
 	let container: HTMLElement;
 	let canvas: HTMLCanvasElement;
@@ -60,7 +59,11 @@
 			});
 
 			// TODO - highlighting
-			console.log(text.innerHTML);
+			for (let child of text.children) {
+				if (child.textContent && highlights.includes(child.textContent)) {
+					child.classList.add('highlight');
+				}
+			}
 		};
 	});
 </script>
@@ -72,6 +75,10 @@
 </div>
 
 <style>
+	:global(.textLayer .highlight) {
+		--highlight-bg-color: color-mix(in srgb, var(--color-primary-lighter) 20%, transparent);
+	}
+
 	.viewer {
 		position: relative;
 		justify-content: center;
