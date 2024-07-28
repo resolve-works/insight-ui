@@ -20,12 +20,17 @@ export async function load({url, fetch}) {
                     }
                 }
             },
+            "query": {
+                "term": {
+                    "type": "file",
+                }
+            },
             "post_filter": {
                 "bool": {
                     "must": [
                         {
                             "bool": {
-                                "should": folders.map(folder => ({"match": {"folder": folder, }}))
+                                "should": folders.map(folder => ({"term": {"folder": folder, }}))
                             },
                         },
                         {

@@ -25,7 +25,7 @@ export async function load({depends, params, fetch, url}) {
     const page = param ? parseInt(param) : 1;
 
     const api_url = `${env.API_ENDPOINT}/inodes`
-        + `?select=id,name,type,files(is_ready)`
+        + `?select=id,name,type,is_indexed,files(is_ready)`
         + `&parent_id=${'id' in params ? `eq.${params.id}` : `is.null`}`
         + `&order=type.asc,created_at.desc`
         + `&limit=${PAGE_SIZE}`

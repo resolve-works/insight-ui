@@ -29,7 +29,7 @@ export const actions = {
 
             const response = await fetch(`${env.API_ENDPOINT}/inodes?id=eq.${params.id}`, {
                 method: 'PATCH',
-                body: JSON.stringify(data),
+                body: JSON.stringify({is_indexed: false, ...data, }),
                 headers: {'Content-Type': 'application/json'}
             })
             // TODO - handle error

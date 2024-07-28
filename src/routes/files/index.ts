@@ -96,15 +96,20 @@ export async function upload({request, fetch, cookies}: RequestEvent) {
 
 export async function remove({request, fetch, cookies}: RequestEvent) {
     const data = await request.formData();
+    const id = data.get('id');
 
-    await fetch(`${env.API_ENDPOINT}/inodes?id=eq.${data.get('id')}`, {
+    if (!id) {
+        throw new Error('missing "id" in form data');
+    }
+
+    await fetch(`${env.API_ENDPOINT}/inodes?id=eq.${id}`, {
         method: 'PATCH',
         body: JSON.stringify({is_deleted: true}),
         headers: {'Content-Type': 'application/json'}
     })
 
     const channel = await Channel.connect(cookies)
-    channel.publish('delete_inode', {id: `${data.get('id')}`});
+    channel.publish('delete_inode', {id});
     await channel.close()
 }
 

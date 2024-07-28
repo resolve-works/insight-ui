@@ -1,9 +1,9 @@
 import type {Actions} from './$types';
 import {env} from '$env/dynamic/private'
 import {sign} from '$lib/sign';
-import {create_folder, upload, remove, parse_content_range, PAGE_SIZE} from '../';
+import {create_folder, upload, remove} from '../';
 
-export async function load({params, fetch, cookies, depends, url}) {
+export async function load({params, fetch, cookies, depends}) {
     depends('api:inodes')
 
     const api_url = `${env.API_ENDPOINT}/inodes`

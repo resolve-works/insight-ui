@@ -66,14 +66,23 @@
 	}
 
 	// Add files to the uploads store to show nice progress objects to user
-	function submit({ formData, cancel }: { formData: FormData; cancel: Function }) {
+	function submit({
+		formData,
+		cancel
+	}: {
+		formData: FormData | undefined;
+		cancel: Function | undefined;
+	}) {
+		if (!formData || !cancel) {
+			throw new Error('formData and cancel function required');
+		}
+
 		const files = formData.getAll('files') as File[];
 		const parent_id = formData.get('parent_id') as string;
 		uploads.update((uploads) => {
 			return [...uploads, ...files.map((file) => new Upload(file, parent_id))];
 		});
 		cancel();
-		return {};
 	}
 
 	onMount(() => {

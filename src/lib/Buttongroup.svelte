@@ -24,9 +24,9 @@
 </script>
 
 <div class="buttongroup" bind:this={element} class:enhance={is_enhanced} class:open={is_open}>
-	<button class="toggle" on:click|preventDefault|stopPropagation={() => (is_open = !is_open)}
-		><Icon class="gg-more-vertical-alt" /></button
-	>
+	<button class="toggle" on:click|preventDefault|stopPropagation={() => (is_open = !is_open)}>
+		<Icon class="gg-more-vertical-alt" />
+	</button>
 
 	<div class="holder">
 		<div class="buttons">
@@ -59,10 +59,12 @@
 		display: block;
 		padding: 0.75rem;
 		border-color: transparent;
+		background-color: transparent;
 	}
 
 	.buttongroup.enhance.open .toggle {
 		border-color: var(--input-border-color);
+		background-color: var(--input-background-color);
 		border-bottom-color: var(--color-white);
 		border-bottom-left-radius: 0;
 		border-bottom-right-radius: 0;
@@ -77,7 +79,9 @@
 		position: absolute;
 		right: 0;
 		top: calc(var(--input-border-size) * -1);
-		border-radius: var(--input-border-radius);
+		border-bottom-left-radius: var(--input-border-radius);
+		border-bottom-right-radius: var(--input-border-radius);
+		border-top-left-radius: var(--input-border-radius);
 		border: var(--input-border-size) solid var(--input-border-color);
 		background: var(--color-white);
 		z-index: 1;
@@ -90,7 +94,7 @@
 	:global(.buttongroup.enhance.open .buttons > *) {
 		background: transparent;
 		border-radius: 0;
-		border-bottom: var(--input-border-size) solid #b5bec8 !important;
+		border-bottom: var(--input-border-size) solid var(--input-border-color) !important;
 	}
 
 	:global(.buttongroup.enhance.open .buttons > *:last-child) {
