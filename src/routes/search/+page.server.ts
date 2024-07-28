@@ -1,11 +1,11 @@
 
 import {env} from '$env/dynamic/private'
 
-function post_filter(url: URL) {
+export async function load({url, fetch}) {
     const query = url.searchParams.get('query');
     const folders = url.searchParams.getAll('folder')
 
-    const folder_filter: Record<string, any>[] = [
+    const must: Record<string, any>[] = [
         {
             "bool": {
                 "should": folders.map(folder => ({"term": {"folder": folder, }}))
@@ -13,25 +13,19 @@ function post_filter(url: URL) {
         },
     ]
 
-    if (!query) {
-        return folder_filter
-    }
-
-    // Search for pages when we have a query
-    return [
-        ...folder_filter,
-        {
-            "nested": {
-                "path": "pages",
-                "query": {
-                    "query_string": {
-                        "query": `${query ? query : '*'}`,
-                        "default_field": "pages.contents"
+    if (query) {
+        must.push({
+            nested: {
+                path: "pages",
+                query: {
+                    query_string: {
+                        query: `${query ? query : '*'}`,
+                        default_field: "pages.contents"
                     }
                 },
-                "inner_hits": {
-                    "highlight": {
-                        "fields": {
+                inner_hits: {
+                    highlight: {
+                        fields: {
                             "pages.contents": {
                                 fragment_size: 200,
                             }
@@ -39,35 +33,19 @@ function post_filter(url: URL) {
                     },
                 },
             },
-        }
-    ]
-}
+        })
+    }
 
-export async function load({url, fetch}) {
     const res = await fetch(`${env.OPENSEARCH_ENDPOINT}/inodes/_search`, {
         method: 'post',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            "_source": {"excludes": ["pages"]},
-            "aggs": {
-                "folder": {
-                    "terms": {
-                        "field": "folder"
-                    }
-                }
-            },
-            "query": {
-                "term": {
-                    "type": "file",
-                }
-            },
-            "post_filter": {
-                "bool": {
-                    "must": post_filter(url),
-                }
-            }
+            "_source": {excludes: ["pages"]},
+            aggs: {folder: {terms: {field: "folder"}}},
+            query: {term: {type: "file", }},
+            post_filter: {bool: {must, }}
         }),
     })
 

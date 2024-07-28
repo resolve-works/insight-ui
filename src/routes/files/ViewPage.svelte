@@ -13,10 +13,10 @@
 	export let id;
 	export let name;
 	export let url;
-	export let from_page;
-	export let to_page;
+	export let files: { from_page: number; to_page: number | undefined };
+	export let highlights;
 
-	$: number_of_pages = (to_page ?? 0) - from_page;
+	$: number_of_pages = (files.to_page ?? 0) - files.from_page;
 
 	function increase() {
 		if ($page !== null && $page < number_of_pages) {
@@ -58,7 +58,7 @@
 	</Title>
 
 	<div class="container">
-		<PDFViewer {url} index={$page ?? 0} />
+		<PDFViewer {url} {highlights} index={$page ?? 1} />
 
 		<button class="cover-button" on:click|preventDefault={decrease}>
 			<Icon class="gg-chevron-left" />

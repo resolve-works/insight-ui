@@ -21,7 +21,7 @@
 	<input
 		name="query"
 		type="text"
-		placeholder="Search contents by keyword"
+		placeholder="Type search query ..."
 		{value}
 		on:focus={() => (is_focused = true)}
 		on:blur={() => (is_focused = false)}

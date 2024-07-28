@@ -10,7 +10,6 @@ export class ValidationError extends Error {
         super('Form validation failed')
         this.data = data;
         this.errors = errors;
-        console.log(errors)
     }
 
     format() {
