@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { tick } from 'svelte';
+	import Buttongroup from '$lib/Buttongroup.svelte';
 	import InputGroup from '$lib/InputGroup.svelte';
 	import Card from '$lib/Card.svelte';
 	import { onMount } from 'svelte';
@@ -139,7 +140,7 @@
 			<Unnamed />
 		{/if}
 
-		<InputGroup slot="actions">
+		<Buttongroup slot="actions">
 			<form
 				method="POST"
 				action="?/upload"
@@ -175,7 +176,7 @@
 				<Icon class="gg-folder-add" />
 				Create Folder
 			</button>
-		</InputGroup>
+		</Buttongroup>
 	</Title>
 
 	<h2 class="drop-message" class:dragover={counter > 0}>

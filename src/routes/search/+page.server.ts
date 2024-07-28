@@ -60,6 +60,9 @@ export async function load({url, fetch}) {
     })
 
     const body = await res.json()
+    if (res.status !== 200) {
+        throw new Error(`Invalid response from opensearch. ${body.error.type}: ${body.error.reason}`)
+    }
 
     return {
         query,

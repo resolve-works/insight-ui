@@ -1,14 +1,13 @@
 <script lang="ts">
 	import MultiSelect from 'svelte-multiselect';
 	import File from './File.svelte';
+	import Title from '$lib/Title.svelte';
 	import Search from '$lib/Search.svelte';
 	import Page from '$lib/Page.svelte';
 	import SideBar from '$lib/SideBar.svelte';
-	import Section from '$lib/Section.svelte';
-	import { page } from '$app/stores';
 	import { breadcrumbs } from '$lib/stores';
 	import { goto } from '$app/navigation';
-	const query = $page.url.searchParams.get('query') || '';
+	import { page } from '$app/stores';
 
 	export let data;
 
@@ -32,13 +31,9 @@
 </script>
 
 <SideBar>
-	<Search slot="header" value={query} />
+	<h2 slot="header">Filters</h2>
 
 	<nav>
-		<Section>
-			<h2>{data.total} file{data.total == 1 ? '' : 's'} found</h2>
-		</Section>
-
 		<p>Filter by folder</p>
 		<MultiSelect
 			options={data.options}
@@ -59,6 +54,10 @@
 </SideBar>
 
 <Page class="with-sidebar-left">
+	<Search slot="header" />
+
+	<Title>{data.total} file{data.total == 1 ? '' : 's'} found</Title>
+
 	{#each data.files as file}
 		<File {...file} />
 	{/each}

@@ -1,39 +1,53 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import Icon from '$lib/Icon.svelte';
-	export let value = '';
+
+	const value = $page.url.searchParams.get('query') || '';
+
+	let is_focused = false;
 </script>
 
 <form method="get" action="/search">
-	<input name="query" type="text" placeholder="Search contents by keyword" {value} />
+	<input
+		name="query"
+		type="text"
+		placeholder="Search contents by keyword"
+		{value}
+		on:focus={() => (is_focused = true)}
+		on:blur={() => (is_focused = false)}
+	/>
 
 	{#each $page.url.searchParams.getAll('folder') as folder}
 		<input type="hidden" name="folder" value={folder} />
 	{/each}
 
-	<button>
+	<button class:focus={is_focused}>
 		<Icon class="gg-search" />
 	</button>
 </form>
 
 <style>
 	form {
-		display: grid;
-		grid-template-columns: 5fr 3rem;
+		display: flex;
 	}
 
 	input[type='text'] {
-		grid-column: 1 / 3;
-		grid-row: 1;
+		min-width: 18rem;
+		border-right: none;
+		border-top-right-radius: 0;
+		border-bottom-right-radius: 0;
 	}
 
 	button {
-		grid-column: 2 / 3;
-		grid-row: 1;
-		background: none;
-		padding: 0 0.5rem;
-		color: var(--text-color-dark);
-		border: none;
+		padding: 0 1rem;
+		color: var(--input-placeholder-color);
 		cursor: pointer;
+		border-left: none;
+		border-top-left-radius: 0;
+		border-bottom-left-radius: 0;
+	}
+
+	button.focus {
+		border-color: var(--input-focus-border-color);
 	}
 </style>

@@ -53,11 +53,11 @@
         --input-border-size: 0.125rem;
         --input-border-radius: 0.4rem;
         --input-border-color: #D0D5DC;
+        --input-border: var(--input-border-size) solid var(--input-border-color);
         --input-focus-border-color: var(--color-tertiary);
-        --input-background-color: var(--color-white);
+        --input-background-color: #fff;
         --input-text-color: var(--text-color-dark);
-        --input-placeholder-color: var(--text-color-dark);
-        --input-placeholder-opacity: 0.5;
+        --input-placeholder-color: #A5A5A5;
         --invalid-input-border-color: var(--color-primary);
 
         --font-body: 'Rubik Variable', sans-serif;
@@ -65,7 +65,7 @@
 
         --sms-font-size: 1rem;
         --sms-padding: var(--input-padding);
-        --sms-border: var(--input-border-size) solid var(--input-border-color);
+        --sms-border: var(--input-border);
         --sms-focus-border: var(--input-border-size) solid var(--input-focus-border-color);
         --sms-border-radius: var(--input-border-radius);
         --sms-bg: var(--input-background-color);
@@ -77,7 +77,7 @@
         --sms-li-active-bg: var(--color-secondary-lighter);
         --sms-selected-text-color: var(--text-color-dark);
         --sms-placeholder-color: var(--input-placeholder-color);
-        --sms-placeholder-opacity: var(--input-placeholder-opacity);
+        --sms-placeholder-opacity: 1;
     }
 
     *,
@@ -130,7 +130,7 @@
         font-weight: normal;
         padding: var(--input-padding);
         border-radius: var(--input-border-radius);
-        border: var(--input-border-size) solid var(--input-border-color);
+        border: var(--input-border);
         text-decoration: none;
         text-align: center;
         background: var(--input-background-color);
@@ -166,7 +166,7 @@
         padding: var(--input-padding);
         font-size: 1rem;
         border-radius: var(--input-border-radius);
-        border: var(--input-border-size) solid var(--input-border-color);
+        border: var(--input-border);
         background: var(--input-background-color);
         color: var(--input-text-color);
     }
@@ -190,7 +190,7 @@
     textarea::placeholder,
     input::placeholder {
         color: var(--input-placeholder-color);
-        opacity: var(--input-placeholder-opacity);
+        opacity: 1;
     }
 
     label {
@@ -207,7 +207,7 @@
 
         width: 1.2rem;
         height: 1.2rem;
-        border: var(--input-border-size) solid var(--text-color-light);
+        border: var(--input-border);
         border-radius: calc(var(--input-border-radius) * 0.8);
 
         display: grid;

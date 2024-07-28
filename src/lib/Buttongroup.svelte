@@ -2,15 +2,15 @@
 	import { onMount } from 'svelte';
 	import Icon from './Icon.svelte';
 
-	let element: HTMLElement;
-
 	let is_enhanced = false;
 	let is_open = false;
 
 	function close(e: MouseEvent) {
-		if (e.target !== null && !element.contains(e.target)) {
-			is_open = false;
+		if (e.target == null) {
+			return;
 		}
+
+		is_open = false;
 	}
 
 	onMount(() => {
@@ -23,7 +23,7 @@
 	});
 </script>
 
-<div class="buttongroup" bind:this={element} class:enhance={is_enhanced} class:open={is_open}>
+<div class="buttongroup" class:enhance={is_enhanced} class:open={is_open}>
 	<button class="toggle" on:click|preventDefault|stopPropagation={() => (is_open = !is_open)}>
 		<Icon class="gg-more-vertical-alt" />
 	</button>
@@ -82,7 +82,7 @@
 		border-bottom-left-radius: var(--input-border-radius);
 		border-bottom-right-radius: var(--input-border-radius);
 		border-top-left-radius: var(--input-border-radius);
-		border: var(--input-border-size) solid var(--input-border-color);
+		border: var(--input-border);
 		background: var(--color-white);
 		z-index: 1;
 	}
@@ -94,7 +94,7 @@
 	:global(.buttongroup.enhance.open .buttons > *) {
 		background: transparent;
 		border-radius: 0;
-		border-bottom: var(--input-border-size) solid var(--input-border-color) !important;
+		border-bottom: var(--input-border) !important;
 	}
 
 	:global(.buttongroup.enhance.open .buttons > *:last-child) {
