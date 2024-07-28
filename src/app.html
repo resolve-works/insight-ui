@@ -29,10 +29,13 @@
         --color-secondary: #FECF49;
         --color-secondary-lighter: #FEEDB9;
         --color-secondary-darker: #E3B740;
+        --color-tertiary: #53AFDC;
+        --color-tertiary-lighter: #84C5E6;
+        --color-tertiary-darker: #1993D0;
         --color-white: #F9FAFB;
 
         --color-page: #ECEEF1;
-        --color-page-border: #D5D5D5;
+        --color-page-border: #D0D5DC;
 
         --text-color-dark: #383838;
         --text-color-light: var(--color-white);
@@ -50,6 +53,7 @@
         --input-border-size: 0.125rem;
         --input-border-radius: 0.4rem;
         --input-border-color: #D0D5DC;
+        --input-focus-border-color: var(--color-tertiary);
         --input-background-color: var(--color-white);
         --input-text-color: var(--text-color-dark);
         --input-placeholder-color: var(--text-color-dark);
@@ -62,12 +66,16 @@
         --sms-font-size: 1rem;
         --sms-padding: var(--input-padding);
         --sms-border: var(--input-border-size) solid var(--input-border-color);
+        --sms-focus-border: var(--input-border-size) solid var(--input-focus-border-color);
         --sms-border-radius: var(--input-border-radius);
         --sms-bg: var(--input-background-color);
         --sms-text-color: var(--input-text-color);
         --sms-options-bg: var(--input-background-color);
         --sms-options-border-radius: var(--input-border-radius);
         --sms-options-shadow: none;
+        --sms-selected-bg: var(--color-secondary);
+        --sms-li-active-bg: var(--color-secondary-lighter);
+        --sms-selected-text-color: var(--text-color-dark);
         --sms-placeholder-color: var(--input-placeholder-color);
         --sms-placeholder-opacity: var(--input-placeholder-opacity);
     }
@@ -154,6 +162,7 @@
 
     textarea,
     input {
+        outline: none;
         padding: var(--input-padding);
         font-size: 1rem;
         border-radius: var(--input-border-radius);
@@ -165,6 +174,11 @@
     textarea.invalid,
     input.invalid {
         border-color: var(--invalid-input-border-color);
+    }
+
+    textarea:focus,
+    input:focus {
+        border-color: var(--input-focus-border-color);
     }
 
     textarea:disabled,
