@@ -1,7 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import worker_url from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-
+	import { onMount, getContext } from 'svelte';
 	import 'pdfjs-dist/web/pdf_viewer.css';
 
 	export let url: string;
@@ -13,6 +11,10 @@
 	let text: HTMLElement;
 	let load_page: Function;
 
+	// Re-use existing worker so we don't load a new one every time we render a document
+	const pdfjs = getContext('pdfjs');
+	const worker = getContext('pdfjs-worker');
+
 	$: {
 		if (load_page) {
 			load_page(index);
@@ -20,11 +22,7 @@
 	}
 
 	onMount(async () => {
-		const { getDocument, GlobalWorkerOptions, renderTextLayer } = await import('pdfjs-dist');
-
-		GlobalWorkerOptions.workerSrc = worker_url;
-
-		const pdf = await getDocument(url).promise;
+		const pdf = await pdfjs.getDocument({ url, worker }).promise;
 
 		load_page = async (index: number) => {
 			const page = await pdf.getPage(index);
@@ -52,13 +50,16 @@
 			text.innerHTML = '';
 			text.style.setProperty('--scale-factor', scale.toString());
 
-			await renderTextLayer({
+			const textLayer = pdfjs.renderTextLayer({
 				textContentSource: await page.getTextContent(),
 				container: text,
 				viewport
 			});
 
-			// TODO - highlighting
+			// Try to highlight
+			if (textLayer) {
+				await textLayer.promise;
+			}
 			for (let child of text.children) {
 				if (child.textContent && highlights.includes(child.textContent)) {
 					child.classList.add('highlight');

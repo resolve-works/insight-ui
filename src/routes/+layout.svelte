@@ -2,9 +2,21 @@
 	import '@fontsource-variable/rubik/index.css';
 	import '@fontsource-variable/roboto-slab/index.css';
 
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount, onDestroy, setContext } from 'svelte';
 	import { invalidate } from '$app/navigation';
 	import Navigation from '$lib/Navigation.svelte';
+	import { browser } from '$app/environment';
+
+	// Create PDF worker in context once to prevent creating a new worker on every PDFViewer load
+	import * as pdfjs from 'pdfjs-dist/build/pdf.mjs';
+	import worker_url from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+	setContext('pdfjs', pdfjs);
+
+	if (browser) {
+		pdfjs.GlobalWorkerOptions.workerSrc = worker_url;
+		const worker = new pdfjs.PDFWorker();
+		setContext('pdfjs-worker', worker);
+	}
 
 	let ac = new AbortController();
 
