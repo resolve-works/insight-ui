@@ -14,8 +14,7 @@
 
 	if (browser) {
 		pdfjs.GlobalWorkerOptions.workerSrc = worker_url;
-		const worker = new pdfjs.PDFWorker();
-		setContext('pdfjs-worker', worker);
+		setContext('pdfjs-worker', new pdfjs.PDFWorker());
 	}
 
 	let ac = new AbortController();

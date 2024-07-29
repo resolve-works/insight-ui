@@ -22,6 +22,7 @@
 		"@types/pdfjs-dist": "^2.10.377",
 		"@typescript-eslint/eslint-plugin": "^7.16.1",
 		"@typescript-eslint/parser": "^7.16.1",
+		"amqplib": "^0.10.4",
 		"eslint": "^8.57.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-svelte": "^2.43.0",
@@ -36,12 +37,11 @@
 		"sveltekit-search-params": "^2.1.2",
 		"tslib": "^2.6.3",
 		"typescript": "^5.5.3",
-		"vite": "^5.3.4"
+		"vite": "^5.3.4",
+		"zod": "^3.23.8"
 	},
 	"type": "module",
 	"dependencies": {
-		"amqplib": "^0.10.4",
-		"rollup": "^4.19.0",
-		"zod": "^3.23.8"
+		"rollup": "^4.19.0"
 	}
 }
