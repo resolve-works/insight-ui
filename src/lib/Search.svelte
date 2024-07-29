@@ -1,28 +1,29 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import Icon from '$lib/Icon.svelte';
+	import { ssp, queryParam } from 'sveltekit-search-params';
 
-	$: value = $page.url.searchParams.get('query') || '';
-	$: page_index = $page.url.searchParams.get('page');
+	export let pushHistory = true;
+	const query = queryParam('query', ssp.string(), { pushHistory });
 
 	let is_focused = false;
 	export let action = '';
+
+	function submit(e: SubmitEvent) {
+		if (!e.target) {
+			throw Error('SubmitEvent target not set');
+		}
+		const formData = new FormData(e.target as HTMLFormElement);
+		$query = formData.get('query');
+	}
 </script>
 
-<form method="get" {action}>
-	{#each $page.url.searchParams.getAll('folder') as folder}
-		<input type="hidden" name="folder" value={folder} />
-	{/each}
-
-	{#if page_index}
-		<input type="hidden" name="page" value={page_index} />
-	{/if}
-
+<form method="get" {action} on:submit|preventDefault={submit}>
 	<input
 		name="query"
 		type="text"
 		placeholder="Type search query ..."
-		{value}
+		value={$query}
 		on:focus={() => (is_focused = true)}
 		on:blur={() => (is_focused = false)}
 	/>

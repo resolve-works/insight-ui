@@ -10,6 +10,7 @@
 	let canvas: HTMLCanvasElement;
 	let text: HTMLElement;
 	let load_page: Function;
+	let set_highlights: Function;
 
 	// Re-use existing worker so we don't load a new one every time we render a document
 	const pdfjs = getContext('pdfjs');
@@ -18,6 +19,12 @@
 	$: {
 		if (load_page) {
 			load_page(index);
+		}
+	}
+
+	$: {
+		if (set_highlights) {
+			set_highlights(highlights);
 		}
 	}
 
@@ -60,7 +67,13 @@
 			if (textLayer) {
 				await textLayer.promise;
 			}
+			set_highlights(highlights);
+		};
+
+		set_highlights = function (highlights: string[]) {
 			for (let child of text.children) {
+				child.classList.remove('highlight');
+
 				if (child.textContent && highlights.includes(child.textContent)) {
 					child.classList.add('highlight');
 				}

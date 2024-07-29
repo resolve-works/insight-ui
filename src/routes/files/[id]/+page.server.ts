@@ -72,7 +72,6 @@ async function get_highlights({params, fetch, url}: ServerLoadEvent) {
     try {
         return body.hits.hits[0].inner_hits.pages.hits.hits[0].highlight["pages.contents"]
     } catch (e) {
-        console.error(e)
         return []
     }
 }

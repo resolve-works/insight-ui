@@ -32,7 +32,7 @@
 </script>
 
 <Page>
-	<Search slot="header" />
+	<Search pushHistory={false} slot="header" />
 
 	<Title>
 		{name}
