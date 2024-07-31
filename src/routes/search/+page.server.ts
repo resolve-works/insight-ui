@@ -1,9 +1,30 @@
 
 import {env} from '$env/dynamic/private'
 
+function parse_folders(param) {
+    if (!param) {
+        return []
+    }
+
+    try {
+        const folders = JSON.parse(param)
+        if (!Array.isArray(folders)) {
+            throw Error('Expected array')
+        }
+
+        if (!folders.every(f => typeof (f) == "string" && f.at(0) == '/')) {
+            throw Error('Expected array of paths starting with "/"')
+        }
+
+        return folders;
+    } catch (_) {
+        return []
+    }
+}
+
 export async function load({url, fetch}) {
     const query = url.searchParams.get('query');
-    const folders = url.searchParams.getAll('folder')
+    const folders = parse_folders(url.searchParams.get('folders'))
 
     const must: Record<string, any>[] = [
         {

@@ -7,10 +7,11 @@
 
 	export let id: string;
 	export let name: string;
+	export let type: string;
 	export let is_indexed;
 	export let files: Record<string, any> | undefined;
 
-	let icon = files ? 'gg-file-document' : 'gg-folder';
+	let icon = type == 'file' ? 'gg-file-document' : 'gg-folder';
 </script>
 
 <Actionable {name} path={`/files/${id}`} {icon}>
