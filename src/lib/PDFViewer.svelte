@@ -77,22 +77,17 @@
 					continue;
 				}
 
-				const words = child.textContent.split(' ');
 				let innerHTML = child.textContent;
 
-				for (let word of words) {
-					if (highlights.includes(word)) {
-						// We want to match full words. That could mean they're
-						// either surrounded by spaces, or start at the start
-						// of the string / stop at the end of the string
-						const match = innerHTML.match(new RegExp(String.raw`(^|\s)${word}(\s|$)`));
-						if (match) {
-							// Replace the word in the match to keep the original whitespace
-							innerHTML = innerHTML.replace(
-								match[0],
-								match[0].replace(word, `<strong class="highlight">${word}</strong>`)
-							);
-						}
+				for (let highlight of highlights) {
+					const match = innerHTML.match(new RegExp(String.raw`\b${highlight}\b`, 'i'));
+					if (match) {
+						// Replace the word in the match to keep the original whitespace
+						// TODO - this could replace the "strong" tag itself
+						innerHTML = innerHTML.replace(
+							match[0],
+							match[0].replace(highlight, `<strong class="highlight">${highlight}</strong>`)
+						);
 					}
 				}
 

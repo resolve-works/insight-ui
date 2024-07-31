@@ -1,4 +1,5 @@
 <script lang="ts">
+	import SideBar from '$lib/SideBar.svelte';
 	import Page from '$lib/Page.svelte';
 	import Card from '$lib/Card.svelte';
 	import Icon from '$lib/Icon.svelte';
@@ -12,7 +13,16 @@
 	}
 </script>
 
-<Page>
+<SideBar>
+	<h2 slot="header">Filters</h2>
+
+	<nav>
+		<p>Filter by folder</p>
+		<!--<FolderFilter {options} />-->
+	</nav>
+</SideBar>
+
+<Page class="with-sidebar-left">
 	<div class="chat">
 		<div class="messages">
 			{#each data.prompts as prompt}
@@ -98,13 +108,15 @@
 	aside {
 		display: grid;
 		align-items: center;
-		width: var(--profile-size);
 		height: var(--profile-size);
 		background: var(--color-primary);
 		text-align: center;
 		border-radius: 50%;
 		color: var(--text-color-light);
 		margin-top: var(--profile-margin);
+		flex-basis: var(--profile-size);
+		flex-shrink: 0;
+		flex-grow: 0;
 	}
 
 	.message.machine aside {
@@ -112,8 +124,8 @@
 	}
 
 	:global(.card) {
-		max-width: 60%;
 		position: relative;
+		max-width: 60rem;
 	}
 
 	:global(.card:before) {
