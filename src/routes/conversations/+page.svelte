@@ -3,10 +3,13 @@
 	import Page from '$lib/Page.svelte';
 	import Card from '$lib/Card.svelte';
 	import Icon from '$lib/Icon.svelte';
+	import Title from '$lib/Title.svelte';
+	import FolderFilter from '$lib/FolderFilter.svelte';
 	import { enhance } from '$app/forms';
 	import { breadcrumbs } from '$lib/stores';
 
 	export let data;
+	const { options } = data;
 
 	$: {
 		breadcrumbs.set([{ name: 'Conversations', path: '/conversations' }]);
@@ -18,13 +21,25 @@
 
 	<nav>
 		<p>Filter by folder</p>
-		<!--<FolderFilter {options} />-->
+		<FolderFilter {options} />
 	</nav>
 </SideBar>
 
 <Page class="with-sidebar-left">
 	<div class="chat">
 		<div class="messages">
+			<div class="message machine">
+				<aside>
+					<h3>M</h3>
+				</aside>
+
+				<Card class="card">
+					<h3>Machine</h3>
+
+					<p>We are conversing about 16 files, what would you like to know about these files?</p>
+				</Card>
+			</div>
+
 			{#each data.prompts as prompt}
 				<div class="message human">
 					<aside>
@@ -73,7 +88,7 @@
 		<form method="POST" use:enhance>
 			<input type="text" name="query" placeholder="What's your question?" />
 			<input type="number" name="similarity_top_k" placeholder="Pages (default: 3)" min="0" />
-			<input type="submit" value="Prompt" class="primary" />
+			<button class="primary">Prompt</button>
 		</form>
 	</div>
 </Page>

@@ -1,7 +1,7 @@
 
 import {env} from '$env/dynamic/private'
 
-function parse_folders(param) {
+function parse_folders(param: string | null) {
     if (!param) {
         return []
     }
@@ -20,6 +20,9 @@ function parse_folders(param) {
     } catch (_) {
         return []
     }
+}
+
+async function query_opensearch(post_filter: Record<string, any>[] | undefined) {
 }
 
 export async function load({url, fetch}) {
@@ -66,7 +69,7 @@ export async function load({url, fetch}) {
             "_source": {excludes: ["pages"]},
             aggs: {folder: {terms: {field: "folder"}}},
             query: {term: {type: "file", }},
-            post_filter: {bool: {must, }}
+            post_filter: {bool: {must}},
         }),
     })
 
