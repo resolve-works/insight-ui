@@ -70,13 +70,33 @@
 			set_highlights(highlights);
 		};
 
+		// Find all words in the textLayer and wrap them in highlight
 		set_highlights = function (highlights: string[]) {
 			for (let child of text.children) {
-				child.classList.remove('highlight');
-
-				if (child.textContent && highlights.includes(child.textContent)) {
-					child.classList.add('highlight');
+				if (!child.textContent) {
+					continue;
 				}
+
+				const words = child.textContent.split(' ');
+				let innerHTML = child.textContent;
+
+				for (let word of words) {
+					if (highlights.includes(word)) {
+						// We want to match full words. That could mean they're
+						// either surrounded by spaces, or start at the start
+						// of the string / stop at the end of the string
+						const match = innerHTML.match(new RegExp(String.raw`(^|\s)${word}(\s|$)`));
+						if (match) {
+							// Replace the word in the match to keep the original whitespace
+							innerHTML = innerHTML.replace(
+								match[0],
+								match[0].replace(word, `<strong class="highlight">${word}</strong>`)
+							);
+						}
+					}
+				}
+
+				child.innerHTML = innerHTML;
 			}
 		};
 	});
@@ -98,5 +118,9 @@
 		justify-content: center;
 		max-width: 64rem;
 		margin: 0 auto;
+	}
+
+	:global(.viewer strong) {
+		font-weight: normal;
 	}
 </style>
