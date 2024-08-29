@@ -97,7 +97,7 @@ export async function load(event: ServerLoadEvent) {
     const highlights = await get_highlights(event)
 
     return {
-        url: sign(`users/${owner_id}/${path}/optimized`, cookies),
+        url: sign(`users/${owner_id}${path}/optimized`, cookies),
         highlights: [...new Set(highlights)],
         ...inode,
     }

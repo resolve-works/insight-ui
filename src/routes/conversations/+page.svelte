@@ -3,7 +3,6 @@
 	import Page from '$lib/Page.svelte';
 	import Card from '$lib/Card.svelte';
 	import Icon from '$lib/Icon.svelte';
-	import Title from '$lib/Title.svelte';
 	import FolderFilter from '$lib/FolderFilter.svelte';
 	import { enhance } from '$app/forms';
 	import { breadcrumbs } from '$lib/stores';
@@ -28,17 +27,17 @@
 <Page class="with-sidebar-left">
 	<div class="chat">
 		<div class="messages">
-			<div class="message machine">
-				<aside>
-					<h3>M</h3>
-				</aside>
+			<!--<div class="message machine">-->
+			<!--<aside>-->
+			<!--<h3>M</h3>-->
+			<!--</aside>-->
 
-				<Card class="card">
-					<h3>Machine</h3>
+			<!--<Card class="card">-->
+			<!--<h3>Machine</h3>-->
 
-					<p>We are conversing about 16 files, what would you like to know about these files?</p>
-				</Card>
-			</div>
+			<!--<p>We are conversing about 16 files, what would you like to know about these files?</p>-->
+			<!--</Card>-->
+			<!--</div>-->
 
 			{#each data.prompts as prompt}
 				<div class="message human">

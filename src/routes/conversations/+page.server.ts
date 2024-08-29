@@ -1,11 +1,16 @@
 
-import type {ServerLoadEvent} from '@sveltejs/kit';
+import type {ServerLoadEvent, RequestEvent} from '@sveltejs/kit';
 import {env} from '$env/dynamic/private'
 import type {Actions} from './$types';
 import {fail} from '@sveltejs/kit';
 import {validate, ValidationError} from '$lib/validation';
 import {schema} from '$lib/validation/prompt';
 import {Channel} from '$lib/amqp';
+
+const SYSTEM_PROMPT = `You are a helpful AI assistant, optimized for finding information in document
+collections. You will be provided with several pages from a document
+collection, and are expected to generate an answer based only on these pages,
+without using any prior knowledge.`
 
 async function get_folder_options(event: ServerLoadEvent) {
     const {fetch} = event
@@ -38,7 +43,7 @@ export async function load(event) {
 
     const res = await fetch(`${env.API_ENDPOINT}/prompts`
         + `?select=query,response,sources(similarity,...pages(index,...inodes(id,name,...files(from_page))))`
-        + `&order=created_at.desc&sources.order=similarity.desc&limit=1`)
+        + `&order=created_at.desc&sources.order=similarity.asc&limit=1`)
     const prompts = await res.json()
 
     const options = await get_folder_options(event)
@@ -57,64 +62,98 @@ async function embed_query(input: string) {
     })
 
     if (response.status !== 200) {
-        console.log(await response.text())
-        throw new Error('Could not query embedding model')
+        throw new Error(await response.text())
     }
 
     return (await response.json()).data[0].embedding;
 }
 
-export const actions = {
-    default: async ({request, fetch, cookies}) => {
-        try {
-            const data = await validate(request, schema)
+async function answer_query(query: string, pages: string[]) {
+    const context = pages.join('\n\n')
+    const prompt = `Context information is below.
+---------------------
+${context}
+---------------------
+Given only the context information, answer the query without using prior knowledge.
 
-            const embeddings = await embed_query(data.query)
-            console.log(embeddings)
+Query: ${query}
+Answer:`
 
-            /*
-            data = {
-                "input": [encoding.encode(string) for string in batch],
-                "model": "text-embedding-3-small",
-            }
-            response = httpx.post(
-                "https://api.openai.com/v1/embeddings",
-                headers=headers,
-                json=data,
-                timeout=30,
-            )
-            if response.status_code == 200:
-                for embedding in response.json()["data"]:
-                    yield embedding["embedding"]
-                    */
+    const data = {
+        model: "gpt-4-turbo",
+        messages: [
+            {role: "system", content: SYSTEM_PROMPT},
+            {role: "user", content: prompt},
+        ],
+    }
 
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: 'post',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${env.OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify(data)
+    })
 
+    if (response.status !== 200) {
+        throw new Error(await response.text())
+    }
 
-        } catch (err) {
-            if (err instanceof ValidationError) {
-                return fail(400, err.format())
-            }
-            throw err
-        }
+    return (await response.json()).choices[0].message.content;
+}
 
+async function create_prompt(event: RequestEvent) {
+    const {request, fetch} = event
 
-        /*
-        const entries = Array.from(await request.formData()).filter(([key, value]) => !!value);
+    try {
+        const data = await validate(request, schema)
+        data.embedding = await embed_query(data.query)
 
-        const response = await fetch(`${env.API_ENDPOINT}/prompts`, {
+        // Wanted to get sources in 1 call but
+        // https://github.com/PostgREST/postgrest/discussions/2933
+        const url = `${env.API_ENDPOINT}/rpc/create_prompt?select=id,query`;
+        const response = await fetch(url, {
             method: 'POST',
-            body: JSON.stringify(Object.fromEntries(entries)),
+            body: JSON.stringify(data),
             headers: {
                 'Content-Type': 'application/json',
                 'Prefer': 'return=representation'
             }
         })
-        const prompts = await response.json()
-        const prompt = prompts[0]
+        if (response.status != 200) {
+            throw new Error(await response.text())
+        }
 
-        const channel = await Channel.connect(cookies)
-        channel.publish('answer_prompt', {id: prompt.id});
-        channel.close()
-        */
+        return (await response.json())[0]
+    } catch (err) {
+        if (err instanceof ValidationError) {
+            return fail(400, err.format())
+        }
+        throw err
+    }
+}
+
+export const actions = {
+    default: async (event) => {
+        const {fetch} = event
+
+        const prompt = await create_prompt(event)
+
+        const sources_response = await fetch(`${env.API_ENDPOINT}/sources?prompt_id=eq.${prompt.id}&select=page_id,similarity,...pages(contents)`)
+        const sources = await sources_response.json()
+
+        const response = await answer_query(prompt.query, sources.map((source: Record<string, any>) => source.contents))
+
+        const update_response = await fetch(`${env.API_ENDPOINT}/prompts?id=eq.${prompt.id}`, {
+            method: "PATCH",
+            body: JSON.stringify({response}),
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        if (update_response.status != 204) {
+            throw new Error(await update_response.text())
+        }
     }
 } satisfies Actions
