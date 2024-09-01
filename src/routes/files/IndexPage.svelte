@@ -22,6 +22,7 @@
 
 	export let parent_id: number | undefined;
 
+	// Pagination
 	export let page;
 	export let first_item;
 	export let last_item;
