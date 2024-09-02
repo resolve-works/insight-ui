@@ -168,7 +168,7 @@ async function set_prompt_answer(fetch: Function, prompt_id: number, answer: str
 }
 
 export const actions = {
-    default: async ({request, fetch, params}) => {
+    answer_prompt: async ({request, fetch, params}) => {
         try {
             const data = await validate(request, schema)
 

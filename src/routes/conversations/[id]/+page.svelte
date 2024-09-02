@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Section from '$lib/Section.svelte';
 	import SideBar from '$lib/SideBar.svelte';
 	import Page from '$lib/Page.svelte';
 	import Card from '$lib/Card.svelte';
@@ -19,10 +20,14 @@
 	<h2 slot="header">Filters</h2>
 
 	<nav>
-		<p>Filter by folder</p>
-		<FolderFilter {options} />
+		<Section>
+			<p>Filter by folder</p>
+			<FolderFilter {options} />
+		</Section>
 
-		<button class="secondary">New Conversation</button>
+		<button class="secondary" title="Start a new conversation with these filters">
+			New Conversation
+		</button>
 	</nav>
 </SideBar>
 

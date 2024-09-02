@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Section from '$lib/Section.svelte';
 	import File from './File.svelte';
 	import Title from '$lib/Title.svelte';
 	import Search from '$lib/Search.svelte';
@@ -19,8 +20,10 @@
 	<h2 slot="header">Filters</h2>
 
 	<nav>
-		<p>Filter by folder</p>
-		<FolderFilter {options} />
+		<Section>
+			<p>Filter by folder</p>
+			<FolderFilter {options} />
+		</Section>
 
 		<button class="secondary" title="Start a conversation with these filters">
 			Start Conversation

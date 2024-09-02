@@ -30,4 +30,10 @@
 		--input-border-color: var(--color-primary-darker);
 		--sms-border: var(--input-border-size) solid var(--input-border-color);
 	}
+
+	aside :global(button),
+	aside :global(.button) {
+		display: block;
+		width: 100%;
+	}
 </style>

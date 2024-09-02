@@ -66,7 +66,7 @@ export async function upload({request, fetch, cookies}: RequestEvent) {
         const inode = inodes[0]
 
         // Stream the file to S3 backend
-        const url = sign(`users/${inode.owner_id}/${inode.path}/original`, cookies, 'PUT')
+        const url = sign(`users/${inode.owner_id}${inode.path}/original`, cookies, 'PUT')
         const storage_response = await fetch(url, {
             method: 'PUT',
             body: upload.stream(),

@@ -11,13 +11,42 @@
 	export let pushHistory = true;
 	export let options: FolderOption[] = [];
 
-	const folders = queryParam('folders', ssp.array(), { pushHistory });
+	const folders = queryParam(
+		'folders',
+		{
+			encode: (selected: FolderOption[]) => {
+				// Unset param
+				if (selected.length == 0) {
+					return undefined;
+				}
 
-	let selected = $folders ? options.filter((option) => $folders.includes(option.key)) : [];
-	$: $folders = selected.map((option) => option.key);
+				return ssp.array().encode(selected.map((option) => option.key));
+			},
+			decode: (param: string | null) => {
+				// No param
+				if (!param) {
+					return null;
+				}
+				const keys = ssp.array().decode(param);
+				// Nothing selected
+				if (!keys) {
+					return null;
+				}
+				return options.filter((option) => keys.includes(option.key));
+			},
+			// Default is no param set
+			defaultValue: undefined
+		},
+		{ pushHistory }
+	);
 </script>
 
-<MultiSelect {options} placeholder="Select folders ..." ulOptionsClass="dropdown" bind:selected>
+<MultiSelect
+	{options}
+	placeholder="Select folders ..."
+	ulOptionsClass="dropdown"
+	bind:value={$folders}
+>
 	<div class="option" slot="option" let:option>
 		<span>{option.label}</span>
 		<span>{option.doc_count} file{option.doc_count != 1 ? 's' : ''}</span>
