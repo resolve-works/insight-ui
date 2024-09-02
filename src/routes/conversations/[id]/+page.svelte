@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
+	import { tick } from 'svelte';
 	import Section from '$lib/Section.svelte';
 	import SideBar from '$lib/SideBar.svelte';
 	import Page from '$lib/Page.svelte';
@@ -14,6 +16,16 @@
 	$: {
 		breadcrumbs.set([{ name: 'Conversations', path: '/conversations' }]);
 	}
+
+	// This is a chat, scroll to bottom
+	async function scroll_to_bottom() {
+		if (browser) {
+			await tick();
+			window.scrollTo(0, document.body.scrollHeight);
+		}
+	}
+
+	$: data && scroll_to_bottom();
 </script>
 
 <SideBar>
@@ -91,7 +103,7 @@
 			{/each}
 		</div>
 
-		<form method="POST" use:enhance>
+		<form method="POST" action="?/answer_prompt" use:enhance={scroll_to_bottom}>
 			<input type="text" name="query" placeholder="What's your question?" />
 			<input type="number" name="similarity_top_k" placeholder="Pages (default: 3)" min="0" />
 			<button class="primary">Prompt</button>

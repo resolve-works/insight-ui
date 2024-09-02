@@ -133,8 +133,7 @@ async function create_prompt(fetch: Function, conversation_id: number, query: st
  */
 async function substantiate_prompt(fetch: Function, prompt_id: number, similarity_top_k: number = 3) {
     const url = new URL(`${env.API_ENDPOINT}/rpc/substantiate_prompt`)
-    //url.searchParams.set('select', 'page_id,similarity,...pages(contents)')
-    url.searchParams.set('select', 'page_id')
+    url.searchParams.set('select', 'page_id,similarity,...pages(contents)')
 
     const response = await fetch(url, {
         method: 'POST',
