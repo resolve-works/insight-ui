@@ -21,6 +21,10 @@
 	<nav>
 		<p>Filter by folder</p>
 		<FolderFilter {options} />
+
+		<button class="secondary" title="Start a conversation with these filters">
+			Start Conversation
+		</button>
 	</nav>
 </SideBar>
 

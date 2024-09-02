@@ -1,5 +1,5 @@
 
-import type {ServerLoadEvent, RequestEvent} from '@sveltejs/kit';
+import type {ServerLoadEvent} from '@sveltejs/kit';
 import {env} from '$env/dynamic/private'
 import type {Actions} from './$types';
 import {fail} from '@sveltejs/kit';
@@ -42,7 +42,7 @@ export async function load(event) {
 
     const url = new URL(`${env.API_ENDPOINT}/prompts`)
     url.searchParams.set('select', 'query,response,sources(similarity,...pages(index,...inodes(id,name,...files(from_page))))')
-    url.searchParams.set('order', 'created_at.desc')
+    url.searchParams.set('order', 'created_at.asc')
     url.searchParams.set('sources.order', 'similarity.asc')
     url.searchParams.set('conversation_id', `eq.${params.id}`)
 
@@ -54,7 +54,7 @@ export async function load(event) {
     return {prompts, options}
 }
 
-async function embed_query(input: string) {
+async function embed(input: string) {
     const response = await fetch("https://api.openai.com/v1/embeddings", {
         method: 'post',
         headers: {
@@ -71,8 +71,7 @@ async function embed_query(input: string) {
     return (await response.json()).data[0].embedding;
 }
 
-async function answer_query(query: string, pages: string[]) {
-    const context = pages.join('\n\n')
+async function answer_query_with_context(query: string, context: string) {
     const prompt = `Context information is below.
 ---------------------
 ${context}
@@ -106,57 +105,90 @@ Answer:`
     return (await response.json()).choices[0].message.content;
 }
 
-async function create_prompt(event: RequestEvent) {
-    const {request, fetch} = event
+async function create_prompt(fetch: Function, conversation_id: number, query: string) {
+    const embedding = await embed(query)
 
-    try {
-        const data = await validate(request, schema)
-        data.embedding = await embed_query(data.query)
+    const url = new URL(`${env.API_ENDPOINT}/prompts`)
+    url.searchParams.set('select', 'id')
 
-        // Wanted to get sources in 1 call but
-        // https://github.com/PostgREST/postgrest/discussions/2933
-        const url = `${env.API_ENDPOINT}/rpc/create_prompt?select=id,query`;
-        const response = await fetch(url, {
-            method: 'POST',
-            body: JSON.stringify(data),
-            headers: {
-                'Content-Type': 'application/json',
-                'Prefer': 'return=representation'
-            }
-        })
-        if (response.status != 200) {
-            throw new Error(await response.text())
+    const response = await fetch(url, {
+        method: 'POST',
+        body: JSON.stringify({conversation_id, query, embedding, }),
+        headers: {
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
         }
+    })
+    if (response.status != 201) {
+        throw new Error(await response.text())
+    }
 
-        return (await response.json())[0]
-    } catch (err) {
-        if (err instanceof ValidationError) {
-            return fail(400, err.format())
+    const prompts = await response.json()
+    return prompts[0]
+}
+
+/*
+ * Substantiate prompt adds source pages to the prompts based on the filtered
+ * context of the conversation the prompt is a part of
+ */
+async function substantiate_prompt(fetch: Function, prompt_id: number, similarity_top_k: number = 3) {
+    const url = new URL(`${env.API_ENDPOINT}/rpc/substantiate_prompt`)
+    //url.searchParams.set('select', 'page_id,similarity,...pages(contents)')
+    url.searchParams.set('select', 'page_id')
+
+    const response = await fetch(url, {
+        method: 'POST',
+        body: JSON.stringify({prompt_id, similarity_top_k, }),
+        headers: {
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
         }
-        throw err
+    })
+    if (response.status != 200) {
+        throw new Error(await response.text())
+    }
+
+    return response.json()
+}
+
+async function set_prompt_answer(fetch: Function, prompt_id: number, answer: string) {
+    const url = new URL(`${env.API_ENDPOINT}/prompts`)
+    url.searchParams.set('id', `eq.${prompt_id}`)
+
+    const response = await fetch(url, {
+        method: "PATCH",
+        body: JSON.stringify({response: answer}),
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    if (response.status != 204) {
+        throw new Error(await response.text())
     }
 }
 
 export const actions = {
-    default: async (event) => {
-        const {fetch} = event
+    default: async ({request, fetch, params}) => {
+        try {
+            const data = await validate(request, schema)
 
-        const prompt = await create_prompt(event)
+            // Create prompt and add sources to it
+            const prompt = await create_prompt(fetch, parseInt(params.id), data.query)
+            const sources = await substantiate_prompt(fetch, prompt.id, data.similarity_top_k)
 
-        const sources_response = await fetch(`${env.API_ENDPOINT}/sources?prompt_id=eq.${prompt.id}&select=page_id,similarity,...pages(contents)`)
-        const sources = await sources_response.json()
+            // Create context from found pages & answer prompt
+            const context = sources
+                .map((source: Record<string, any>) => source.contents)
+                .join('\n\n')
+            const answer = await answer_query_with_context(data.query, context)
 
-        const response = await answer_query(prompt.query, sources.map((source: Record<string, any>) => source.contents))
-
-        const update_response = await fetch(`${env.API_ENDPOINT}/prompts?id=eq.${prompt.id}`, {
-            method: "PATCH",
-            body: JSON.stringify({response}),
-            headers: {
-                'Content-Type': 'application/json',
+            await set_prompt_answer(fetch, prompt.id, answer)
+        } catch (err) {
+            if (err instanceof ValidationError) {
+                return fail(400, err.format())
             }
-        })
-        if (update_response.status != 204) {
-            throw new Error(await update_response.text())
+            throw err
         }
+
     }
 } satisfies Actions
