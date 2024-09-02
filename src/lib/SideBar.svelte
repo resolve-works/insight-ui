@@ -12,17 +12,16 @@
 		background: var(--color-subnavigation);
 		color: var(--text-color-light);
 		box-shadow: var(--box-shadow);
+		min-height: 100vh;
 		display: grid;
-		grid-template-rows: subgrid;
-		grid-column: 2 / 3;
-		grid-row: 1 / 4;
+		grid-template-rows: var(--header-height) 1fr var(--footer-height);
+		align-self: start;
 		position: sticky;
 		top: 0;
-		min-height: 100vh;
 	}
 
 	header {
-		display: grid;
+		display: flex;
 		align-items: center;
 	}
 

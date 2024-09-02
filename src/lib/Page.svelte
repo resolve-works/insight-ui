@@ -26,9 +26,8 @@
 	article {
 		position: relative;
 		display: grid;
-		grid-template-rows: subgrid;
+		grid-template-rows: var(--header-height) 1fr var(--footer-height);
 		grid-column: 2 / 5;
-		grid-row: 1 / 4;
 		padding: 0 calc(var(--padding-x) * 1.5);
 		background: var(--color-page);
 		box-shadow: var(--box-shadow);
