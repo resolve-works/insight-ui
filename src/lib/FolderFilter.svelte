@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tick, onMount } from 'svelte';
 	import { ssp, queryParam } from 'sveltekit-search-params';
 	import MultiSelect from 'svelte-multiselect';
 	import type { ObjectOption } from 'svelte-multiselect';
@@ -39,13 +40,26 @@
 		},
 		{ pushHistory }
 	);
+
+	let selected: FolderOption[] = $folders ?? [];
+
+	onMount(() => {
+		const unsubscribe = folders.subscribe((options) => {
+			selected = options ?? [];
+		});
+		return () => unsubscribe();
+	});
 </script>
 
 <MultiSelect
 	{options}
 	placeholder="Select folders ..."
 	ulOptionsClass="dropdown"
-	bind:value={$folders}
+	bind:selected
+	on:change={async () => {
+		await tick();
+		$folders = selected;
+	}}
 >
 	<div class="option" slot="option" let:option>
 		<span>{option.label}</span>

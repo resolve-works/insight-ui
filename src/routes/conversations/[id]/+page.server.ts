@@ -72,14 +72,18 @@ async function embed(input: string) {
 }
 
 async function answer_query_with_context(query: string, context: string) {
-    const prompt = `Context information is below.
----------------------
+    const prompt = `Given the following context information:
+"""
 ${context}
----------------------
-Given only the context information, answer the query without using prior knowledge.
+"""
 
-Query: ${query}
-Answer:`
+And the following query: 
+"""
+${query}
+"""
+
+Answer the query using only the context information, not using prior knowledge.`
+
 
     const data = {
         model: "gpt-4-turbo",
