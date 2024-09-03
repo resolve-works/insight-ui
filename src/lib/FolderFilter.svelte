@@ -17,7 +17,13 @@
 	<input type="hidden" name="folders[]" value={option.key} />
 {/each}
 
-<MultiSelect {options} placeholder="Select folders ..." ulOptionsClass="dropdown" bind:selected>
+<MultiSelect
+	{options}
+	placeholder="Select folders ..."
+	ulOptionsClass="dropdown"
+	bind:selected
+	on:change
+>
 	<div class="option" slot="option" let:option>
 		<span>{option.label}</span>
 		<span>{option.doc_count} file{option.doc_count != 1 ? 's' : ''}</span>

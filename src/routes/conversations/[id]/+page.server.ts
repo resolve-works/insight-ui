@@ -44,7 +44,7 @@ export async function load(event) {
     const url = new URL(`${env.API_ENDPOINT}/conversations`)
     const sources = `sources(similarity,...pages(index,...inodes(id,name,...files(from_page))))`
     url.searchParams.set('select', `prompts(query,response,${sources}),inodes(path)`)
-    url.searchParams.set('order', 'created_at.asc')
+    url.searchParams.set('prompts.order', 'created_at.asc')
     url.searchParams.set('prompts.sources.order', 'similarity.asc')
     url.searchParams.set('id', `eq.${params.id}`)
 
@@ -93,7 +93,6 @@ ${query}
 """
 
 Answer the query using only the context information, not using prior knowledge.`
-
 
     const data = {
         model: "gpt-4-turbo",

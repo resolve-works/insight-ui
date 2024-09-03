@@ -22,9 +22,6 @@ function parse_folders(param: string | null) {
     }
 }
 
-async function query_opensearch(post_filter: Record<string, any>[] | undefined) {
-}
-
 export async function load({url, fetch}) {
     const query = url.searchParams.get('query');
     const folders = parse_folders(url.searchParams.get('folders'))

@@ -14,6 +14,8 @@
 	export let data;
 	const { options, paths } = data;
 
+	let form: HTMLFormElement;
+
 	$: {
 		breadcrumbs.set([{ name: 'Conversations', path: '/conversations' }]);
 	}
@@ -35,10 +37,18 @@
 	<h2 slot="header">Filters</h2>
 
 	<nav>
-		<form>
+		<form action="/conversations?/create_conversation" method="POST" bind:this={form}>
 			<Section>
 				<p>Filter by folder</p>
-				<FolderFilter {options} {selected} />
+				<FolderFilter
+					{options}
+					{selected}
+					on:change={async () => {
+						// Start a new conversation when the filters change
+						await tick();
+						form.submit();
+					}}
+				/>
 			</Section>
 
 			<button class="secondary" title="Start a new conversation with these filters">
