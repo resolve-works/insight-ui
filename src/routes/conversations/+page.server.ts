@@ -1,9 +1,10 @@
 
-import {redirect} from '@sveltejs/kit';
+import {fail, redirect} from '@sveltejs/kit';
 import type {Actions} from './$types';
 import {env} from '$env/dynamic/private'
 import {parse_content_range, PAGE_SIZE} from '$lib/pagination';
-import {ssp} from 'sveltekit-search-params';
+import {validate, ValidationError} from '$lib/validation';
+import {schema} from '$lib/validation/conversation';
 
 export async function load({depends, fetch, url}) {
     depends('api:conversations')
@@ -30,29 +31,36 @@ export async function load({depends, fetch, url}) {
     }
 }
 
-async function create_conversation({request, fetch, url, cookies}: RequestEvent) {
-    const paths = ssp.array().decode(url.searchParams.get('folders'))
+async function create_conversation({request, fetch, cookies}: RequestEvent) {
+    try {
+        const data = await validate(request, schema)
 
-    const api_url = new URL(`${env.API_ENDPOINT}/rpc/create_conversation`)
-    api_url.searchParams.set('select', 'id')
+        const api_url = new URL(`${env.API_ENDPOINT}/rpc/create_conversation`)
+        api_url.searchParams.set('select', 'id')
 
-    const res = await fetch(api_url, {
-        method: 'POST',
-        body: JSON.stringify({paths}),
-        headers: {
-            'Content-Type': 'application/json',
-            'Prefer': 'return=representation',
+        const res = await fetch(api_url, {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {
+                'Content-Type': 'application/json',
+                'Prefer': 'return=representation',
+            }
+        })
+
+        if (res.status !== 200) {
+            throw new Error(await res.text())
         }
-    })
 
-    if (res.status !== 200) {
-        throw new Error(await res.text())
+        const conversations = await res.json()
+        const conversation = conversations[0]
+
+        return redirect(303, `/conversations/${conversation.id}`);
+    } catch (err) {
+        if (err instanceof ValidationError) {
+            return fail(400, err.format())
+        }
+        throw err
     }
-
-    const conversations = await res.json()
-    const conversation = conversations[0]
-
-    return redirect(303, `/conversations/${conversation.id}`);
 }
 
 export const actions = {

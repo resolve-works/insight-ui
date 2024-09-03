@@ -32,14 +32,16 @@
 	<h2 slot="header">Filters</h2>
 
 	<nav>
-		<Section>
-			<p>Filter by folder</p>
-			<FolderFilter {options} />
-		</Section>
+		<form>
+			<Section>
+				<p>Filter by folder</p>
+				<FolderFilter {options} />
+			</Section>
 
-		<button class="secondary" title="Start a new conversation with these filters">
-			New Conversation
-		</button>
+			<button class="secondary" title="Start a new conversation with these filters">
+				New Conversation
+			</button>
+		</form>
 	</nav>
 </SideBar>
 

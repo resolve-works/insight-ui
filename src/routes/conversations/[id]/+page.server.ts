@@ -40,18 +40,28 @@ export async function load(event) {
     const {fetch, depends, params} = event
     depends('api:conversations')
 
-    const url = new URL(`${env.API_ENDPOINT}/prompts`)
-    url.searchParams.set('select', 'query,response,sources(similarity,...pages(index,...inodes(id,name,...files(from_page))))')
+
+    const url = new URL(`${env.API_ENDPOINT}/conversations`)
+    const sources = `sources(similarity,...pages(index,...inodes(id,name,...files(from_page))))`
+    url.searchParams.set('select', `prompts(query,response,${sources}),inodes(path)`)
     url.searchParams.set('order', 'created_at.asc')
-    url.searchParams.set('sources.order', 'similarity.asc')
-    url.searchParams.set('conversation_id', `eq.${params.id}`)
+    url.searchParams.set('prompts.sources.order', 'similarity.asc')
+    url.searchParams.set('id', `eq.${params.id}`)
 
     const res = await fetch(url)
-    const prompts = await res.json()
+    if (res.status !== 200) {
+        throw new Error(await res.text())
+    }
+    const conversations = await res.json()
+    const conversation = conversations[0]
 
     const options = await get_folder_options(event)
 
-    return {prompts, options}
+    return {
+        folders: conversation.inodes.map((inode: {path: string}) => inode.path),
+        ...conversation,
+        options
+    }
 }
 
 async function embed(input: string) {
