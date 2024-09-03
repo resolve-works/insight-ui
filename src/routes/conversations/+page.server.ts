@@ -1,6 +1,9 @@
 
+import {redirect} from '@sveltejs/kit';
+import type {Actions} from './$types';
 import {env} from '$env/dynamic/private'
 import {parse_content_range, PAGE_SIZE} from '$lib/pagination';
+import {ssp} from 'sveltekit-search-params';
 
 export async function load({depends, fetch, url}) {
     depends('api:conversations')
@@ -27,3 +30,31 @@ export async function load({depends, fetch, url}) {
     }
 }
 
+async function create_conversation({request, fetch, url, cookies}: RequestEvent) {
+    const paths = ssp.array().decode(url.searchParams.get('folders'))
+
+    const api_url = new URL(`${env.API_ENDPOINT}/rpc/create_conversation`)
+    api_url.searchParams.set('select', 'id')
+
+    const res = await fetch(api_url, {
+        method: 'POST',
+        body: JSON.stringify({paths}),
+        headers: {
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation',
+        }
+    })
+
+    if (res.status !== 200) {
+        throw new Error(await res.text())
+    }
+
+    const conversations = await res.json()
+    const conversation = conversations[0]
+
+    return redirect(303, `/conversations/${conversation.id}`);
+}
+
+export const actions = {
+    create_conversation,
+} satisfies Actions;

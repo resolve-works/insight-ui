@@ -53,7 +53,6 @@
 	button {
 		background: none;
 		border: none;
-		font-size: 1rem;
 		width: 100%;
 	}
 
@@ -76,10 +75,8 @@
 
 	a.logo {
 		border-bottom: 1px solid var(--color-navigation-darker);
-	}
-	a.logo h1 {
-		font-size: 1.5rem;
-		margin: 0;
+		display: flex;
+		align-items: center;
 	}
 
 	ul {
