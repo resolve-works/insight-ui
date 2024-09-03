@@ -58,7 +58,7 @@ export async function load(event) {
     const options = await get_folder_options(event)
 
     return {
-        folders: conversation.inodes.map((inode: {path: string}) => inode.path),
+        paths: conversation.inodes.map((inode: {path: string}) => inode.path),
         ...conversation,
         options
     }

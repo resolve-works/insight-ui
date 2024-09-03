@@ -14,7 +14,7 @@
 </script>
 
 {#each selected as option (option.key)}
-	<input type="hidden" name="folder" value={option.key} />
+	<input type="hidden" name="folders[]" value={option.key} />
 {/each}
 
 <MultiSelect {options} placeholder="Select folders ..." ulOptionsClass="dropdown" bind:selected>

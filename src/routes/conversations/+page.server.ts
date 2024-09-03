@@ -31,7 +31,7 @@ export async function load({depends, fetch, url}) {
     }
 }
 
-async function create_conversation({request, fetch, cookies}: RequestEvent) {
+async function create_conversation({request, fetch}: RequestEvent) {
     try {
         const data = await validate(request, schema)
 
@@ -40,7 +40,7 @@ async function create_conversation({request, fetch, cookies}: RequestEvent) {
 
         const res = await fetch(api_url, {
             method: 'POST',
-            body: JSON.stringify(data),
+            body: JSON.stringify({folders: data['folders[]']}),
             headers: {
                 'Content-Type': 'application/json',
                 'Prefer': 'return=representation',

@@ -1,21 +1,24 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { tick } from 'svelte';
+	import { enhance } from '$app/forms';
 	import Section from '$lib/Section.svelte';
 	import SideBar from '$lib/SideBar.svelte';
 	import Page from '$lib/Page.svelte';
 	import Card from '$lib/Card.svelte';
 	import Icon from '$lib/Icon.svelte';
 	import FolderFilter from '$lib/FolderFilter.svelte';
-	import { enhance } from '$app/forms';
+	import type { FolderOption } from '$lib/FolderFilter.svelte';
 	import { breadcrumbs } from '$lib/stores';
 
 	export let data;
-	const { options } = data;
+	const { options, paths } = data;
 
 	$: {
 		breadcrumbs.set([{ name: 'Conversations', path: '/conversations' }]);
 	}
+
+	$: selected = options.filter((option: FolderOption) => paths.includes(option.key));
 
 	// This is a chat, scroll to bottom
 	async function scroll_to_bottom() {
@@ -35,7 +38,7 @@
 		<form>
 			<Section>
 				<p>Filter by folder</p>
-				<FolderFilter {options} />
+				<FolderFilter {options} {selected} />
 			</Section>
 
 			<button class="secondary" title="Start a new conversation with these filters">
@@ -105,7 +108,7 @@
 			{/each}
 		</div>
 
-		<form method="POST" action="?/answer_prompt" use:enhance={scroll_to_bottom}>
+		<form class="prompt" method="POST" action="?/answer_prompt" use:enhance={scroll_to_bottom}>
 			<input type="text" name="query" placeholder="What's your question?" />
 			<input type="number" name="similarity_top_k" placeholder="Pages (default: 3)" min="0" />
 			<button class="primary">Prompt</button>
@@ -181,7 +184,7 @@
 		border-left-color: var(--color-white);
 	}
 
-	form {
+	form.prompt {
 		display: grid;
 		grid-template-columns: 4fr 1fr 1fr;
 		align-items: center;

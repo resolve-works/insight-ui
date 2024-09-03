@@ -16,8 +16,9 @@
 	const folders = queryParam('folders', ssp.array(), { showDefaults: false });
 
 	// Multiselect has the FolderOption objects to show extra information
-	let selected: FolderOption[] = [];
-
+	let selected: FolderOption[] = options.filter((option: { key: string }) =>
+		($folders ?? []).includes(option.key)
+	);
 	$: $folders = selected.length ? selected.map((option) => option.key) : null;
 
 	$: {
