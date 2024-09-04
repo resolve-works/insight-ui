@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { tick, onMount } from 'svelte';
     import { invalidate } from '$app/navigation';
 	import { browser } from '$app/environment';
-	import { tick } from 'svelte';
 	import { enhance } from '$app/forms';
 	import Section from '$lib/Section.svelte';
 	import SideBar from '$lib/SideBar.svelte';
@@ -18,6 +18,7 @@
 	let form: HTMLFormElement;
 	let query: string;
 	let is_answering = false;
+    let input: HTMLInputElement;
 
 	$: {
 		breadcrumbs.set([{ name: 'Conversations', path: '/conversations' }]);
@@ -34,6 +35,7 @@
             query = "";
             invalidate('api:prompts')
             scroll_to_bottom()
+            input.focus();
         }
     }
 
@@ -44,6 +46,9 @@
 			window.scrollTo(0, document.body.scrollHeight);
 		}
 	}
+
+    // Focus on input on load
+    onMount(() => input.focus())
 
 	// Scroll to bottom when data changes
 	$: data && scroll_to_bottom();
@@ -133,6 +138,7 @@
 				type="text"
 				name="query"
 				placeholder="Your question ..."
+				bind:this={input}
 				bind:value={query}
 				disabled={is_answering}
 			/>
