@@ -39,7 +39,7 @@ async function get_folder_options(event: ServerLoadEvent) {
 export async function load(event) {
     const {fetch, depends, params} = event
     depends('api:conversations')
-
+    depends('api:prompts')
 
     const url = new URL(`${env.API_ENDPOINT}/conversations`)
     const sources = `sources(similarity,...pages(index,...inodes(id,name,...files(from_page))))`

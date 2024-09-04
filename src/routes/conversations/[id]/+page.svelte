@@ -1,13 +1,14 @@
 <script lang="ts">
+    import { invalidate } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import { tick } from 'svelte';
 	import { enhance } from '$app/forms';
 	import Section from '$lib/Section.svelte';
 	import SideBar from '$lib/SideBar.svelte';
 	import Page from '$lib/Page.svelte';
-	import Card from '$lib/Card.svelte';
 	import Icon from '$lib/Icon.svelte';
 	import FolderFilter from '$lib/FolderFilter.svelte';
+    import Message from `./Message.svelte`;
 	import type { FolderOption } from '$lib/FolderFilter.svelte';
 	import { breadcrumbs } from '$lib/stores';
 
@@ -15,12 +16,26 @@
 	const { options, paths } = data;
 
 	let form: HTMLFormElement;
+	let query: string;
+	let is_answering = false;
 
 	$: {
 		breadcrumbs.set([{ name: 'Conversations', path: '/conversations' }]);
 	}
 
 	$: selected = options.filter((option: FolderOption) => paths.includes(option.key));
+
+    async function answer_prompt() {
+        is_answering = true;
+        scroll_to_bottom()
+
+        return () => {
+            is_answering = false;
+            query = "";
+            invalidate('api:prompts')
+            scroll_to_bottom()
+        }
+    }
 
 	// This is a chat, scroll to bottom
 	async function scroll_to_bottom() {
@@ -30,6 +45,7 @@
 		}
 	}
 
+	// Scroll to bottom when data changes
 	$: data && scroll_to_bottom();
 </script>
 
@@ -74,53 +90,59 @@
 			<!--</div>-->
 
 			{#each data.prompts as prompt}
-				<div class="message human">
-					<aside>
-						<h3>H</h3>
-					</aside>
+				<Message class="human" name="Human">
+					<p>{prompt.query}</p>
+				</Message>
 
-					<Card class="card">
-						<h3>Human</h3>
+				<Message class="machine" name="Machine">
+					{#if prompt.response}
+						<p>{prompt.response}</p>
 
-						<p>{prompt.query}</p>
-					</Card>
-				</div>
-
-				<div class="message machine">
-					<aside>
-						<h3>M</h3>
-					</aside>
-
-					<Card class="card">
-						<h3>Machine</h3>
-
-						{#if prompt.response}
-							<p>{prompt.response}</p>
-
-							{#if prompt.sources.length}
-								<p>
-									{#each prompt.sources as source}
-										<a href="/files/{source.id}?page={source.index - source.from_page + 1}">
-											<span>
-												<Icon class="gg-file" />
-												{source.index - source.from_page + 1}
-											</span>
-											{source.name}
-										</a>
-									{/each}
-								</p>
-							{/if}
-						{:else}
-							<Icon class="gg-loadbar" />
+						{#if prompt.sources.length}
+							<p>
+								{#each prompt.sources as source}
+									<a href="/files/{source.id}?page={source.index - source.from_page + 1}">
+										<span>
+											<Icon class="gg-file" />
+											{source.index - source.from_page + 1}
+										</span>
+										{source.name}
+									</a>
+								{/each}
+							</p>
 						{/if}
-					</Card>
-				</div>
+					{:else}
+						<p><Icon class="gg-loadbar" /></p>
+					{/if}
+				</Message>
 			{/each}
+
+			{#if is_answering}
+				<Message class="human" name="Human">
+					<p>{query}</p>
+				</Message>
+
+				<Message class="machine" name="Machine">
+					<p><Icon class="gg-loadbar" /></p>
+				</Message>
+			{/if}
 		</div>
 
-		<form class="prompt" method="POST" action="?/answer_prompt" use:enhance={scroll_to_bottom}>
-			<input type="text" name="query" placeholder="What's your question?" />
-			<input type="number" name="similarity_top_k" placeholder="Pages (default: 3)" min="0" />
+		<form class="prompt" method="POST" action="?/answer_prompt" use:enhance={answer_prompt}>
+			<input
+				type="text"
+				name="query"
+				placeholder="What's your question?"
+				bind:value={query}
+				disabled={is_answering}
+			/>
+			<input
+				type="number"
+				name="similarity_top_k"
+				placeholder="Pages (default: 3)"
+				min="0"
+				disabled={is_answering}
+			/>
 			<button class="primary">Prompt</button>
 		</form>
 	</div>
@@ -137,61 +159,6 @@
 		display: grid;
 		grid-template-rows: 1fr auto;
 		min-height: 100%;
-	}
-
-	.messages {
-		width: 100%;
-	}
-
-	.message {
-		display: flex;
-		gap: 2rem;
-		margin-bottom: 1rem;
-	}
-
-	.message.human {
-		flex-direction: row-reverse;
-	}
-
-	aside {
-		display: grid;
-		align-items: center;
-		height: var(--profile-size);
-		background: var(--color-primary);
-		text-align: center;
-		border-radius: 50%;
-		color: var(--text-color-light);
-		margin-top: var(--profile-margin);
-		flex-basis: var(--profile-size);
-		flex-shrink: 0;
-		flex-grow: 0;
-	}
-
-	.message.machine aside {
-		background: #6167c9;
-	}
-
-	:global(.card) {
-		position: relative;
-		max-width: 60rem;
-	}
-
-	:global(.card:before) {
-		content: '';
-		width: var(--triangle-size);
-		height: var(--triangle-size);
-		position: absolute;
-		top: calc(var(--profile-margin) + (var(--profile-size) - var(--triangle-size)) / 2);
-		border: calc(var(--triangle-size) / 2) solid transparent;
-	}
-
-	.message.machine :global(.card:before) {
-		left: calc(var(--triangle-size) * -1);
-		border-right-color: var(--color-white);
-	}
-	.message.human :global(.card:before) {
-		right: calc(var(--triangle-size) * -1);
-		border-left-color: var(--color-white);
 	}
 
 	form.prompt {
