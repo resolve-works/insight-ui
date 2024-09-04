@@ -7,8 +7,17 @@ import {validate, ValidationError} from '$lib/validation';
 import {schema} from '$lib/validation/prompt';
 
 
-async function get_folder_options(event: ServerLoadEvent) {
+async function get_folder_options(event: ServerLoadEvent, folders: string[]) {
     const {fetch} = event
+
+    const must: Record<string, any>[] = [
+        {
+            "bool": {
+                "should": folders.map(folder => ({"term": {"folder": folder, }}))
+            },
+        },
+    ]
+
     const res = await fetch(`${env.OPENSEARCH_ENDPOINT}/inodes/_search`, {
         method: 'post',
         headers: {
@@ -18,6 +27,7 @@ async function get_folder_options(event: ServerLoadEvent) {
             "_source": {excludes: ["pages"]},
             aggs: {folder: {terms: {field: "folder"}}},
             query: {term: {type: "file", }},
+            post_filter: {bool: {must}},
         }),
     })
 
@@ -26,10 +36,13 @@ async function get_folder_options(event: ServerLoadEvent) {
         throw new Error(`Invalid response from opensearch. ${body.error.type}: ${body.error.reason}`)
     }
 
-    return body.aggregations.folder.buckets.map((bucket: Record<string, any>) => ({
-        label: bucket.key,
-        ...bucket
-    }))
+    return {
+        total: body.hits.total.value,
+        options: body.aggregations.folder.buckets.map((bucket: Record<string, any>) => ({
+            label: bucket.key,
+            ...bucket
+        })),
+    }
 }
 
 export async function load(event) {
@@ -51,13 +64,11 @@ export async function load(event) {
     const conversations = await res.json()
     const conversation = conversations[0]
 
-    const options = await get_folder_options(event)
+    const paths = conversation.inodes.map((inode: {path: string}) => inode.path);
 
-    return {
-        paths: conversation.inodes.map((inode: {path: string}) => inode.path),
-        ...conversation,
-        options
-    }
+    const {options, total} = await get_folder_options(event, paths)
+
+    return {paths, ...conversation, options, total, }
 }
 
 async function embed(input: string) {

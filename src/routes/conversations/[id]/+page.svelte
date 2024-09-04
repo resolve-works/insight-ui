@@ -13,7 +13,7 @@
 	import { breadcrumbs } from '$lib/stores';
 
 	export let data;
-	const { options, paths } = data;
+	const { options, total, paths } = data;
 
 	let form: HTMLFormElement;
 	let query: string;
@@ -77,17 +77,17 @@
 <Page class="with-sidebar-left">
 	<div class="chat">
 		<div class="messages">
-			<!--<div class="message machine">-->
-			<!--<aside>-->
-			<!--<h3>M</h3>-->
-			<!--</aside>-->
+			<Message class="machine" name="Machine">
+				<p>
+					We are conversing about {total} files.
 
-			<!--<Card class="card">-->
-			<!--<h3>Machine</h3>-->
+					{#if !selected.length}
+						You can narrow the context of our conversation with the filters.
+					{/if}
 
-			<!--<p>We are conversing about 16 files, what would you like to know about these files?</p>-->
-			<!--</Card>-->
-			<!--</div>-->
+					To what question do you think these files hold the answer?
+				</p>
+			</Message>
 
 			{#each data.prompts as prompt}
 				<Message class="human" name="Human">
@@ -132,14 +132,14 @@
 			<input
 				type="text"
 				name="query"
-				placeholder="What's your question?"
+				placeholder="Your question ..."
 				bind:value={query}
 				disabled={is_answering}
 			/>
 			<input
 				type="number"
 				name="similarity_top_k"
-				placeholder="Pages (default: 3)"
+				placeholder="Pages (default: 3) ..."
 				min="0"
 				disabled={is_answering}
 			/>
@@ -162,10 +162,13 @@
 	}
 
 	form.prompt {
-		display: grid;
-		grid-template-columns: 4fr 1fr 1fr;
+		display: flex;
 		align-items: center;
 		gap: 0.5rem;
+	}
+
+	form.prompt input[type='text'] {
+		flex-grow: 1;
 	}
 
 	.response {

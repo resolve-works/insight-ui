@@ -9,7 +9,6 @@
 	import Title from '$lib/Title.svelte';
 
 	export let data;
-	export let form;
 
 	$: {
 		breadcrumbs.set([
