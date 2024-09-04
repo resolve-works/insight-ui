@@ -21,6 +21,7 @@
 	export let form;
 
 	export let parent_id: number | undefined;
+	export let path: string;
 
 	// Pagination
 	export let page;
@@ -177,10 +178,14 @@
 				Create Folder
 			</button>
 
-			<!--<button title="Start conversation about the files in this folder">-->
-			<!--<Icon class="gg-comment" />-->
-			<!--Start Conversation-->
-			<!--</button>-->
+			<form action="/conversations?/create_conversation" method="POST">
+				<input type="hidden" name="folders[]" value={path} />
+
+				<button title="Start conversation about the files in this folder">
+					<Icon class="gg-comment" />
+					Start Conversation
+				</button>
+			</form>
 		</InputGroup>
 	</Title>
 
