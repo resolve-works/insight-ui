@@ -96,7 +96,7 @@
 
 				<Message class="machine" name="Machine">
 					{#if prompt.response}
-						<p>{prompt.response}</p>
+						<p class="response">{prompt.response}</p>
 
 						{#if prompt.sources.length}
 							<p>
@@ -166,6 +166,10 @@
 		grid-template-columns: 4fr 1fr 1fr;
 		align-items: center;
 		gap: 0.5rem;
+	}
+
+	.response {
+		white-space: pre-wrap;
 	}
 
 	a {

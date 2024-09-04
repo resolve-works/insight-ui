@@ -6,10 +6,6 @@ import {fail} from '@sveltejs/kit';
 import {validate, ValidationError} from '$lib/validation';
 import {schema} from '$lib/validation/prompt';
 
-const SYSTEM_PROMPT = `You are a helpful AI assistant, optimized for finding information in document
-collections. You will be provided with several pages from a document
-collection, and are expected to generate an answer based only on these pages,
-without using any prior knowledge.`
 
 async function get_folder_options(event: ServerLoadEvent) {
     const {fetch} = event
@@ -81,24 +77,58 @@ async function embed(input: string) {
     return (await response.json()).data[0].embedding;
 }
 
-async function answer_query_with_context(query: string, context: string) {
-    const prompt = `Given the following context information:
+async function generate_answer(prompts: {query: string, response: string, sources: {contents: string}[]}[]) {
+    // The system prompt instructs the model on how to approach the users messages
+    const SYSTEM_PROMPT = `You are a helpful AI assistant, optimized for
+finding information in document collections. You will be provided with
+some context in the form of several pages from a document collection. 
+
+Every user message will optionally provide you with some context information,
+and a query. You answer the query based only on the context provided to you in
+the users messages, without using any prior knowledge.`
+
+    // Build user & assistant messages from the complete conversation
+    const messages = prompts
+        .map(prompt => {
+            // Create single string from sources
+            // TODO - Add more info to sources to allow model to provide more
+            // structured responses pointing to certain sources
+            const context = prompt.sources
+                .map((source: Record<string, any>) => source.contents)
+                .join('\n\n')
+
+            const messages = [
+                {
+                    role: "user",
+                    content: `Context:
 """
 ${context}
 """
 
-And the following query: 
+Query:
 """
-${query}
-"""
+${prompt.query}
+"""`,
+                },
+            ];
 
-Answer the query using only the context information, not using prior knowledge.`
+            // Add assistant answer when prompt was answered
+            if ('response' in prompt && prompt.response != "") {
+                messages.push({
+                    role: "assistant",
+                    content: prompt.response
+                })
+            }
+
+            return messages
+        })
+        .flat()
 
     const data = {
         model: "gpt-4-turbo",
         messages: [
             {role: "system", content: SYSTEM_PROMPT},
-            {role: "user", content: prompt},
+            ...messages,
         ],
     }
 
@@ -122,7 +152,10 @@ async function create_prompt(fetch: Function, conversation_id: number, query: st
     const embedding = await embed(query)
 
     const url = new URL(`${env.API_ENDPOINT}/prompts`)
-    url.searchParams.set('select', 'id')
+    // Fetch conversation history so we can send the whole conversation to LLM
+    url.searchParams.set('select', 'id,query,...conversations(prompts(query,response,sources(...pages(contents))))')
+    url.searchParams.set('conversations.prompts.order', 'created_at.asc')
+    url.searchParams.set('conversations.prompts.sources.order', 'similarity.asc')
 
     const response = await fetch(url, {
         method: 'POST',
@@ -188,11 +221,11 @@ export const actions = {
             const prompt = await create_prompt(fetch, parseInt(params.id), data.query)
             const sources = await substantiate_prompt(fetch, prompt.id, data.similarity_top_k)
 
-            // Create context from found pages & answer prompt
-            const context = sources
-                .map((source: Record<string, any>) => source.contents)
-                .join('\n\n')
-            const answer = await answer_query_with_context(data.query, context)
+            // TODO - When creating sources in trigger, we can do all this in one call
+            const prompts = prompt.prompts
+            prompt.sources = sources;
+            prompts.push(prompt)
+            const answer = await generate_answer(prompts)
 
             await set_prompt_answer(fetch, prompt.id, answer)
         } catch (err) {

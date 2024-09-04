@@ -176,6 +176,11 @@
 				<Icon class="gg-folder-add" />
 				Create Folder
 			</button>
+
+			<!--<button title="Start conversation about the files in this folder">-->
+			<!--<Icon class="gg-comment" />-->
+			<!--Start Conversation-->
+			<!--</button>-->
 		</InputGroup>
 	</Title>
 
