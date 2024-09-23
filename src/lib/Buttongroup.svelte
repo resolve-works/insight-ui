@@ -2,6 +2,8 @@
 	import { onMount } from 'svelte';
 	import Icon from './Icon.svelte';
 
+	export let test_id: string | undefined;
+
 	let is_enhanced = false;
 	let is_open = false;
 
@@ -23,8 +25,12 @@
 	});
 </script>
 
-<div class="buttongroup" class:enhance={is_enhanced} class:open={is_open}>
-	<button class="toggle" on:click|preventDefault|stopPropagation={() => (is_open = !is_open)}>
+<div class="buttongroup" class:enhance={is_enhanced} class:open={is_open} data-testid={test_id}>
+	<button
+		class="toggle"
+		on:click|preventDefault|stopPropagation={() => (is_open = !is_open)}
+		data-testid={test_id ? `${test_id}-toggle` : undefined}
+	>
 		<Icon class="gg-more-vertical-alt" />
 	</button>
 

@@ -173,6 +173,7 @@
 					await tick();
 					folder_input.focus();
 				}}
+				data-testid="show-folder-form"
 			>
 				<Icon class="gg-folder-add" />
 				Create Folder
@@ -181,7 +182,10 @@
 			<form action="/conversations?/create_conversation" method="POST">
 				<input type="hidden" name="folders[]" value={path} />
 
-				<button title="Start conversation about the files in this folder">
+				<button
+					title="Start conversation about the files in this folder"
+					data-testid="start-conversation"
+				>
 					<Icon class="gg-comment" />
 					Start Conversation
 				</button>

@@ -14,21 +14,21 @@
 	let icon = type == 'file' ? 'gg-file-document' : 'gg-folder';
 </script>
 
-<Actionable {name} path={`/files/${id}`} {icon}>
+<Actionable {name} path={`/files/${id}`} {icon} test_id="inode">
 	<Actions slot="actions">
 		{#if (files && !files.is_ready) || !is_indexed}
 			<Icon class="gg-loadbar" />
 		{/if}
 
-		<Buttongroup>
-			<a class="button" href={`/files/${id}/edit`}>
+		<Buttongroup test_id="inode-actions">
+			<a class="button" href={`/files/${id}/edit`} data-testid="edit-inode">
 				<Icon class="gg-pen" />
 				Edit
 			</a>
 
 			<form method="POST" action="?/remove" use:enhance>
 				<input type="hidden" name="id" value={id} />
-				<button><Icon class="gg-trash" /> Delete</button>
+				<button data-testid="delete-inode"><Icon class="gg-trash" /> Delete</button>
 			</form>
 		</Buttongroup>
 	</Actions>

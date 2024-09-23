@@ -6,11 +6,12 @@
 	export let name: string | undefined;
 	export let path: string;
 	export let icon: string;
+	export let test_id: string | undefined;
 </script>
 
-<Card>
+<Card data-testid={test_id}>
 	<header>
-		<h3>
+		<h3 data-testid={test_id ? `${test_id}-title` : undefined}>
 			<a class="unstyled" href={path}>
 				<Icon class={icon} />
 
