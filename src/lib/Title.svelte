@@ -1,23 +1,22 @@
-
 <header>
-    <h2>
-        <slot />
-    </h2>
+	<h2 data-testid="title">
+		<slot />
+	</h2>
 
-    <slot name="actions" />
+	<slot name="actions" />
 </header>
 
 <style>
-    header {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 1rem;
-        align-items: center;
-    }
+	header {
+		display: grid;
+		grid-template-columns: 1fr auto;
+		gap: 1rem;
+		align-items: center;
+	}
 
-    h2 {
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        overflow-x: hidden;
-    }
+	h2 {
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		overflow-x: hidden;
+	}
 </style>

@@ -45,9 +45,15 @@
 			>
 				<Icon class={data.files ? 'gg-file-document' : 'gg-folder'} />
 
-				<input type="text" name="name" placeholder="File name" value={data.name} />
+				<input
+					type="text"
+					name="name"
+					placeholder="File name"
+					value={data.name}
+					data-testid="inode-name-input"
+				/>
 
-				<button class="primary">
+				<button class="primary" data-testid="change-inode-name">
 					<Icon class="gg-pen" /> Change name
 				</button>
 			</form>
