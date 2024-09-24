@@ -7,8 +7,10 @@
 	import Section from '$lib/Section.svelte';
 	import { breadcrumbs } from '$lib/stores';
 	import Title from '$lib/Title.svelte';
+	import FormErrors from '$lib/FormErrors.svelte';
 
 	export let data;
+	export let form;
 
 	$: {
 		breadcrumbs.set([
@@ -43,15 +45,21 @@
 					async ({ update }) =>
 						update({ reset: false })}
 			>
-				<Icon class={data.files ? 'gg-file-document' : 'gg-folder'} />
+				<div class="icon">
+					<Icon class={data.files ? 'gg-file-document' : 'gg-folder'} />
+				</div>
 
-				<input
-					type="text"
-					name="name"
-					placeholder="File name"
-					value={data.name}
-					data-testid="inode-name-input"
-				/>
+				<div class="input">
+					<input
+						type="text"
+						name="name"
+						placeholder="File name"
+						value={data.name}
+						data-testid="inode-name-input"
+					/>
+
+					<FormErrors errors={form?.errors} key="name" />
+				</div>
 
 				<button class="primary" data-testid="change-inode-name">
 					<Icon class="gg-pen" /> Change name
@@ -62,14 +70,22 @@
 </Page>
 
 <style>
+	.icon {
+		margin: var(--input-padding-y) 0;
+	}
+
 	form {
 		display: flex;
-		align-items: center;
+		align-items: start;
 		gap: 1rem;
 		margin: 0.5rem 0;
 	}
 
-	input {
+	.input {
 		flex-grow: 1;
+	}
+
+	.input input {
+		width: 100%;
 	}
 </style>
