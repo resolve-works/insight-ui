@@ -16,12 +16,10 @@
 
 <Actionable {name} path={`/files/${id}`} {icon} test_id="inode">
 	<Actions slot="actions">
-		{#if (files && !files.is_ready) || !is_indexed}
-			<Icon class="gg-loadbar" />
-		{/if}
-
 		{#if files && files.error}
 			<Icon test_id="inode-error" class="gg-danger error" title={files.error} />
+		{:else if (files && !files.is_ready) || !is_indexed}
+			<Icon class="gg-loadbar" />
 		{/if}
 
 		<Buttongroup test_id="inode-actions">
