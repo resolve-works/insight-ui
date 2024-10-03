@@ -9,6 +9,7 @@
 		// Track progress
 		total: number;
 		loaded = 0;
+		error: string | undefined = undefined;
 
 		is_started = false;
 
@@ -26,16 +27,18 @@
 			this.xhr.upload.addEventListener('progress', (e) => {
 				this.loaded = e.loaded;
 				this.total = e.total;
-				this.dispatchEvent(new Event('progress'));
+				this.dispatchEvent(new Event('update'));
 			});
 
-			// TODO - handle error states
-			this.xhr.upload.addEventListener('loadend', async () => {
-				this.dispatchEvent(new Event('finished'));
+			this.xhr.addEventListener('loadend', (e) => {
+				console.log(this.xhr.status);
+				console.log(e);
+				console.log('finish');
+				//this.dispatchEvent(new Event('finished'));
 			});
 
 			const data = new FormData();
-			data.append('files', this.file);
+			data.append('file', this.file);
 			if (this.parent_id) {
 				data.append('parent_id', this.parent_id);
 			}
@@ -51,7 +54,7 @@
 
 	export let upload: Upload;
 	// Re-assign to trigger svelte reactivity
-	upload.addEventListener('progress', () => {
+	upload.addEventListener('update', () => {
 		upload = upload;
 	});
 </script>

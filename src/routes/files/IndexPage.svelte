@@ -67,24 +67,17 @@
 		files_input.dispatchEvent(new Event('change'));
 	}
 
-	// Add files to the uploads store to show nice progress objects to user
-	function submit({
-		formData,
-		cancel
-	}: {
-		formData: FormData | undefined;
-		cancel: Function | undefined;
-	}) {
-		if (!formData || !cancel) {
-			throw new Error('formData and cancel function required');
-		}
-
-		const files = formData.getAll('files') as File[];
-		const parent_id = formData.get('parent_id') as string;
+	// Add files to the uploads store to show nice progress objects to user.
+	// This defeats the purpose of svelte enhance though.
+	function create_uploads(e: SubmitEvent) {
+		const form_data = new FormData(e.target as HTMLFormElement);
+		const files = form_data.getAll('files') as File[];
+		const parent_id = form_data.get('parent_id') as string;
 		uploads.update((uploads) => {
 			return [...uploads, ...files.map((file) => new Upload(file, parent_id))];
 		});
-		cancel();
+		// Prevent form submission
+		return false;
 	}
 
 	onMount(() => {
@@ -142,13 +135,7 @@
 		{/if}
 
 		<InputGroup slot="actions">
-			<form
-				method="POST"
-				action="?/upload"
-				enctype="multipart/form-data"
-				bind:this={files_form}
-				use:enhance={submit}
-			>
+			<form bind:this={files_form} on:submit={create_uploads}>
 				<input
 					name="files"
 					type="file"
