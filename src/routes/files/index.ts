@@ -2,7 +2,7 @@
 import {env} from '$env/dynamic/private'
 import type {RequestEvent} from '@sveltejs/kit';
 import {fail} from '@sveltejs/kit';
-import {sign} from '$lib/sign';
+import {sign} from '$lib/storage';
 import {Channel} from '$lib/amqp.js';
 import {schema} from '$lib/validation/inode';
 import {validate, ValidationError} from '$lib/validation';
@@ -86,7 +86,9 @@ export async function upload({request, fetch, cookies}: RequestEvent) {
             body: JSON.stringify({is_uploaded: true}),
             headers: {'Content-Type': 'application/json', }
         })
-        // TODO error handling
+        if (patch_response.status !== 204) {
+            throw new Error(`Error marking inode as uploaded: "${await patch_response.text()}"`)
+        }
 
         const channel = await Channel.connect(cookies)
         channel.publish('ingest_file', {id: inode.id});

@@ -18,7 +18,7 @@ export function sign(path: string, cookies: Cookies, method: string = 'GET') {
         protocol: url.protocol,
         port: url.port,
         method,
-        path: encodeURI('/' + env.STORAGE_BUCKET + '/' + path),
+        path: url_encode('/' + env.STORAGE_BUCKET + '/' + path),
         headers: {
             host: url.host
         },
@@ -33,3 +33,14 @@ export function sign(path: string, cookies: Cookies, method: string = 'GET') {
         new Date(), 60 * 60
     )
 }
+
+/**
+ * S3 url encode
+ */
+export function url_encode(str: string) {
+    return encodeURI(str)
+        .replace(/[+!"#$&'(),:;=?@]/g, char => {
+            return '%' + char.charCodeAt(0).toString(16).toUpperCase();
+        });
+}
+

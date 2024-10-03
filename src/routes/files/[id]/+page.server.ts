@@ -1,6 +1,6 @@
 import type {Actions} from './$types';
 import {env} from '$env/dynamic/private'
-import {sign} from '$lib/sign';
+import {sign} from '$lib/storage';
 import {create_folder, upload, remove} from '../';
 import type {ServerLoadEvent} from '@sveltejs/kit';
 
@@ -96,8 +96,9 @@ export async function load(event: ServerLoadEvent) {
 
     const highlights = await get_highlights(event)
 
+    const url = `users/${owner_id}${path}/optimized`
     return {
-        url: sign(`users/${owner_id}${path}/optimized`, cookies),
+        url: sign(url, cookies),
         highlights: [...new Set(highlights)],
         ...inode,
     }
