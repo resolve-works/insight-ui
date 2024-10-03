@@ -2,7 +2,7 @@
 	import '@fontsource-variable/rubik/index.css';
 	import '@fontsource-variable/roboto-slab/index.css';
 
-	import { onMount, onDestroy, setContext } from 'svelte';
+	import { onMount, setContext } from 'svelte';
 	import { invalidate } from '$app/navigation';
 	import Navigation from '$lib/Navigation.svelte';
 	import { browser } from '$app/environment';
@@ -17,11 +17,7 @@
 		setContext('pdfjs-worker', new pdfjs.PDFWorker());
 	}
 
-	let ac = new AbortController();
-
-	class StreamAbortedError extends Error {}
-
-	async function getEvents() {
+	onMount(() => {
 		const source = new EventSource('/events');
 		source.addEventListener('message', (message) => {
 			const body = JSON.parse(message.data);
@@ -40,14 +36,10 @@
 				}
 			}
 		});
-	}
 
-	onMount(() => {
-		getEvents();
-	});
-
-	onDestroy(() => {
-		ac.abort(new StreamAbortedError());
+		return () => {
+			source.close();
+		};
 	});
 </script>
 
