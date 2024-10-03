@@ -106,7 +106,7 @@
 			// Start active uploads that have not been started yet.
 			if (!upload.is_started) {
 				// Remove uploads from store on completion
-				upload.addEventListener('upload_finished', () => {
+				upload.addEventListener('finished', () => {
 					invalidate('api:inodes');
 					uploads.update((uploads) => uploads.filter((u) => u != upload));
 				});

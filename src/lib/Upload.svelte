@@ -26,11 +26,12 @@
 			this.xhr.upload.addEventListener('progress', (e) => {
 				this.loaded = e.loaded;
 				this.total = e.total;
+				this.dispatchEvent(new Event('progress'));
 			});
 
 			// TODO - handle error states
 			this.xhr.upload.addEventListener('loadend', async () => {
-				this.dispatchEvent(new Event('upload_finished'));
+				this.dispatchEvent(new Event('finished'));
 			});
 
 			const data = new FormData();
@@ -49,6 +50,10 @@
 	import Card from '$lib/Card.svelte';
 
 	export let upload: Upload;
+	// Re-assign to trigger svelte reactivity
+	upload.addEventListener('progress', () => {
+		upload = upload;
+	});
 </script>
 
 <Card>
