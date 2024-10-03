@@ -6,7 +6,7 @@
 	export let name: string | undefined;
 	export let path: string;
 	export let icon: string;
-	export let test_id: string | undefined;
+	export let test_id: string | undefined = undefined;
 </script>
 
 <Card data-testid={test_id}>

@@ -1,5 +1,9 @@
+<script lang="ts">
+	export let test_id: string | undefined = undefined;
+</script>
+
 <span>
-	<i role={$$props.class == 'gg-loadbar' ? 'progressbar' : ''} {...$$props} />
+	<i data-testid={test_id} role={$$props.class == 'gg-loadbar' ? 'progressbar' : ''} {...$$props} />
 </span>
 
 <style>
@@ -11,5 +15,13 @@
 		display: grid;
 		align-items: center;
 		justify-content: center;
+	}
+
+	.error {
+		color: var(--color-error);
+	}
+
+	.warning {
+		color: var(--color-warning);
 	}
 </style>

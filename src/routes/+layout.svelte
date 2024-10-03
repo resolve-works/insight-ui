@@ -22,50 +22,24 @@
 	class StreamAbortedError extends Error {}
 
 	async function getEvents() {
-		try {
-			// Fetch will error with AbortError when abort is called
-			const response = await fetch('/events', { signal: ac.signal });
-			if (!response.body) {
-				throw new Error('Expected response body from the events path');
-			}
+		const source = new EventSource('/events');
+		source.addEventListener('message', (message) => {
+			const body = JSON.parse(message.data);
 
-			const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
-			while (true) {
-				const { value, done } = await reader.read();
+			const mapping = {
+				ingest_file: ['api:inodes'],
+				index_inode: ['api:inodes'],
+				embed_file: ['api:inodes'],
+				answer_prompt: ['api:conversations']
+			};
 
-				if (value === undefined) {
-					continue;
-				}
-
-				// Multiple messages can be concatenated together when they are sent at the same time
-				const messages = value.trim().split('\n\n');
-				for (const message of messages) {
-					const body = JSON.parse(message);
-
-					const mapping = {
-						ingest_file: ['api:inodes'],
-						index_inode: ['api:inodes'],
-						embed_file: ['api:inodes'],
-						answer_prompt: ['api:conversations']
-					};
-
-					if ('task' in body && body.task in mapping) {
-						// @ts-ignore
-						for (const key of mapping[body.task]) {
-							invalidate(key);
-						}
-					}
-				}
-
-				if (done) {
-					break;
+			if ('task' in body && body.task in mapping) {
+				// @ts-ignore
+				for (const key of mapping[body.task]) {
+					invalidate(key);
 				}
 			}
-		} catch (error) {
-			if (!(error instanceof StreamAbortedError)) {
-				throw error;
-			}
-		}
+		});
 	}
 
 	onMount(() => {

@@ -9,8 +9,7 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check . && eslint .",
-		"format": "prettier --write .",
-		"download-icons": "curl 'https://css.gg/css?=|box|comment|copy|more-vertical-alt|file|file-document|menu|search|log-out|folder|folder-add|software-upload|software-download|loadbar|add|trash|pen|check-o|eye|chevron-right|chevron-double-right|chevron-left|chevron-double-left|home' -o ./src/lib/icons.css"
+		"format": "prettier --write ."
 	},
 	"devDependencies": {
 		"@fontsource-variable/roboto-slab": "^5.1.0",

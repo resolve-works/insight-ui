@@ -20,6 +20,10 @@
 			<Icon class="gg-loadbar" />
 		{/if}
 
+		{#if files && files.error}
+			<Icon test_id="inode-error" class="gg-danger error" title={files.error} />
+		{/if}
+
 		<Buttongroup test_id="inode-actions">
 			<a class="button" href={`/files/${id}/edit`} data-testid="edit-inode">
 				<Icon class="gg-pen" />

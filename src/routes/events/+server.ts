@@ -1,13 +1,13 @@
 
-import { connect } from '$lib/amqp.ts';
+import {connect} from '$lib/amqp.ts';
 
-export async function GET({ cookies, locals }) {
+export async function GET({cookies, locals}) {
     const connection = await connect(cookies)
     const channel = await connection.createChannel()
 
     // Make sure user queue exists
     const queue = `user-${locals.sub}`
-    await channel.assertQueue(queue, { autoDelete: true });
+    await channel.assertQueue(queue, {autoDelete: true});
 
     let interval: ReturnType<typeof setInterval>;
 
@@ -15,11 +15,11 @@ export async function GET({ cookies, locals }) {
     const readable = new ReadableStream({
         async start(controller) {
             // Pinging ensures that our connection stays alive
-            interval = setInterval(() => controller.enqueue(JSON.stringify({ ping: true })), 30000)
+            interval = setInterval(() => controller.enqueue(`data: ${JSON.stringify({ping: true})}\n\n`), 30000)
 
             await channel.consume(queue, (message) => {
                 if (message !== null) {
-                    controller.enqueue(message.content.toString() + '\n\n')
+                    controller.enqueue(`data: ${message.content.toString()}\n\n`)
                     channel.ack(message);
                 } else {
                     console.log('Consumer cancelled by server');
