@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { tick, onMount } from 'svelte';
-    import { invalidate } from '$app/navigation';
+	import { invalidate } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import { enhance } from '$app/forms';
 	import Section from '$lib/Section.svelte';
@@ -8,7 +8,7 @@
 	import Page from '$lib/Page.svelte';
 	import Icon from '$lib/Icon.svelte';
 	import FolderFilter from '$lib/FolderFilter.svelte';
-    import Message from `./Message.svelte`;
+	import Message, { MessageType } from './Message.svelte';
 	import type { FolderOption } from '$lib/FolderFilter.svelte';
 	import { breadcrumbs } from '$lib/stores';
 
@@ -18,7 +18,7 @@
 	let form: HTMLFormElement;
 	let query: string;
 	let is_answering = false;
-    let input: HTMLInputElement;
+	let input: HTMLInputElement;
 
 	$: {
 		breadcrumbs.set([{ name: 'Conversations', path: '/conversations' }]);
@@ -26,18 +26,18 @@
 
 	$: selected = options.filter((option: FolderOption) => paths.includes(option.key));
 
-    async function answer_prompt() {
-        is_answering = true;
-        scroll_to_bottom()
+	async function answer_prompt() {
+		is_answering = true;
+		scroll_to_bottom();
 
-        return () => {
-            is_answering = false;
-            query = "";
-            invalidate('api:prompts')
-            scroll_to_bottom()
-            input.focus();
-        }
-    }
+		return () => {
+			is_answering = false;
+			query = '';
+			invalidate('api:prompts');
+			scroll_to_bottom();
+			input.focus();
+		};
+	}
 
 	// This is a chat, scroll to bottom
 	async function scroll_to_bottom() {
@@ -47,8 +47,8 @@
 		}
 	}
 
-    // Focus on input on load
-    onMount(() => input.focus())
+	// Focus on input on load
+	onMount(() => input.focus());
 
 	// Scroll to bottom when data changes
 	$: data && scroll_to_bottom();
@@ -82,7 +82,7 @@
 <Page class="with-sidebar-left">
 	<div class="chat">
 		<div class="messages">
-			<Message class="machine" name="Machine">
+			<Message type={MessageType.machine}>
 				<p>
 					We are conversing about {total} files.
 
@@ -95,11 +95,11 @@
 			</Message>
 
 			{#each data.prompts as prompt}
-				<Message class="human" name="Human">
+				<Message type={MessageType.human}>
 					<p>{prompt.query}</p>
 				</Message>
 
-				<Message class="machine" name="Machine">
+				<Message type={MessageType.machine}>
 					{#if prompt.response}
 						<p class="response">{prompt.response}</p>
 
@@ -123,11 +123,11 @@
 			{/each}
 
 			{#if is_answering}
-				<Message class="human" name="Human">
+				<Message type={MessageType.human}>
 					<p>{query}</p>
 				</Message>
 
-				<Message class="machine" name="Machine">
+				<Message type={MessageType.machine}>
 					<p><Icon class="gg-loadbar" /></p>
 				</Message>
 			{/if}
@@ -137,6 +137,7 @@
 			<input
 				type="text"
 				name="query"
+				data-testid="query-input"
 				placeholder="Your question ..."
 				bind:this={input}
 				bind:value={query}
@@ -145,11 +146,12 @@
 			<input
 				type="number"
 				name="similarity_top_k"
+				data-testid="similarity-top-k-input"
 				placeholder="Pages (default: 3) ..."
 				min="0"
 				disabled={is_answering}
 			/>
-			<button class="primary">Prompt</button>
+			<button class="primary" data-testid="create-prompt">Prompt</button>
 		</form>
 	</div>
 </Page>

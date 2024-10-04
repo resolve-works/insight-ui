@@ -64,6 +64,7 @@
 <script lang="ts">
 	import Card from '$lib/Card.svelte';
 	import Icon from './Icon.svelte';
+	import ErrorMessage from './ErrorMessage.svelte';
 
 	export let upload: Upload;
 	// Re-assign to trigger svelte reactivity
@@ -84,7 +85,7 @@
 	<progress value={upload.loaded} max={upload.total}></progress>
 
 	{#if upload.error}
-		<p data-testid="upload-error"><Icon class="gg-danger error" /> {upload.error}</p>
+		<ErrorMessage message={upload.error} />
 	{/if}
 </Card>
 
@@ -103,11 +104,5 @@
 	progress {
 		width: 100%;
 		accent-color: var(--color-primary);
-	}
-
-	p {
-		color: var(--color-error);
-		display: flex;
-		gap: 0.5rem;
 	}
 </style>

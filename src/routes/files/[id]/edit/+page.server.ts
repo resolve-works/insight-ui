@@ -32,7 +32,10 @@ export const actions = {
                 body: JSON.stringify({is_indexed: false, ...data, }),
                 headers: {'Content-Type': 'application/json'}
             })
-            // TODO - handle error
+            if (response.status != 204) {
+                const data = await response.json()
+                throw new Error(data.message)
+            }
 
             const channel = await Channel.connect(cookies)
             channel.publish('move_inode', {id: params.id});

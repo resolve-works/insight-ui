@@ -1,9 +1,19 @@
-<script lang="ts">
-	import Card from '$lib/Card.svelte';
-	export let name: string;
+<script lang="ts" context="module">
+	export enum MessageType {
+		machine,
+		human
+	}
 </script>
 
-<div class={`message ${$$props.class}`}>
+<script lang="ts">
+	import Card from '$lib/Card.svelte';
+	export let type: MessageType;
+
+	const type_class = MessageType[type];
+	const name = type_class.charAt(0).toUpperCase() + type_class.slice(1);
+</script>
+
+<div class={`message ${type_class}`} data-testid={`${type_class}-message`}>
 	<h3 class="profile">{name.slice(0, 1)}</h3>
 
 	<Card class="card">

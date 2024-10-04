@@ -138,6 +138,7 @@
 			<form bind:this={files_form} on:submit={create_uploads}>
 				<input
 					name="files"
+					data-testid="files-input"
 					type="file"
 					accept=".pdf"
 					multiple
@@ -202,12 +203,18 @@
 
 				<Icon class="gg-folder" />
 
-				<input name="name" placeholder="Folder name" bind:this={folder_input} />
+				<input
+					name="name"
+					data-testid="folder-name-input"
+					placeholder="Folder name"
+					bind:this={folder_input}
+				/>
 
 				<InputGroup>
-					<button class="primary">Create</button>
+					<button class="primary" data-testid="create-folder">Create</button>
 
 					<button
+						data-testid="cancel-create-folder"
 						on:click|preventDefault={() => {
 							folder_form.reset();
 							show_folder_form = false;
