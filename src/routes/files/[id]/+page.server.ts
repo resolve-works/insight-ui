@@ -1,7 +1,7 @@
 import type {Actions} from './$types';
 import {env} from '$env/dynamic/private'
 import {sign} from '$lib/storage';
-import {create_folder, upload, remove} from '../';
+import {create_folder, remove} from '../';
 import type {ServerLoadEvent} from '@sveltejs/kit';
 
 async function get_highlights({params, fetch, url}: ServerLoadEvent) {
@@ -106,6 +106,5 @@ export async function load(event: ServerLoadEvent) {
 
 export const actions = {
     create_folder,
-    upload,
     remove,
 } satisfies Actions;
