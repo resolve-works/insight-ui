@@ -11,6 +11,7 @@
 	import Message, { MessageType } from './Message.svelte';
 	import type { FolderOption } from '$lib/FolderFilter.svelte';
 	import { breadcrumbs } from '$lib/stores';
+	import ErrorMessage from '$lib/ErrorMessage.svelte';
 
 	export let data;
 	const { options, total, paths } = data;
@@ -96,10 +97,14 @@
 			{#each data.prompts as prompt}
 				<Message type={MessageType.human}>
 					<p>{prompt.query}</p>
+
+					{#if prompt.error}
+						<ErrorMessage message={prompt.error} />
+					{/if}
 				</Message>
 
-				<Message type={MessageType.machine}>
-					{#if prompt.response}
+				{#if prompt.response}
+					<Message type={MessageType.machine}>
 						<p class="response">{prompt.response}</p>
 
 						{#if prompt.sources.length}
@@ -115,10 +120,8 @@
 								{/each}
 							</p>
 						{/if}
-					{:else}
-						<p><Icon test_id="message-loader" class="gg-loadbar" /></p>
-					{/if}
-				</Message>
+					</Message>
+				{/if}
 			{/each}
 
 			{#if query}
