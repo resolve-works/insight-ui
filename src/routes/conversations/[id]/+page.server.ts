@@ -50,7 +50,7 @@ export async function load(event) {
 
 	const url = new URL(`${env.API_ENDPOINT}/conversations`);
 	const sources = `sources(similarity,...pages(index,...inodes(id,name,...files(from_page))))`;
-	url.searchParams.set('select', `prompts(query,response,error,${sources}),inodes(path)`);
+	url.searchParams.set('select', `error,prompts(query,response,error,${sources}),inodes(path)`);
 	url.searchParams.set('prompts.order', 'created_at.asc');
 	url.searchParams.set('prompts.sources.order', 'similarity.asc');
 	url.searchParams.set('id', `eq.${params.id}`);
@@ -62,7 +62,10 @@ export async function load(event) {
 	const conversations = await res.json();
 	const conversation = conversations[0];
 
-	const paths = conversation.inodes.map((inode: { path: string }) => inode.path);
+	const paths =
+		'inodes' in conversation
+			? conversation.inodes.map((inode: { path: string }) => inode.path)
+			: [];
 
 	const { options, total } = await get_folder_options(event, paths);
 
@@ -83,8 +86,10 @@ async function embed(input: string) {
 
 	if (response.status !== 200) {
 		const data = await response.json();
-		// Context could be exceeded
-		if (data.error.type == 'invalid_request_error') {
+		if (
+			data.error.type == 'invalid_request_error' &&
+			data.error.message.includes('maximum context length')
+		) {
 			throw new EmbedError('embed_context_exceeded');
 		}
 
@@ -93,6 +98,8 @@ async function embed(input: string) {
 
 	return (await response.json()).data[0].embedding;
 }
+
+class CompletionError extends Error {}
 
 async function generate_answer(
 	prompts: { query: string; response: string; sources: { contents: string }[] }[]
@@ -155,52 +162,60 @@ ${prompt.query}
 		})
 	});
 
+	const data = await response.json();
+
 	if (response.status !== 200) {
-		const data = await response.json();
+		if (
+			data.error.type == 'invalid_request_error' &&
+			data.error.code == 'context_length_exceeded'
+		) {
+			throw new CompletionError('completion_context_exceeded');
+		}
+
 		throw new Error(data.error.message);
 	}
 
-	return (await response.json()).choices[0].message.content;
+	return data.choices[0].message.content;
 }
 
-async function create_errored_prompt(
-	fetch: Function,
-	conversation_id: number,
-	query: string,
-	error: string
-) {
+type CreatePromptData = {
+	conversation_id: number;
+	query: string;
+	embedding: Array<number>;
+	error: string;
+};
+
+async function create_prompt(fetch: Function, conversation_id: number, query: string) {
+	const data: Partial<CreatePromptData> = {
+		conversation_id,
+		query
+	};
+
 	const url = new URL(`${env.API_ENDPOINT}/prompts`);
 
-	const response = await fetch(url, {
-		method: 'POST',
-		body: JSON.stringify({ conversation_id, query, error }),
-		headers: {
-			'Content-Type': 'application/json'
+	// Only fetch related info when embed succesfull
+	try {
+		data.embedding = await embed(query);
+
+		// Fetch conversation history so we can send the whole conversation to LLM
+		url.searchParams.set(
+			'select',
+			'id,query,error,...conversations(prompts(query,response,sources(...pages(contents))))'
+		);
+		url.searchParams.set('conversations.prompts.response', 'not.is.null');
+		url.searchParams.set('conversations.prompts.order', 'created_at.asc');
+		url.searchParams.set('conversations.prompts.sources.order', 'similarity.asc');
+	} catch (err) {
+		if (err instanceof EmbedError) {
+			data.error = err.message;
+		} else {
+			throw err;
 		}
-	});
-	if (response.status != 201) {
-		throw new Error(await response.text());
 	}
-}
-
-async function create_prompt(
-	fetch: Function,
-	conversation_id: number,
-	query: string,
-	embedding: Array<number>
-) {
-	const url = new URL(`${env.API_ENDPOINT}/prompts`);
-	// Fetch conversation history so we can send the whole conversation to LLM
-	url.searchParams.set(
-		'select',
-		'id,query,...conversations(prompts(query,response,sources(...pages(contents))))'
-	);
-	url.searchParams.set('conversations.prompts.order', 'created_at.asc');
-	url.searchParams.set('conversations.prompts.sources.order', 'similarity.asc');
 
 	const response = await fetch(url, {
 		method: 'POST',
-		body: JSON.stringify({ conversation_id, query, embedding }),
+		body: JSON.stringify(data),
 		headers: {
 			'Content-Type': 'application/json',
 			Prefer: 'return=representation'
@@ -257,36 +272,54 @@ async function set_prompt_answer(fetch: Function, prompt_id: number, answer: str
 	}
 }
 
+async function set_conversation_error(fetch: Function, conversation_id: number, error: string) {
+	const url = new URL(`${env.API_ENDPOINT}/conversations`);
+	url.searchParams.set('id', `eq.${conversation_id}`);
+
+	const response = await fetch(url, {
+		method: 'PATCH',
+		body: JSON.stringify({ error }),
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	});
+	console.log(response.status);
+	if (response.status != 204) {
+		throw new Error(await response.text());
+	}
+}
+
 export const actions = {
 	answer_prompt: async ({ request, fetch, params }) => {
+		const conversation_id = parseInt(params.id);
 		try {
 			const data = await validate(request, schema);
 
-			// Try to embed query, substantiate and answer
-			try {
-				const embedding = await embed(data.query);
-				const prompt = await create_prompt(fetch, parseInt(params.id), data.query, embedding);
-				const sources = await substantiate_prompt(fetch, prompt.id, data.similarity_top_k);
-
-				// TODO - When creating sources in postgres trigger, we can do all this in one call
-				const prompts = prompt.prompts;
-				prompt.sources = sources;
-				prompts.push(prompt);
-				const answer = await generate_answer(prompts);
-
-				await set_prompt_answer(fetch, prompt.id, answer);
-			} catch (err) {
-				if (err instanceof EmbedError) {
-					await create_errored_prompt(fetch, parseInt(params.id), data.query, err.message);
-					return;
-				}
-				throw err;
+			// We expect users to insert queries that are to long, don't substantiate errored prompts (that have no embedding)
+			const prompt = await create_prompt(fetch, conversation_id, data.query);
+			if (prompt.error) {
+				return;
 			}
+
+			const sources = await substantiate_prompt(fetch, prompt.id, data.similarity_top_k);
+
+			// TODO - When creating sources in postgres trigger, we can do this in one call
+			const prompts = prompt.prompts;
+			prompt.sources = sources;
+			prompts.push(prompt);
+
+			// We expect users to insert to much context into conversation.
+			const answer = await generate_answer(prompts);
+
+			await set_prompt_answer(fetch, prompt.id, answer);
 		} catch (err) {
 			if (err instanceof ValidationError) {
 				return fail(400, err.format());
+			} else if (err instanceof CompletionError) {
+				await set_conversation_error(fetch, conversation_id, err.message);
+			} else {
+				throw err;
 			}
-			throw err;
 		}
 	}
 } satisfies Actions;

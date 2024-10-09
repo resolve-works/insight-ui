@@ -12,7 +12,7 @@
 <Card data-testid={test_id}>
 	<header>
 		<h3 data-testid={test_id ? `${test_id}-title` : undefined}>
-			<a class="unstyled" href={path}>
+			<a data-testid={test_id ? `${test_id}-link` : undefined} class="unstyled" href={path}>
 				<Icon class={icon} />
 
 				{#if name}

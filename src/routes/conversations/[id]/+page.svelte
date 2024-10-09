@@ -16,9 +16,12 @@
 	export let data;
 	const { options, total, paths } = data;
 
-	let form: HTMLFormElement;
+	let create_conversation_form: HTMLFormElement;
+	let answer_prompt_form: HTMLFormElement;
 	let input: HTMLInputElement;
 	let query: string;
+
+	$: is_disabled = !!query || !!data.error;
 
 	$: {
 		breadcrumbs.set([{ name: 'Conversations', path: '/conversations' }]);
@@ -28,7 +31,7 @@
 
 	async function answer_prompt() {
 		query = input.value;
-		input.value = '';
+		answer_prompt_form.reset();
 		scroll_to_bottom();
 
 		return () => {
@@ -58,7 +61,11 @@
 	<h2 slot="header">Filters</h2>
 
 	<nav>
-		<form action="/conversations?/create_conversation" method="POST" bind:this={form}>
+		<form
+			action="/conversations?/create_conversation"
+			method="POST"
+			bind:this={create_conversation_form}
+		>
 			<Section>
 				<p>Filter by folder</p>
 				<FolderFilter
@@ -67,7 +74,7 @@
 					on:change={async () => {
 						// Start a new conversation when the filters change
 						await tick();
-						form.submit();
+						create_conversation_form.submit();
 					}}
 				/>
 			</Section>
@@ -84,7 +91,7 @@
 		<div class="messages">
 			<Message type={MessageType.machine}>
 				<p>
-					We are conversing about {total} files.
+					We are conversing about {total} file{#if total != 1}s{/if}.
 
 					{#if !selected.length}
 						You can narrow the context of our conversation with the filters.
@@ -133,16 +140,30 @@
 					<p><Icon test_id="message-loader" class="gg-loadbar" /></p>
 				</Message>
 			{/if}
+
+			{#if data.error}
+				<Message type={MessageType.machine}>
+					<ErrorMessage
+						message="Maximum conversation context exceeded. Start a new conversation."
+					/>
+				</Message>
+			{/if}
 		</div>
 
-		<form class="prompt" method="POST" action="?/answer_prompt" use:enhance={answer_prompt}>
+		<form
+			class="prompt"
+			method="POST"
+			action="?/answer_prompt"
+			use:enhance={answer_prompt}
+			bind:this={answer_prompt_form}
+		>
 			<input
 				type="text"
 				name="query"
 				data-testid="query-input"
 				placeholder="Your question ..."
 				bind:this={input}
-				disabled={!!query}
+				disabled={is_disabled}
 			/>
 			<input
 				type="number"
@@ -150,9 +171,9 @@
 				data-testid="similarity-top-k-input"
 				placeholder="Pages (default: 3) ..."
 				min="0"
-				disabled={!!query}
+				disabled={is_disabled}
 			/>
-			<button class="primary" data-testid="create-prompt">Prompt</button>
+			<button class="primary" data-testid="create-prompt" disabled={is_disabled}>Prompt</button>
 		</form>
 	</div>
 </Page>
