@@ -16,9 +16,8 @@
 	const { options, total, paths } = data;
 
 	let form: HTMLFormElement;
-	let query: string;
-	let is_answering = false;
 	let input: HTMLInputElement;
+	let query: string;
 
 	$: {
 		breadcrumbs.set([{ name: 'Conversations', path: '/conversations' }]);
@@ -27,11 +26,11 @@
 	$: selected = options.filter((option: FolderOption) => paths.includes(option.key));
 
 	async function answer_prompt() {
-		is_answering = true;
+		query = input.value;
+		input.value = '';
 		scroll_to_bottom();
 
 		return () => {
-			is_answering = false;
 			query = '';
 			invalidate('api:prompts');
 			scroll_to_bottom();
@@ -122,7 +121,7 @@
 				</Message>
 			{/each}
 
-			{#if is_answering}
+			{#if query}
 				<Message type={MessageType.human}>
 					<p>{query}</p>
 				</Message>
@@ -140,8 +139,7 @@
 				data-testid="query-input"
 				placeholder="Your question ..."
 				bind:this={input}
-				bind:value={query}
-				disabled={is_answering}
+				disabled={!!query}
 			/>
 			<input
 				type="number"
@@ -149,7 +147,7 @@
 				data-testid="similarity-top-k-input"
 				placeholder="Pages (default: 3) ..."
 				min="0"
-				disabled={is_answering}
+				disabled={!!query}
 			/>
 			<button class="primary" data-testid="create-prompt">Prompt</button>
 		</form>
