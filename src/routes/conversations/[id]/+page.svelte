@@ -116,7 +116,7 @@
 							</p>
 						{/if}
 					{:else}
-						<p><Icon class="gg-loadbar" /></p>
+						<p><Icon test_id="message-loader" class="gg-loadbar" /></p>
 					{/if}
 				</Message>
 			{/each}
@@ -127,7 +127,7 @@
 				</Message>
 
 				<Message type={MessageType.machine}>
-					<p><Icon class="gg-loadbar" /></p>
+					<p><Icon test_id="message-loader" class="gg-loadbar" /></p>
 				</Message>
 			{/if}
 		</div>
