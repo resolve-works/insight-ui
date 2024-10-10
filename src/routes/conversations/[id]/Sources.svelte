@@ -28,7 +28,7 @@
 	{/if}
 
 	<p>
-		Loaded {sources.length} page{#if sources.length != 1}s{/if}
+		Linked {sources.length} page{#if sources.length != 1}s{/if}
 		<button
 			on:click={() => {
 				is_opened = !is_opened;

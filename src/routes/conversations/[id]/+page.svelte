@@ -1,12 +1,11 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import { tick, onMount } from 'svelte';
-	import { invalidate } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import { enhance } from '$app/forms';
 	import Section from '$lib/Section.svelte';
 	import SideBar from '$lib/SideBar.svelte';
 	import Page from '$lib/Page.svelte';
-	import Icon from '$lib/Icon.svelte';
 	import FolderFilter from '$lib/FolderFilter.svelte';
 	import Message, { MessageType } from './Message.svelte';
 	import Sources from './Sources.svelte';
@@ -15,14 +14,12 @@
 	import ErrorMessage from '$lib/ErrorMessage.svelte';
 
 	export let data;
+	export let form;
 	const { options, total, paths } = data;
 
 	let create_conversation_form: HTMLFormElement;
-	let answer_prompt_form: HTMLFormElement;
 	let input: HTMLInputElement;
-	let query: string;
-
-	$: is_disabled = !!query || !!data.error;
+	let answer: string = '';
 
 	$: {
 		breadcrumbs.set([{ name: 'Conversations', path: '/conversations' }]);
@@ -30,25 +27,51 @@
 
 	$: selected = options.filter((option: FolderOption) => paths.includes(option.key));
 
-	async function answer_prompt() {
-		query = input.value;
-		answer_prompt_form.reset();
-		scroll_to_bottom();
-
-		return () => {
-			query = '';
-			invalidate('api:prompts');
-			scroll_to_bottom();
-			input.focus();
-		};
-	}
-
 	// This is a chat, scroll to bottom
 	async function scroll_to_bottom() {
 		if (browser) {
 			await tick();
 			window.scrollTo(0, document.body.scrollHeight);
 		}
+	}
+
+	async function generate_answer() {
+		return async ({ result, update }) => {
+			await update();
+
+			const url = new URL($page.url);
+			url.pathname += '/answer';
+
+			const decoder = new TextDecoder('utf-8');
+
+			const response = await fetch(url, { method: 'POST' });
+			if (response.body) {
+				const reader = response.body.getReader();
+				while (true) {
+					const { done, value } = await reader.read();
+					if (done) {
+						break;
+					}
+
+					const chunk = decoder.decode(value);
+					const lines = chunk.split('\n\n');
+					const parsedLines = lines
+						.map((line) => line.replace(/^data: /, '').trim()) // Remove the "data: " prefix
+						.filter((line) => line !== '' && line !== '[DONE]') // Remove empty lines and "[DONE]"
+						.map((line) => JSON.parse(line)); // Parse the JSON string
+
+					for (const parsedLine of parsedLines) {
+						const { choices } = parsedLine;
+						const { delta } = choices[0];
+						const { content } = delta;
+						// Update the UI with the new content
+						if (content) {
+							answer += content;
+						}
+					}
+				}
+			}
+		};
 	}
 
 	// Focus on input on load
@@ -120,13 +143,9 @@
 				{/if}
 			{/each}
 
-			{#if query}
-				<Message type={MessageType.human}>
-					<p>{query}</p>
-				</Message>
-
+			{#if answer}
 				<Message type={MessageType.machine}>
-					<p><Icon test_id="message-loader" class="gg-loadbar" /></p>
+					<p class="response">{answer}</p>
 				</Message>
 			{/if}
 
@@ -139,20 +158,13 @@
 			{/if}
 		</div>
 
-		<form
-			class="prompt"
-			method="POST"
-			action="?/answer_prompt"
-			use:enhance={answer_prompt}
-			bind:this={answer_prompt_form}
-		>
+		<form class="prompt" method="POST" action="?/create_prompt" use:enhance={generate_answer}>
 			<input
 				type="text"
 				name="query"
 				data-testid="query-input"
 				placeholder="Your question ..."
 				bind:this={input}
-				disabled={is_disabled}
 			/>
 			<input
 				type="number"
@@ -160,9 +172,8 @@
 				data-testid="similarity-top-k-input"
 				placeholder="Pages (default: 3) ..."
 				min="0"
-				disabled={is_disabled}
 			/>
-			<button class="primary" data-testid="create-prompt" disabled={is_disabled}>Prompt</button>
+			<button class="primary" data-testid="create-prompt">Prompt</button>
 		</form>
 	</div>
 </Page>
