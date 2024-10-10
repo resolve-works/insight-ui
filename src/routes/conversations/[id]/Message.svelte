@@ -24,6 +24,12 @@
 </div>
 
 <style>
+	:root {
+		--profile-size: 4rem;
+		--profile-margin: 1rem;
+		--triangle-size: 3rem;
+	}
+
 	.message {
 		display: flex;
 		gap: 2rem;

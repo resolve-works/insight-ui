@@ -24,7 +24,7 @@ export async function connect(cookies: Cookies) {
 		const connection = await amqplib.connect(amqp_url(cookies));
 		return connection;
 	} catch (e) {
-		if (e instanceof Error && e.message.indexOf('ACCESS_REFUSED') !== -1) {
+		if (e instanceof Error && e.message.includes('ACCESS_REFUSED')) {
 			await refresh_tokens(cookies);
 			const connection = await amqplib.connect(amqp_url(cookies));
 			return connection;

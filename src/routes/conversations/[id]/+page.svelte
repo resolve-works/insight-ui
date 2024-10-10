@@ -9,6 +9,7 @@
 	import Icon from '$lib/Icon.svelte';
 	import FolderFilter from '$lib/FolderFilter.svelte';
 	import Message, { MessageType } from './Message.svelte';
+	import Sources from './Sources.svelte';
 	import type { FolderOption } from '$lib/FolderFilter.svelte';
 	import { breadcrumbs } from '$lib/stores';
 	import ErrorMessage from '$lib/ErrorMessage.svelte';
@@ -108,25 +109,13 @@
 					{#if prompt.error}
 						<ErrorMessage message={prompt.error} />
 					{/if}
+
+					<Sources sources={prompt.sources} />
 				</Message>
 
 				{#if prompt.response}
 					<Message type={MessageType.machine}>
 						<p class="response">{prompt.response}</p>
-
-						{#if prompt.sources.length}
-							<p>
-								{#each prompt.sources as source}
-									<a href="/files/{source.id}?page={source.index - source.from_page + 1}">
-										<span>
-											<Icon class="gg-file" />
-											{source.index - source.from_page + 1}
-										</span>
-										{source.name}
-									</a>
-								{/each}
-							</p>
-						{/if}
 					</Message>
 				{/if}
 			{/each}
@@ -179,12 +168,6 @@
 </Page>
 
 <style>
-	:root {
-		--profile-size: 4rem;
-		--profile-margin: 1rem;
-		--triangle-size: 3rem;
-	}
-
 	.chat {
 		display: grid;
 		grid-template-rows: 1fr auto;
@@ -203,19 +186,5 @@
 
 	.response {
 		white-space: pre-wrap;
-	}
-
-	a {
-		display: grid;
-		align-items: center;
-		grid-template-columns: 6rem auto;
-	}
-
-	span {
-		display: grid;
-		height: 2rem;
-		grid-template-columns: 2rem auto;
-		align-items: center;
-		margin-right: 1rem;
 	}
 </style>
