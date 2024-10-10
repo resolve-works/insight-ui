@@ -15,6 +15,8 @@
 	import { enhance } from '$app/forms';
 	import { invalidate } from '$app/navigation';
 	import Pagination from '$lib/Pagination.svelte';
+	import InputRow from '$lib/InputRow.svelte';
+	import FormErrors from '$lib/FormErrors.svelte';
 
 	export let name;
 	export let inodes;
@@ -186,7 +188,7 @@
 		Drop PDF files to upload
 	</h2>
 
-	<div class="create-folder" class:visible={show_folder_form}>
+	<div class="create-folder" class:visible={show_folder_form || form?.errors}>
 		<Card>
 			<form
 				class="create-folder-form"
@@ -201,31 +203,32 @@
 					<input name="parent_id" type="hidden" value={parent_id} />
 				{/if}
 
-				<Icon class="gg-folder" />
+				<InputRow icon="gg-folder">
+					<div slot="input">
+						<input
+							name="name"
+							data-testid="folder-name-input"
+							placeholder="Folder name"
+							bind:this={folder_input}
+						/>
 
-				<input
-					name="name"
-					data-testid="folder-name-input"
-					placeholder="Folder name"
-					bind:this={folder_input}
-				/>
+						<FormErrors errors={form?.errors} key="name" />
+					</div>
 
-				<InputGroup>
-					<button class="primary" data-testid="create-folder">Create</button>
+					<InputGroup>
+						<button class="primary" data-testid="create-folder">Create</button>
 
-					<button
-						data-testid="cancel-create-folder"
-						on:click|preventDefault={() => {
-							folder_form.reset();
-							show_folder_form = false;
-						}}>Cancel</button
-					>
-				</InputGroup>
+						<button
+							data-testid="cancel-create-folder"
+							on:click|preventDefault={() => {
+								folder_form.reset();
+								show_folder_form = false;
+								form = undefined;
+							}}>Cancel</button
+						>
+					</InputGroup>
+				</InputRow>
 			</form>
-
-			{#if form?.error}
-				<p class="error">{form.error}</p>
-			{/if}
 		</Card>
 	</div>
 
@@ -267,17 +270,5 @@
 
 	.create-folder.visible {
 		display: block;
-	}
-
-	.create-folder form {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 1rem;
-		margin: 0.5rem 0;
-	}
-
-	.create-folder form input {
-		flex-grow: 1;
 	}
 </style>

@@ -1,9 +1,17 @@
 import { env } from '$env/dynamic/private';
 import { redirect } from '@sveltejs/kit';
-import { redirect_to_oidc_provider, get_tokens, refresh_tokens, parse_token } from '$lib/auth.ts';
+import {
+	redirect_to_oidc_provider,
+	get_tokens,
+	refresh_tokens,
+	parse_token,
+	InvalidAccessTokenError,
+	clear_tokens
+} from '$lib/auth.ts';
 
 export async function handle({ event, resolve }) {
 	// Did the authentication platform just redirect to us with a new code?
+	// TODO - add querystring to redirect_uri
 	const redirect_uri = event.url.origin + event.url.pathname;
 	const code = event.url.searchParams.get('code');
 	if (code) {
@@ -29,8 +37,15 @@ export async function handle({ event, resolve }) {
 	}
 
 	// So we do have tokens, Add user info & resolve event
-	const { sub } = parse_token(access_token);
-	event.locals = { ...event.locals, sub };
+	try {
+		const { sub } = parse_token(access_token);
+		event.locals = { ...event.locals, sub };
+	} catch (err) {
+		if (err instanceof InvalidAccessTokenError) {
+			clear_tokens(event.cookies);
+			throw redirect_to_oidc_provider(redirect_uri);
+		}
+	}
 
 	return resolve(event);
 }

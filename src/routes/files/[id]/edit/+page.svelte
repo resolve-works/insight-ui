@@ -8,6 +8,7 @@
 	import { breadcrumbs } from '$lib/stores';
 	import Title from '$lib/Title.svelte';
 	import FormErrors from '$lib/FormErrors.svelte';
+	import InputRow from '$lib/InputRow.svelte';
 
 	export let data;
 	export let form;
@@ -45,47 +46,24 @@
 					async ({ update }) =>
 						update({ reset: false })}
 			>
-				<div class="icon">
-					<Icon class={data.files ? 'gg-file-document' : 'gg-folder'} />
-				</div>
+				<InputRow icon={data.files ? 'gg-file-document' : 'gg-folder'}>
+					<div slot="input">
+						<input
+							type="text"
+							name="name"
+							placeholder="File name"
+							value={data.name}
+							data-testid="inode-name-input"
+						/>
 
-				<div class="input">
-					<input
-						type="text"
-						name="name"
-						placeholder="File name"
-						value={data.name}
-						data-testid="inode-name-input"
-					/>
+						<FormErrors errors={form?.errors} key="name" />
+					</div>
 
-					<FormErrors errors={form?.errors} key="name" />
-				</div>
-
-				<button class="primary" data-testid="change-inode-name">
-					<Icon class="gg-pen" /> Change name
-				</button>
+					<button class="primary" data-testid="change-inode-name">
+						<Icon class="gg-pen" /> Change name
+					</button>
+				</InputRow>
 			</form>
 		</Card>
 	</Section>
 </Page>
-
-<style>
-	.icon {
-		margin: var(--input-padding-y) 0;
-	}
-
-	form {
-		display: flex;
-		align-items: start;
-		gap: 1rem;
-		margin: 0.5rem 0;
-	}
-
-	.input {
-		flex-grow: 1;
-	}
-
-	.input input {
-		width: 100%;
-	}
-</style>

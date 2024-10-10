@@ -3,7 +3,7 @@
 	import '@fontsource-variable/roboto-slab/index.css';
 
 	import { onMount, setContext } from 'svelte';
-	import { invalidate } from '$app/navigation';
+	import { invalidate, goto } from '$app/navigation';
 	import Navigation from '$lib/Navigation.svelte';
 	import { browser } from '$app/environment';
 
@@ -19,6 +19,12 @@
 
 	onMount(() => {
 		const source = new EventSource('/events');
+
+		source.addEventListener('error', () => {
+			console.log('err');
+			goto('/');
+		});
+
 		source.addEventListener('message', (message) => {
 			const body = JSON.parse(message.data);
 
