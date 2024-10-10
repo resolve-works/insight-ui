@@ -57,15 +57,15 @@
 			text.innerHTML = '';
 			text.style.setProperty('--scale-factor', scale.toString());
 
-			const textLayer = pdfjs.renderTextLayer({
+			const text_layer = new pdfjs.TextLayer({
 				textContentSource: await page.getTextContent(),
 				container: text,
 				viewport
 			});
 
 			// Try to highlight
-			if (textLayer) {
-				await textLayer.promise;
+			if (text_layer) {
+				await text_layer.render();
 			}
 			set_highlights(highlights);
 		};
