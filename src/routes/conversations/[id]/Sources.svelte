@@ -28,13 +28,14 @@
 	{/if}
 
 	<p>
-		Linked {sources.length} page{#if sources.length != 1}s{/if}
 		<button
 			on:click={() => {
 				is_opened = !is_opened;
 			}}
+			title="Pages related to your query are used by the model to generate a response."
 		>
-			{#if is_opened}hide{:else}show{/if}
+			{#if is_opened}Hide{:else}Show{/if}
+			{sources.length} linked page{#if sources.length != 1}s{/if}
 		</button>
 	</p>
 {/if}
@@ -54,15 +55,14 @@
 		margin-right: 1rem;
 	}
 
-	p {
-		display: flex;
-		gap: 0.5rem;
+	button {
+		background: none;
+		padding: 0;
+		border: none;
 		color: var(--text-color-page);
 	}
 
-	button {
-		padding: 0;
-		border: none;
+	button:hover {
 		color: var(--color-primary);
 	}
 </style>
