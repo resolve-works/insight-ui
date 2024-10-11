@@ -55,13 +55,13 @@ ${prompt.query}
 		.flat();
 
 	const response = await fetch('https://api.openai.com/v1/chat/completions', {
-		method: 'post',
+		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
 			Authorization: `Bearer ${env.OPENAI_API_KEY}`
 		},
 		body: JSON.stringify({
-			model: 'gpt-4-turbo',
+			model: 'gpt-4o',
 			messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...messages],
 			stream: true
 		})
@@ -128,30 +128,6 @@ async function get_prompts(fetch: Function, conversation_id: string) {
 	return conversations[0].prompts;
 }
 
-const transformer = {
-	decoder: new TextDecoder(),
-	encoder: new TextEncoder(),
-
-	transform: function (chunk, controller) {
-		const text = this.decoder.decode(chunk);
-		const lines = text.split('\n\n');
-		const parsedLines = lines
-			.map((line) => line.replace(/^data: /, '').trim()) // Remove the "data: " prefix
-			.filter((line) => line !== '' && line !== '[DONE]') // Remove empty lines and "[DONE]"
-			.map((line) => JSON.parse(line)); // Parse the JSON string
-
-		for (const parsedLine of parsedLines) {
-			const { choices } = parsedLine;
-			const { delta } = choices[0];
-			const { content } = delta;
-			// Update the UI with the new content
-			if (content) {
-				controller.enqueue(this.encoder.encode(content));
-			}
-		}
-	}
-};
-
 class Consumer {
 	stream: ReadableStream<Uint8Array>;
 	answer = '';
@@ -166,8 +142,6 @@ class Consumer {
 			const text = this.decoder.decode(chunk);
 			this.answer += text;
 		}
-
-		console.log(this.answer);
 	}
 }
 
@@ -180,6 +154,44 @@ export async function POST({ fetch, params }) {
 	if (!response.body) {
 		return error(500);
 	}
+
+	// Transform OpenAI completion stream to text only
+	const transformer = {
+		buffer: '',
+		decoder: new TextDecoder(),
+		encoder: new TextEncoder(),
+
+		transform: function (chunk, controller) {
+			const text = this.decoder.decode(chunk);
+			// Parse SSE response
+			const lines = text
+				.split('\n\n')
+				.map((line) => line.replace(/^data: /, '').trim())
+				.filter((line) => line !== '' && line !== '[DONE]');
+
+			// When buffer is set, there is a partial response from the last chunk
+			if (this.buffer) {
+				lines[0] = this.buffer + lines[0];
+				this.buffer = '';
+			}
+
+			for (const line of lines) {
+				try {
+					// Only get the textual delta
+					const data = JSON.parse(line);
+					const content = data.choices[0].delta.content;
+					if (content) {
+						controller.enqueue(this.encoder.encode(content));
+					}
+				} catch (err) {
+					// Responses can be cut of, the rest of the JSON response will follow in next chunk
+					if (err instanceof SyntaxError) {
+						this.buffer = line;
+					}
+				}
+			}
+		}
+	};
 
 	// Save response & stream response to the browser. For this we'll turn the openai stream into just the text, and duplicate the stream to these 2 destinations
 	const [to_consume, to_respond] = response.body
