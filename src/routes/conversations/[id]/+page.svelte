@@ -133,7 +133,7 @@
 
 			{#if answer}
 				<Message type={MessageType.machine}>
-					<p class="response">{answer}</p>
+					<p class="response" data-testid="streamed-answer">{answer}</p>
 				</Message>
 			{/if}
 
