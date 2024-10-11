@@ -1,6 +1,7 @@
 import { env } from '$env/dynamic/private';
 import { error } from '@sveltejs/kit';
-import { Readable } from 'stream';
+import { PassThrough, Readable } from 'stream';
+import { TransformStream } from 'stream/web';
 
 class CompletionError extends Error {}
 
@@ -127,6 +128,49 @@ async function get_prompts(fetch: Function, conversation_id: string) {
 	return conversations[0].prompts;
 }
 
+const transformer = {
+	decoder: new TextDecoder(),
+	encoder: new TextEncoder(),
+
+	transform: function (chunk, controller) {
+		const text = this.decoder.decode(chunk);
+		const lines = text.split('\n\n');
+		const parsedLines = lines
+			.map((line) => line.replace(/^data: /, '').trim()) // Remove the "data: " prefix
+			.filter((line) => line !== '' && line !== '[DONE]') // Remove empty lines and "[DONE]"
+			.map((line) => JSON.parse(line)); // Parse the JSON string
+
+		for (const parsedLine of parsedLines) {
+			const { choices } = parsedLine;
+			const { delta } = choices[0];
+			const { content } = delta;
+			// Update the UI with the new content
+			if (content) {
+				controller.enqueue(this.encoder.encode(content));
+			}
+		}
+	}
+};
+
+class Consumer {
+	stream: ReadableStream<Uint8Array>;
+	answer = '';
+	decoder = new TextDecoder();
+
+	constructor(stream: ReadableStream<Uint8Array>) {
+		this.stream = stream;
+	}
+
+	async consume() {
+		for await (const chunk of this.stream) {
+			const text = this.decoder.decode(chunk);
+			this.answer += text;
+		}
+
+		console.log(this.answer);
+	}
+}
+
 export async function POST({ fetch, params }) {
 	const prompts = await get_prompts(fetch, params.id);
 
@@ -137,9 +181,15 @@ export async function POST({ fetch, params }) {
 		return error(500);
 	}
 
-	// TODO - save response aswell, clone stream
+	// Save response & stream response to the browser. For this we'll turn the openai stream into just the text, and duplicate the stream to these 2 destinations
+	const [to_consume, to_respond] = response.body
+		.pipeThrough(new TransformStream(transformer))
+		.tee();
 
-	return new Response(response.body, {
+	const consumer = new Consumer(to_consume);
+	consumer.consume();
+
+	return new Response(to_respond, {
 		headers: {
 			'Content-Type': 'text/event-stream',
 			'Cache-Control': 'no-cache',

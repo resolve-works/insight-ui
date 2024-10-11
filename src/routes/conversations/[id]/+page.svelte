@@ -14,7 +14,6 @@
 	import ErrorMessage from '$lib/ErrorMessage.svelte';
 
 	export let data;
-	export let form;
 	const { options, total, paths } = data;
 
 	let create_conversation_form: HTMLFormElement;
@@ -36,39 +35,24 @@
 	}
 
 	async function generate_answer() {
-		return async ({ result, update }) => {
+		return async ({ update }: { update: Function }) => {
 			await update();
 
 			const url = new URL($page.url);
 			url.pathname += '/answer';
 
-			const decoder = new TextDecoder('utf-8');
+			const decoder = new TextDecoder();
 
 			const response = await fetch(url, { method: 'POST' });
 			if (response.body) {
 				const reader = response.body.getReader();
+				// TODO - not while true.
 				while (true) {
 					const { done, value } = await reader.read();
 					if (done) {
 						break;
 					}
-
-					const chunk = decoder.decode(value);
-					const lines = chunk.split('\n\n');
-					const parsedLines = lines
-						.map((line) => line.replace(/^data: /, '').trim()) // Remove the "data: " prefix
-						.filter((line) => line !== '' && line !== '[DONE]') // Remove empty lines and "[DONE]"
-						.map((line) => JSON.parse(line)); // Parse the JSON string
-
-					for (const parsedLine of parsedLines) {
-						const { choices } = parsedLine;
-						const { delta } = choices[0];
-						const { content } = delta;
-						// Update the UI with the new content
-						if (content) {
-							answer += content;
-						}
-					}
+					answer += decoder.decode(value);
 				}
 			}
 		};
