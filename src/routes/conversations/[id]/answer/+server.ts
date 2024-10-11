@@ -1,6 +1,5 @@
 import { env } from '$env/dynamic/private';
 import { error } from '@sveltejs/kit';
-import { PassThrough, Readable } from 'stream';
 import { TransformStream } from 'stream/web';
 
 class CompletionError extends Error {}
@@ -118,7 +117,7 @@ async function get_prompts(fetch: Function, conversation_id: string) {
 	const url = new URL(`${env.API_ENDPOINT}/conversations`);
 
 	// Fetch conversation history so we can send the whole conversation to LLM
-	url.searchParams.set('select', 'prompts(query,response,error,sources(...pages(contents)))');
+	url.searchParams.set('select', 'prompts(id,query,response,error,sources(...pages(contents)))');
 	url.searchParams.set('prompts.order', 'created_at.asc');
 	url.searchParams.set('prompts.sources.order', 'similarity.asc');
 	url.searchParams.set('id', `eq.${conversation_id}`);
@@ -126,23 +125,6 @@ async function get_prompts(fetch: Function, conversation_id: string) {
 	const response = await fetch(url);
 	const conversations = await response.json();
 	return conversations[0].prompts;
-}
-
-class Consumer {
-	stream: ReadableStream<Uint8Array>;
-	answer = '';
-	decoder = new TextDecoder();
-
-	constructor(stream: ReadableStream<Uint8Array>) {
-		this.stream = stream;
-	}
-
-	async consume() {
-		for await (const chunk of this.stream) {
-			const text = this.decoder.decode(chunk);
-			this.answer += text;
-		}
-	}
 }
 
 export async function POST({ fetch, params }) {
@@ -194,14 +176,36 @@ export async function POST({ fetch, params }) {
 	};
 
 	// Save response & stream response to the browser. For this we'll turn the openai stream into just the text, and duplicate the stream to these 2 destinations
-	const [to_consume, to_respond] = response.body
-		.pipeThrough(new TransformStream(transformer))
-		.tee();
+	const reader = response.body.pipeThrough(new TransformStream(transformer)).getReader();
 
-	const consumer = new Consumer(to_consume);
-	consumer.consume();
+	const decoder = new TextDecoder();
+	let answer = '';
 
-	return new Response(to_respond, {
+	// Proxy response body so we can also save the answer
+	const response_body = new ReadableStream({
+		start(controller) {
+			return pump();
+			async function pump() {
+				const { done, value } = await reader.read();
+
+				// Store answer before closing so we can invalidate
+				if (done) {
+					await set_prompt_answer(fetch, prompts.at(-1).id, answer);
+
+					controller.close();
+					return;
+				}
+
+				answer += decoder.decode(value);
+
+				controller.enqueue(value);
+				return pump();
+			}
+		}
+	});
+
+	// Return a event stream so we can render the text as it comes in
+	return new Response(response_body, {
 		headers: {
 			'Content-Type': 'text/event-stream',
 			'Cache-Control': 'no-cache',

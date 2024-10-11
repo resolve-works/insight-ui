@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { invalidate } from '$app/navigation';
 	import { tick, onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { enhance } from '$app/forms';
@@ -46,13 +47,16 @@
 			const response = await fetch(url, { method: 'POST' });
 			if (response.body) {
 				const reader = response.body.getReader();
-				// TODO - not while true.
 				while (true) {
 					const { done, value } = await reader.read();
 					if (done) {
+						await invalidate('api:conversations');
+						answer = '';
+						input.focus();
 						break;
 					}
 					answer += decoder.decode(value);
+					await scroll_to_bottom();
 				}
 			}
 		};
