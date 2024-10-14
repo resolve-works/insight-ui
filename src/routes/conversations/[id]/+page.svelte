@@ -42,6 +42,8 @@
 		return async ({ update }: { update: Function }) => {
 			await update();
 
+			// Tick will force svelte to set `form`
+			await tick();
 			if (form && 'errors' in form) {
 				return;
 			}
@@ -197,7 +199,7 @@
 	}
 
 	.similarity {
-		max-width: 12rem;
+		max-width: 15rem;
 	}
 
 	.response {

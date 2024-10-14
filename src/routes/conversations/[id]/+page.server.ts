@@ -99,6 +99,23 @@ async function embed(input: string) {
 	return (await response.json()).data[0].embedding;
 }
 
+async function create_embed_query(fetch: Function, conversation_id: number, query: string) {
+	const url = new URL(`${env.API_ENDPOINT}/prompts`);
+	url.searchParams.set('conversation_id', `eq.${conversation_id}`);
+	url.searchParams.set('select', 'query');
+	url.searchParams.set('order', 'created_at.asc');
+
+	const response = await fetch(url);
+
+	if (response.status != 200) {
+		throw new Error(await response.text());
+	}
+
+	const prompts = [...(await response.json()), { query }];
+
+	return prompts.map((prompt) => prompt.query).join(', ');
+}
+
 type CreatePromptData = {
 	conversation_id: number;
 	query: string;
@@ -112,9 +129,11 @@ async function create_prompt(fetch: Function, conversation_id: number, query: st
 		query
 	};
 
-	// We expect users to insert to large prompts
 	try {
-		data.embedding = await embed(query);
+		// Concatenate all queries from previous prompts with the current query.
+		// We do this to search for pages that are related to all of the conversation
+		const embed_query = await create_embed_query(fetch, conversation_id, query);
+		data.embedding = await embed(embed_query);
 	} catch (err) {
 		if (err instanceof EmbedError) {
 			data.error = err.message;
