@@ -9,14 +9,19 @@ class CompletionError extends Error {}
 async function generate_answer(
 	prompts: { query: string; response: string; sources: { contents: string }[] }[]
 ) {
+	// TODO - side effects bad
+	let source_index = 0;
+
 	// Build user & assistant messages from the complete conversation
 	const messages = prompts
-		.map((prompt, prompt_index) => {
+		.map((prompt) => {
 			// Create single string from sources
 			const context = prompt.sources
-				.map((source: Record<string, any>, source_index) => {
+				.map((source: Record<string, any>) => {
 					// Add indexes to contents so LLM can reference them
-					return `Page ${prompt_index}_${source_index}:\n${source.contents}`;
+					const text = `Page ${source_index}:\n${source.contents}`;
+					source_index++;
+					return text;
 				})
 				.join('\n\n');
 
