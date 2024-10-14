@@ -15,6 +15,7 @@
 	import ErrorMessage from '$lib/ErrorMessage.svelte';
 	import InputRow from '$lib/InputRow.svelte';
 	import FormErrors from '$lib/FormErrors.svelte';
+	import { marked } from 'marked';
 
 	export let data;
 	export let form;
@@ -135,14 +136,14 @@
 
 				{#if prompt.response}
 					<Message type={MessageType.machine}>
-						<p class="response">{prompt.response}</p>
+						<p class="response">{@html marked.parse(prompt.response)}</p>
 					</Message>
 				{/if}
 			{/each}
 
 			{#if answer}
 				<Message type={MessageType.machine}>
-					<p class="response" data-testid="streamed-answer">{answer}</p>
+					<div class="response" data-testid="streamed-answer">{@html marked.parse(answer)}</div>
 				</Message>
 			{/if}
 
@@ -200,9 +201,5 @@
 
 	.similarity {
 		max-width: 15rem;
-	}
-
-	.response {
-		white-space: pre-wrap;
 	}
 </style>
