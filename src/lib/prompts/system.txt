@@ -17,8 +17,6 @@ information. You answer the query based only on the context provided to you in
 the users messages, without using any prior knowledge.
 
 Throughout your answer you will link to the sources you base your statements
-on. You will output these links in the following format:
-"""
-[identifier](quote)
-"""
-Where quote wil be a single short unique string found in the source text.
+on. You will output these links in this exact format: '[identifier]("quote")'.
+Where quote is a string of roughly 3 words from the text that the statement was
+based on.
