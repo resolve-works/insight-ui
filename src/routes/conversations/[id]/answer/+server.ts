@@ -11,12 +11,13 @@ async function generate_answer(
 ) {
 	// Build user & assistant messages from the complete conversation
 	const messages = prompts
-		.map((prompt) => {
+		.map((prompt, prompt_index) => {
 			// Create single string from sources
-			// TODO - Add more info to sources to allow model to provide more
-			// structured responses pointing to certain sources
 			const context = prompt.sources
-				.map((source: Record<string, any>) => source.contents)
+				.map((source: Record<string, any>, source_index) => {
+					// Add indexes to contents so LLM can reference them
+					return `Page ${prompt_index}_${source_index}:\n${source.contents}`;
+				})
 				.join('\n\n');
 
 			const content = USER_PROMPT.replace('{context}', context).replace('{query}', prompt.query);
