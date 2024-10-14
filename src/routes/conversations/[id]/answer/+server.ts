@@ -1,21 +1,14 @@
 import { env } from '$env/dynamic/private';
 import { error } from '@sveltejs/kit';
 import { TransformStream } from 'stream/web';
+import SYSTEM_PROMPT from '$lib/prompts/system.txt?raw';
+import USER_PROMPT from '$lib/prompts/user.txt?raw';
 
 class CompletionError extends Error {}
 
 async function generate_answer(
 	prompts: { query: string; response: string; sources: { contents: string }[] }[]
 ) {
-	// The system prompt instructs the model on how to approach the users messages
-	const SYSTEM_PROMPT = `You are a helpful AI assistant, optimized for
-finding information in document collections. You will be provided with
-some context in the form of several pages from a document collection. 
-
-Every user message will optionally provide you with some context information,
-and a query. You answer the query based only on the context provided to you in
-the users messages, without using any prior knowledge.`;
-
 	// Build user & assistant messages from the complete conversation
 	const messages = prompts
 		.map((prompt) => {
@@ -26,20 +19,9 @@ the users messages, without using any prior knowledge.`;
 				.map((source: Record<string, any>) => source.contents)
 				.join('\n\n');
 
-			const messages = [
-				{
-					role: 'user',
-					content: `Context:
-"""
-${context}
-"""
+			const content = USER_PROMPT.replace('{context}', context).replace('{query}', prompt.query);
 
-Query:
-"""
-${prompt.query}
-"""`
-				}
-			];
+			const messages = [{ role: 'user', content }];
 
 			// Add assistant answer when prompt was answered
 			if ('response' in prompt && prompt.response) {
