@@ -6,14 +6,10 @@
 
 <div class="row">
 	{#if icon}
-		<div class="icon">
+		<span class="icon">
 			<Icon class={icon} />
-		</div>
+		</span>
 	{/if}
-
-	<div class="input">
-		<slot name="input" />
-	</div>
 
 	<slot />
 </div>
@@ -30,11 +26,11 @@
 		margin: 0.5rem 0;
 	}
 
-	.input {
+	.row :global(div) {
 		flex-grow: 1;
 	}
 
-	:global(.input input) {
+	.row :global(div input) {
 		width: 100%;
 	}
 </style>

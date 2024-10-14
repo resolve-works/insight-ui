@@ -204,7 +204,7 @@
 				{/if}
 
 				<InputRow icon="gg-folder">
-					<div slot="input">
+					<div>
 						<input
 							name="name"
 							data-testid="folder-name-input"

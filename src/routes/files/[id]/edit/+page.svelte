@@ -47,7 +47,7 @@
 						update({ reset: false })}
 			>
 				<InputRow icon={data.files ? 'gg-file-document' : 'gg-folder'}>
-					<div slot="input">
+					<div>
 						<input
 							type="text"
 							name="name"

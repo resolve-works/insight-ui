@@ -13,8 +13,11 @@
 	import type { FolderOption } from '$lib/FolderFilter.svelte';
 	import { breadcrumbs } from '$lib/stores';
 	import ErrorMessage from '$lib/ErrorMessage.svelte';
+	import InputRow from '$lib/InputRow.svelte';
+	import FormErrors from '$lib/FormErrors.svelte';
 
 	export let data;
+	export let form;
 	const { options, total, paths } = data;
 
 	let create_conversation_form: HTMLFormElement;
@@ -38,6 +41,10 @@
 	async function generate_answer() {
 		return async ({ update }: { update: Function }) => {
 			await update();
+
+			if (form && 'errors' in form) {
+				return;
+			}
 
 			const url = new URL($page.url);
 			url.pathname += '/answer';
@@ -147,21 +154,33 @@
 		</div>
 
 		<form class="prompt" method="POST" action="?/create_prompt" use:enhance={generate_answer}>
-			<input
-				type="text"
-				name="query"
-				data-testid="query-input"
-				placeholder="Your question ..."
-				bind:this={input}
-			/>
-			<input
-				type="number"
-				name="similarity_top_k"
-				data-testid="similarity-top-k-input"
-				placeholder="Pages (default: 3) ..."
-				min="0"
-			/>
-			<button class="primary" data-testid="create-prompt">Prompt</button>
+			<InputRow>
+				<div class="prompt">
+					<input
+						type="text"
+						name="query"
+						data-testid="query-input"
+						placeholder="Your question ..."
+						bind:this={input}
+					/>
+
+					<FormErrors errors={form?.errors} key="query" />
+				</div>
+
+				<div class="similarity">
+					<input
+						type="number"
+						name="similarity_top_k"
+						data-testid="similarity-top-k-input"
+						placeholder="Pages (default: 3) ..."
+						min="0"
+					/>
+
+					<FormErrors errors={form?.errors} key="similarity_top_k" />
+				</div>
+
+				<button class="primary" data-testid="create-prompt">Prompt</button>
+			</InputRow>
 		</form>
 	</div>
 </Page>
@@ -173,14 +192,12 @@
 		min-height: 100%;
 	}
 
-	form.prompt {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
+	.prompt {
+		flex-grow: 5 !important;
 	}
 
-	form.prompt input[type='text'] {
-		flex-grow: 1;
+	.similarity {
+		max-width: 12rem;
 	}
 
 	.response {
