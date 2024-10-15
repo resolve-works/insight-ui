@@ -4,27 +4,26 @@
 	export let index: number;
 	export let from_page: number;
 	export let name: string;
-	export let url: string = `/files/${id}?page=${index - from_page + 1}`;
 </script>
 
-<a href={url}>
-	<span>
+<span class="source">
+	<span class="icon">
 		<Icon class="gg-file" />
 
 		{index - from_page + 1}
 	</span>
 	{name}
-</a>
+</span>
 
 <style>
-	a {
+	.source {
 		display: grid;
 		align-items: center;
-		grid-template-columns: 4rem auto;
+		grid-template-columns: 4.5rem auto;
 		gap: 0.5rem;
 	}
 
-	span {
+	.icon {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;

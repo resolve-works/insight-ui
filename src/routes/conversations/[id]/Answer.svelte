@@ -41,16 +41,16 @@
 {#if source_links.length}
 	<p>
 		{#each source_links as link, index}
-			<div class="link">
-				<span>[{index + 1}]:</span>
-				<SourceComponent {...link.source} url={link.url} />
-			</div>
+			<a href={link.url}>
+				[{index + 1}]:
+				<SourceComponent {...link.source} />
+			</a>
 		{/each}
 	</p>
 {/if}
 
 <style>
-	.link {
+	a {
 		display: grid;
 		align-items: center;
 		gap: 0.5rem;

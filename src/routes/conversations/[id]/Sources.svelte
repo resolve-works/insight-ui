@@ -17,9 +17,13 @@
 
 {#if sources.length}
 	{#if is_opened}
-		{#each sources as source}
-			<SourceComponent {...source} />
-		{/each}
+		<p>
+			{#each sources as source}
+				<a href={`/files/${source.id}?page=${source.index - source.from_page + 1}`}>
+					<SourceComponent {...source} />
+				</a>
+			{/each}
+		</p>
 	{/if}
 
 	<p>
@@ -40,7 +44,7 @@
 		background: none;
 		padding: 0;
 		border: none;
-		color: var(--text-color-page);
+		color: var(--text-color-dark-lighter);
 	}
 
 	button:hover {
