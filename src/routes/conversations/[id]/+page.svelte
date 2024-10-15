@@ -15,15 +15,14 @@
 	import ErrorMessage from '$lib/ErrorMessage.svelte';
 	import InputRow from '$lib/InputRow.svelte';
 	import FormErrors from '$lib/FormErrors.svelte';
-	import { marked } from 'marked';
+	import type { Source } from './Answer.svelte';
+	import Answer from './Answer.svelte';
 
 	export let data;
 	export let form;
 	const { options, total, paths } = data;
 
-	$: sources = data.prompts
-		.map((prompt: { sources: Record<string, any>[] }) => prompt.sources)
-		.flat();
+	$: sources = data.prompts.map((prompt: { sources: Source[] }) => prompt.sources).flat();
 
 	let create_conversation_form: HTMLFormElement;
 	let input: HTMLInputElement;
@@ -34,23 +33,6 @@
 	}
 
 	$: selected = options.filter((option: FolderOption) => paths.includes(option.key));
-
-	function expand_quote_links(answer: string) {
-		let links = [];
-
-		return answer.replaceAll(/\[([^\]]+)\]\(([^\)]+)\)/g, (_, source_index, quote) => {
-			// LLM answers with links to quotes in the form of
-			// [source_index]("quote"). Transform these into links to sources
-			const source = sources[source_index];
-			const url = `/files/${source.id}?page=${source.index + 1}&query=${encodeURIComponent(quote)}`;
-			links.push({
-				url,
-				source
-			});
-			const link = `[\[${links.length}\]](${url})`;
-			return link;
-		});
-	}
 
 	// This is a chat, scroll to bottom
 	async function scroll_to_bottom() {
@@ -157,7 +139,7 @@
 
 				{#if prompt.response}
 					<Message type={MessageType.machine}>
-						<p class="response">{@html marked.parse(expand_quote_links(prompt.response))}</p>
+						<Answer {sources} response={prompt.response} />
 					</Message>
 				{/if}
 			{/each}
@@ -165,7 +147,7 @@
 			{#if answer}
 				<Message type={MessageType.machine}>
 					<div class="response" data-testid="streamed-answer">
-						{@html marked.parse(expand_quote_links(answer))}
+						<Answer {sources} response={answer} />
 					</div>
 				</Message>
 			{/if}
