@@ -20,7 +20,7 @@
 	a {
 		display: grid;
 		align-items: center;
-		grid-template-columns: 6rem auto;
+		grid-template-columns: 4rem auto;
 		gap: 0.5rem;
 	}
 
