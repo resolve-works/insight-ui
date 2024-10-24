@@ -28,7 +28,9 @@
 			// LLM answers with links to quotes in the form of
 			// [source_index]("quote"). Transform these into links to sources
 			const source = sources[source_index];
-			const url = `/files/${source.id}?page=${source.index + 1}&query=${encodeURIComponent(quote)}`;
+			// Strip quotes
+			const query = encodeURIComponent(quote.trim().replace(/^"(.+)"$/, '$1'));
+			const url = `/files/${source.id}?page=${source.index + 1}&query=${query}`;
 			source_links = [...source_links, { url, source }];
 			const link = `[\[${source_links.length}\]](${url})`;
 			return link;

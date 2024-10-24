@@ -19,7 +19,7 @@ async function generate_answer(
 			const context = prompt.sources
 				.map((source: Record<string, any>) => {
 					// Add indexes to contents so LLM can reference them
-					const text = `${source_index}\n${source.contents}`;
+					const text = `${source_index}\n"""\n${source.contents}\n"""`;
 					source_index++;
 					return text;
 				})
