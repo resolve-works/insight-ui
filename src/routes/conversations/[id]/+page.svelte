@@ -13,7 +13,7 @@
 	import type { FolderOption } from '$lib/FolderFilter.svelte';
 	import { breadcrumbs } from '$lib/stores';
 	import ErrorMessage from '$lib/ErrorMessage.svelte';
-	import InputRow from '$lib/InputRow.svelte';
+	import Row from '$lib/Row.svelte';
 	import FormErrors from '$lib/FormErrors.svelte';
 	import type { Source } from './Answer.svelte';
 	import Answer from './Answer.svelte';
@@ -162,7 +162,7 @@
 		</div>
 
 		<form class="prompt" method="POST" action="?/create_prompt" use:enhance={generate_answer}>
-			<InputRow>
+			<Row>
 				<div class="prompt">
 					<input
 						type="text"
@@ -188,7 +188,7 @@
 				</div>
 
 				<button class="primary" data-testid="create-prompt">Prompt</button>
-			</InputRow>
+			</Row>
 		</form>
 	</div>
 </Page>
@@ -202,6 +202,10 @@
 
 	.prompt {
 		flex-grow: 5 !important;
+	}
+
+	.prompt input {
+		width: 100%;
 	}
 
 	.similarity {

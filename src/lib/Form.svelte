@@ -4,14 +4,16 @@
 	export let icon: string | undefined = undefined;
 </script>
 
-<div class="row">
+<div class="form">
 	{#if icon}
 		<span class="icon">
 			<Icon class={icon} />
 		</span>
 	{/if}
 
-	<slot />
+	<div class="inputs">
+		<slot />
+	</div>
 </div>
 
 <style>
@@ -19,18 +21,22 @@
 		margin: var(--input-padding-y) 0;
 	}
 
-	.row {
+	.form {
 		display: flex;
 		align-items: start;
 		gap: 1rem;
 		margin: 0.5rem 0;
 	}
 
-	.row :global(div) {
+	.inputs {
 		flex-grow: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
 	}
 
-	.row :global(div input) {
-		width: 100%;
+	:global(.inputs .button),
+	:global(.inputs button) {
+		align-self: end;
 	}
 </style>

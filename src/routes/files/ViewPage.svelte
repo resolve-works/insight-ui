@@ -4,7 +4,7 @@
 	import Icon from '$lib/Icon.svelte';
 	import Page from '$lib/Page.svelte';
 	import Title from '$lib/Title.svelte';
-	import Actions from '$lib/Actions.svelte';
+	import Row from '$lib/Row.svelte';
 	import PDFViewer from '$lib/PDFViewer.svelte';
 	import { ssp, queryParam } from 'sveltekit-search-params';
 
@@ -37,7 +37,7 @@
 	<Title>
 		{name}
 
-		<Actions slot="actions">
+		<Row slot="actions">
 			<a class="button" href={`/files/${id}/edit`}>
 				<Icon class="gg-pen" />
 				Edit
@@ -54,7 +54,7 @@
 					<Icon class="gg-chevron-right" />
 				</button>
 			</InputGroup>
-		</Actions>
+		</Row>
 	</Title>
 
 	<div class="container">

@@ -8,7 +8,7 @@
 	import { breadcrumbs } from '$lib/stores';
 	import Title from '$lib/Title.svelte';
 	import FormErrors from '$lib/FormErrors.svelte';
-	import InputRow from '$lib/InputRow.svelte';
+	import Form from '$lib/Form.svelte';
 
 	export let data;
 	export let form;
@@ -46,23 +46,33 @@
 					async ({ update }) =>
 						update({ reset: false })}
 			>
-				<InputRow icon={data.files ? 'gg-file-document' : 'gg-folder'}>
-					<div>
+				<Form icon={data.files ? 'gg-file-document' : 'gg-folder'}>
+					<input
+						type="text"
+						name="name"
+						placeholder="File name"
+						value={data.name}
+						data-testid="inode-name-input"
+					/>
+
+					<FormErrors errors={form?.errors} key="name" />
+
+					<label title="A public folder can be viewed by everyone">
 						<input
-							type="text"
-							name="name"
-							placeholder="File name"
-							value={data.name}
-							data-testid="inode-name-input"
+							type="checkbox"
+							name="is_public"
+							value={data.is_public}
+							data-testid="inode-is-public-input"
 						/>
+						This is a public {data.files ? 'document' : 'folder'}
+					</label>
 
-						<FormErrors errors={form?.errors} key="name" />
-					</div>
+					<FormErrors errors={form?.errors} key="is_public" />
 
-					<button class="primary" data-testid="change-inode-name">
-						<Icon class="gg-pen" /> Change name
+					<button class="primary" data-testid="update-inode">
+						<Icon class="gg-pen" /> Update {data.files ? 'Document' : 'Folder'}
 					</button>
-				</InputRow>
+				</Form>
 			</form>
 		</Card>
 	</Section>

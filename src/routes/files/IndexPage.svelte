@@ -15,8 +15,9 @@
 	import { enhance } from '$app/forms';
 	import { invalidate } from '$app/navigation';
 	import Pagination from '$lib/Pagination.svelte';
-	import InputRow from '$lib/InputRow.svelte';
+	import Form from '$lib/Form.svelte';
 	import FormErrors from '$lib/FormErrors.svelte';
+	import Row from '$lib/Row.svelte';
 
 	export let name;
 	export let inodes;
@@ -203,31 +204,33 @@
 					<input name="parent_id" type="hidden" value={parent_id} />
 				{/if}
 
-				<InputRow icon="gg-folder">
-					<div>
-						<input
-							name="name"
-							data-testid="folder-name-input"
-							placeholder="Folder name"
-							bind:this={folder_input}
-						/>
+				<Form icon="gg-folder">
+					<Row>
+						<div class="input">
+							<input
+								name="name"
+								data-testid="folder-name-input"
+								placeholder="Folder name"
+								bind:this={folder_input}
+							/>
 
-						<FormErrors errors={form?.errors} key="name" />
-					</div>
+							<FormErrors errors={form?.errors} key="name" />
+						</div>
 
-					<InputGroup>
-						<button class="primary" data-testid="create-folder">Create</button>
+						<InputGroup>
+							<button class="primary" data-testid="create-folder">Create</button>
 
-						<button
-							data-testid="cancel-create-folder"
-							on:click|preventDefault={() => {
-								folder_form.reset();
-								show_folder_form = false;
-								form = undefined;
-							}}>Cancel</button
-						>
-					</InputGroup>
-				</InputRow>
+							<button
+								data-testid="cancel-create-folder"
+								on:click|preventDefault={() => {
+									folder_form.reset();
+									show_folder_form = false;
+									form = undefined;
+								}}>Cancel</button
+							>
+						</InputGroup>
+					</Row>
+				</Form>
 			</form>
 		</Card>
 	</div>
@@ -266,6 +269,14 @@
 
 	.create-folder {
 		display: none;
+	}
+
+	.create-folder .input {
+		flex-grow: 1;
+	}
+
+	.create-folder .input input {
+		width: 100%;
 	}
 
 	.create-folder.visible {
