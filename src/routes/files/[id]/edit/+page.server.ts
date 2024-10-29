@@ -38,7 +38,7 @@ export const actions = {
 			}
 
 			const channel = await Channel.connect(cookies);
-			channel.publish('move_inode', { id: params.id });
+			channel.publish('update_inode', { id: params.id });
 			await channel.close();
 		} catch (err) {
 			if (err instanceof ValidationError) {
