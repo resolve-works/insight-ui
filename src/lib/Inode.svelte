@@ -1,9 +1,9 @@
 <script lang="ts">
 	import Icon from '$lib/Icon.svelte';
-	import Row from '$lib/Row.svelte';
 	import Actionable from './Actionable.svelte';
 	import { enhance } from '$app/forms';
 	import Buttongroup from './Buttongroup.svelte';
+	import InputGroup from './InputGroup.svelte';
 
 	export let id: string;
 	export let name: string;
@@ -15,7 +15,7 @@
 </script>
 
 <Actionable {name} path={`/files/${id}`} {icon} test_id="inode">
-	<Row slot="actions">
+	<InputGroup slot="actions">
 		{#if files && files.error}
 			<Icon test_id="inode-error" class="gg-danger error" title={files.error} />
 		{:else if (files && !files.is_ready) || !is_indexed}
@@ -33,5 +33,5 @@
 				<button data-testid="delete-inode"><Icon class="gg-trash" /> Delete</button>
 			</form>
 		</Buttongroup>
-	</Row>
+	</InputGroup>
 </Actionable>

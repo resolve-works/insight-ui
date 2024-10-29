@@ -61,8 +61,8 @@
 						<input
 							type="checkbox"
 							name="is_public"
-							value={data.is_public}
 							data-testid="inode-is-public-input"
+							checked={data.is_public}
 						/>
 						This is a public {data.files ? 'document' : 'folder'}
 					</label>
