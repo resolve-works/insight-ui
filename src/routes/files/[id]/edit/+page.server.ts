@@ -1,4 +1,3 @@
-import { Channel } from '$lib/amqp.js';
 import type { Actions } from '@sveltejs/kit';
 import { fail } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
@@ -23,7 +22,7 @@ export async function load({ params, fetch, depends }) {
 }
 
 export const actions = {
-	update: async ({ request, fetch, params, cookies }) => {
+	update: async ({ request, fetch, params }) => {
 		try {
 			const data = await validate(request, schema);
 
@@ -36,10 +35,6 @@ export const actions = {
 				const data = await response.json();
 				throw new Error(data.message);
 			}
-
-			const channel = await Channel.connect(cookies);
-			channel.publish('update_inode', { id: params.id });
-			await channel.close();
 		} catch (err) {
 			if (err instanceof ValidationError) {
 				return fail(400, err.format());
