@@ -22,7 +22,7 @@ export async function POST({ request, fetch, cookies }: RequestEvent) {
 			Prefer: 'return=representation'
 		}
 	});
-	if (response.status !== 200) {
+	if (response.status !== 201) {
 		const data = await response.json();
 		if (data.message.includes('duplicate key value')) {
 			return error(400, 'Duplicate file name');
@@ -53,7 +53,7 @@ export async function POST({ request, fetch, cookies }: RequestEvent) {
 	}
 
 	// Mark upload as succesful
-	const patch_response = await fetch(`${env.API_ENDPOINT}/files?inode_id=eq.${inode.id}`, {
+	const patch_response = await fetch(`${env.API_ENDPOINT}/inodes?id=eq.${inode.id}`, {
 		method: 'PATCH',
 		body: JSON.stringify({ is_uploaded: true }),
 		headers: { 'Content-Type': 'application/json' }

@@ -79,8 +79,6 @@
 		uploads.update((uploads) => {
 			return [...uploads, ...files.map((file) => new Upload(file, parent_id))];
 		});
-		// Prevent form submission
-		return false;
 	}
 
 	onMount(() => {
@@ -138,7 +136,7 @@
 		{/if}
 
 		<InputGroup slot="actions">
-			<form bind:this={files_form} on:submit={create_uploads}>
+			<form bind:this={files_form} on:submit|preventDefault={create_uploads}>
 				<input
 					name="files"
 					data-testid="files-input"

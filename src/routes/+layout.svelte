@@ -24,10 +24,9 @@
 			const body = JSON.parse(message.data);
 
 			const mapping = {
-				ingest_file: ['api:inodes'],
-				index_inode: ['api:inodes'],
-				embed_file: ['api:inodes'],
-				answer_prompt: ['api:conversations']
+				ingest_inode: ['api:inodes'],
+				embed_inode: ['api:inodes'],
+				index_inode: ['api:inodes']
 			};
 
 			if ('task' in body && body.task in mapping) {

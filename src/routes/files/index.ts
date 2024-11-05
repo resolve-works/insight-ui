@@ -43,9 +43,5 @@ export async function remove({ request, fetch }: RequestEvent) {
 		throw new Error('missing "id" in form data');
 	}
 
-	await fetch(`${env.API_ENDPOINT}/inodes?id=eq.${id}`, {
-		method: 'PATCH',
-		body: JSON.stringify({ is_deleted: true }),
-		headers: { 'Content-Type': 'application/json' }
-	});
+	await fetch(`${env.API_ENDPOINT}/inodes?id=eq.${id}`, { method: 'DELETE' });
 }
