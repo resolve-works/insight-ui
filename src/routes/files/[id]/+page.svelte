@@ -20,7 +20,7 @@
     }
 </script>
 
-{#if data.files}
+{#if data.type == 'file'}
 	<ViewPage {...data} />
 {:else}
 	<IndexPage {...data} {form} />

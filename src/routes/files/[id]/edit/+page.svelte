@@ -46,7 +46,7 @@
 					async ({ update }) =>
 						update({ reset: false })}
 			>
-				<Form icon={data.files ? 'gg-file-document' : 'gg-folder'}>
+				<Form icon={data.type == 'file' ? 'gg-file-document' : 'gg-folder'}>
 					<input
 						type="text"
 						name="name"
@@ -64,13 +64,13 @@
 							data-testid="inode-is-public-input"
 							checked={data.is_public}
 						/>
-						This is a public {data.files ? 'document' : 'folder'}
+						This is a public {data.type == 'file' ? 'document' : 'folder'}
 					</label>
 
 					<FormErrors errors={form?.errors} key="is_public" />
 
 					<button class="primary" data-testid="update-inode">
-						<Icon class="gg-pen" /> Update {data.files ? 'Document' : 'Folder'}
+						<Icon class="gg-pen" /> Update {data.type == 'file' ? 'Document' : 'Folder'}
 					</button>
 				</Form>
 			</form>

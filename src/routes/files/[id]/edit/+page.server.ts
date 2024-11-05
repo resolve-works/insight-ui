@@ -10,7 +10,7 @@ export async function load({ params, fetch, depends }) {
 	const api_url =
 		`${env.API_ENDPOINT}/inodes` +
 		`?id=eq.${params.id}` +
-		`&select=id,name,is_public,files(from_page,to_page),ancestors(id,name)`;
+		`&select=id,name,is_public,type,from_page,to_page,ancestors(id,name)`;
 
 	const res = await fetch(api_url);
 	const inodes = await res.json();

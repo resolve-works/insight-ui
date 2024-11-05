@@ -10,20 +10,18 @@ export async function POST({ request, fetch, cookies }: RequestEvent) {
 	const upload: File = data.get('file') as File;
 
 	// First create a file model to check if we can upload this file
-	const response = await fetch(
-		`${env.API_ENDPOINT}/rpc/create_file?select=id,owner_id,parent_id,path`,
-		{
-			method: 'POST',
-			body: JSON.stringify({
-				name: upload.name,
-				parent_id: data.get('parent_id')
-			}),
-			headers: {
-				'Content-Type': 'application/json',
-				Prefer: 'return=representation'
-			}
+	const response = await fetch(`${env.API_ENDPOINT}/inodes?select=id,owner_id,parent_id,path`, {
+		method: 'POST',
+		body: JSON.stringify({
+			type: 'file',
+			name: upload.name,
+			parent_id: data.get('parent_id')
+		}),
+		headers: {
+			'Content-Type': 'application/json',
+			Prefer: 'return=representation'
 		}
-	);
+	});
 	if (response.status !== 200) {
 		const data = await response.json();
 		if (data.message.includes('duplicate key value')) {

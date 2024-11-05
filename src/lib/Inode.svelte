@@ -9,16 +9,17 @@
 	export let name: string;
 	export let type: string;
 	export let is_indexed;
-	export let files: Record<string, any> | undefined;
+	export let is_ready: boolean;
+	export let error: string | undefined;
 
 	let icon = type == 'file' ? 'gg-file-document' : 'gg-folder';
 </script>
 
 <Actionable {name} path={`/files/${id}`} {icon} test_id="inode">
 	<InputGroup slot="actions">
-		{#if files && files.error}
-			<Icon test_id="inode-error" class="gg-danger error" title={files.error} />
-		{:else if (files && !files.is_ready) || !is_indexed}
+		{#if error}
+			<Icon test_id="inode-error" class="gg-danger error" title={error} />
+		{:else if (type == 'file' && !is_ready) || (type == 'folder' && !is_indexed)}
 			<Icon test_id="inode-loader" class="gg-loadbar" />
 		{/if}
 
