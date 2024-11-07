@@ -51,7 +51,7 @@ export async function load(event) {
 	depends('api:prompts');
 
 	const url = new URL(`${env.API_ENDPOINT}/conversations`);
-	const sources = `sources(similarity,...pages(index,...inodes(id,name,...files(from_page))))`;
+	const sources = `sources(similarity,...pages(index,...inodes(id,name,from_page)))`;
 	url.searchParams.set('select', `error,prompts(query,response,error,${sources}),inodes(path)`);
 	url.searchParams.set('prompts.order', 'created_at.asc');
 	url.searchParams.set('prompts.sources.order', 'similarity.asc');

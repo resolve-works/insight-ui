@@ -12,7 +12,7 @@
 	span {
 		width: 1.35rem;
 		height: 1.35rem;
-		display: grid;
+		display: flex;
 		align-items: center;
 		justify-content: center;
 	}

@@ -20,6 +20,8 @@
 	import Row from '$lib/Row.svelte';
 
 	export let name;
+	export let is_owned: boolean = true;
+	export let users: { name: string } | undefined;
 	export let inodes;
 	export let form;
 
@@ -136,6 +138,10 @@
 		{/if}
 
 		<InputGroup slot="actions">
+			{#if !is_owned}
+				<span class="shared">Shared by {users.name}</span>
+			{/if}
+
 			<form bind:this={files_form} on:submit|preventDefault={create_uploads}>
 				<input
 					name="files"
@@ -279,5 +285,10 @@
 
 	.create-folder.visible {
 		display: block;
+	}
+
+	.shared {
+		margin-right: 1rem;
+		color: var(--text-color-page);
 	}
 </style>

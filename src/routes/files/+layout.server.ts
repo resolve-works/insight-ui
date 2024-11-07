@@ -8,7 +8,10 @@ export async function load({ depends, params, fetch, url }) {
 	const page = param ? parseInt(param) : 1;
 
 	const api_url = new URL(`${env.API_ENDPOINT}/inodes`);
-	api_url.searchParams.set('select', 'id,name,type,path,is_indexed,is_ready,error');
+	api_url.searchParams.set(
+		'select',
+		'id,name,parent_id,type,path,is_indexed,is_ready,is_owned,error,users(name)'
+	);
 	api_url.searchParams.set('parent_id', `${'id' in params ? `eq.${params.id}` : `is.null`}`);
 	api_url.searchParams.set('order', 'type.asc,created_at.desc');
 	api_url.searchParams.set('limit', PAGE_SIZE.toString());

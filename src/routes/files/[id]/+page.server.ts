@@ -83,7 +83,7 @@ export async function load(event: ServerLoadEvent) {
 	const api_url =
 		`${env.API_ENDPOINT}/inodes` +
 		`?id=eq.${params.id}` +
-		`&select=id,owner_id,name,path,type,from_page,to_page,ancestors(id,name)`;
+		`&select=id,owner_id,name,is_owned,path,type,from_page,to_page,ancestors(id,name),users(name)`;
 
 	const res = await fetch(api_url);
 	const inodes = await res.json();
