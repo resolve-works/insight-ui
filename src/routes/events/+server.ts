@@ -11,6 +11,10 @@ export async function GET({ cookies, locals }) {
 		const queue = `user-${locals.sub}`;
 		await channel.assertQueue(queue, { autoDelete: true });
 
+		// Bind to the user topic exchange
+		await channel.bindQueue(queue, 'user', queue);
+		await channel.bindQueue(queue, 'user', 'public');
+
 		let interval: ReturnType<typeof setInterval>;
 
 		// Forward rabbitmq messages for user
