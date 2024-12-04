@@ -83,12 +83,13 @@ export async function load(event: ServerLoadEvent) {
 	const api_url =
 		`${env.API_ENDPOINT}/inodes` +
 		`?id=eq.${params.id}` +
-		`&select=id,owner_id,name,is_owned,path,type,from_page,to_page,ancestors(id,name),users(name)`;
+		`&select=id,name,is_owned,owner_id,path,type,from_page,to_page,ancestors(id,name),users(name)`;
 
 	const res = await fetch(api_url);
 	const inodes = await res.json();
 	const inode = inodes[0];
 	const { owner_id, path, type } = inode;
+	const optimized_path = path.replace(/(.+)(\/[^/.]+)(\..+)$/, '$1$2_optimized$3');
 
 	// This is a folder, there is no extra information we need
 	if (type == 'folder') {
@@ -97,9 +98,8 @@ export async function load(event: ServerLoadEvent) {
 
 	const highlights = await get_highlights(event);
 
-	const url = `users/${owner_id}${path}/optimized`;
 	return {
-		url: sign(url, cookies),
+		url: sign(`users/${owner_id}${optimized_path}`, cookies),
 		highlights: [...new Set(highlights)],
 		...inode
 	};

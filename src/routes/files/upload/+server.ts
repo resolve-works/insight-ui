@@ -10,7 +10,7 @@ export async function POST({ request, fetch, cookies }: RequestEvent) {
 	const upload: File = data.get('file') as File;
 
 	// First create a file model to check if we can upload this file
-	const response = await fetch(`${env.API_ENDPOINT}/inodes?select=id,owner_id,parent_id,path`, {
+	const response = await fetch(`${env.API_ENDPOINT}/inodes?select=id,parent_id,owner_id,path`, {
 		method: 'POST',
 		body: JSON.stringify({
 			type: 'file',
@@ -33,10 +33,10 @@ export async function POST({ request, fetch, cookies }: RequestEvent) {
 	}
 
 	const inodes = await response.json();
-	const inode = inodes[0];
+	const { owner_id, path, id } = inodes[0];
 
 	// Stream the file to S3 backend
-	const url = sign(`users/${inode.owner_id}${inode.path}/original`, cookies, 'PUT');
+	const url = sign(`users/${owner_id}${path}`, cookies, 'PUT');
 	const storage_response = await fetch(url, {
 		method: 'PUT',
 		body: upload.stream(),
@@ -53,7 +53,7 @@ export async function POST({ request, fetch, cookies }: RequestEvent) {
 	}
 
 	// Mark upload as succesful
-	const patch_response = await fetch(`${env.API_ENDPOINT}/inodes?id=eq.${inode.id}`, {
+	const patch_response = await fetch(`${env.API_ENDPOINT}/inodes?id=eq.${id}`, {
 		method: 'PATCH',
 		body: JSON.stringify({ is_uploaded: true }),
 		headers: { 'Content-Type': 'application/json' }

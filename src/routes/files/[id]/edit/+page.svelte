@@ -15,7 +15,7 @@
 
 	$: {
 		breadcrumbs.set([
-			{ name: 'Uploads', path: '/files' },
+			{ name: 'Files', path: '/files' },
 			...data.ancestors.reverse().map((ancestor: Record<string, string>) => {
 				return {
 					name: ancestor.name,
