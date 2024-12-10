@@ -1,4 +1,3 @@
-import type { ServerLoadEvent } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
 import type { Actions } from './$types';
 import { fail } from '@sveltejs/kit';
@@ -6,10 +5,9 @@ import { validate, ValidationError } from '$lib/validation';
 import { schema } from '$lib/validation/prompt';
 
 class EmbedError extends Error {}
+type Fetch = typeof fetch;
 
-async function get_folder_options(event: ServerLoadEvent, folders: string[]) {
-	const { fetch } = event;
-
+async function get_folder_options(fetch: Fetch, folders: string[]) {
 	const must: Record<string, any>[] = [
 		{
 			bool: {
@@ -45,8 +43,7 @@ async function get_folder_options(event: ServerLoadEvent, folders: string[]) {
 	};
 }
 
-export async function load(event) {
-	const { fetch, depends, params } = event;
+export async function load({ fetch, depends, params }) {
 	depends('api:conversations');
 	depends('api:prompts');
 
@@ -69,7 +66,9 @@ export async function load(event) {
 			? conversation.inodes.map((inode: { path: string }) => inode.path)
 			: [];
 
-	const { options, total } = await get_folder_options(event, paths);
+	const { options, total } = await get_folder_options(fetch, paths);
+
+	console.log(conversation);
 
 	return { paths, ...conversation, options, total };
 }
