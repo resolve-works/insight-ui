@@ -2,9 +2,10 @@
 	import Icon from './Icon.svelte';
 
 	export let icon: string | undefined = undefined;
+	export let test_id: string | undefined = undefined;
 </script>
 
-<div class="form">
+<div class="form" data-testid={test_id}>
 	{#if icon}
 		<span class="icon">
 			<Icon class={icon} />

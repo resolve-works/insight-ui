@@ -7,19 +7,8 @@
 	import SideBar from '$lib/SideBar.svelte';
 	import FolderFilter from '$lib/FolderFilter.svelte';
 	import { breadcrumbs } from '$lib/stores';
-	import { ssp, queryParam } from 'sveltekit-search-params';
-	import type { FolderOption } from '$lib/FolderFilter.svelte';
 
 	export let data;
-	const { options } = data;
-
-	const folders = queryParam('folders', ssp.array(), { showDefaults: false });
-
-	// Multiselect has the FolderOption objects to show extra information
-	let selected: FolderOption[] = options.filter((option: { key: string }) =>
-		($folders ?? []).includes(option.key)
-	);
-	$: $folders = selected.length ? selected.map((option) => option.key) : null;
 
 	$: {
 		breadcrumbs.set([{ name: 'Search', path: '/search' }]);
@@ -33,7 +22,7 @@
 		<form action="/conversations?/create_conversation" method="POST">
 			<Section>
 				<p>Filter by folder</p>
-				<FolderFilter {options} bind:selected />
+				<FolderFilter />
 			</Section>
 
 			<button class="secondary" title="Start a conversation with these filters">

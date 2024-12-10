@@ -197,10 +197,15 @@
 		<Card>
 			<form
 				class="create-folder-form"
+				data-testid="create-folder-form"
 				method="POST"
 				action="?/create_folder"
 				use:enhance={() => {
-					show_folder_form = false;
+					return async ({ update }) => {
+						await update();
+						invalidate('api:inodes');
+						show_folder_form = false;
+					};
 				}}
 				bind:this={folder_form}
 			>

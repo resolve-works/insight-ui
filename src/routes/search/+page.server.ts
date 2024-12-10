@@ -1,25 +1,5 @@
 import { env } from '$env/dynamic/private';
-
-function parse_folders(param: string | null) {
-	if (!param) {
-		return [];
-	}
-
-	try {
-		const folders = JSON.parse(param);
-		if (!Array.isArray(folders)) {
-			throw Error('Expected array');
-		}
-
-		if (!folders.every((f) => typeof f == 'string' && f.at(0) == '/')) {
-			throw Error('Expected array of paths starting with "/"');
-		}
-
-		return folders;
-	} catch (_) {
-		return [];
-	}
-}
+import { parse_folders } from '$lib/search';
 
 export async function load({ url, fetch }) {
 	const query = url.searchParams.get('query');
@@ -30,9 +10,11 @@ export async function load({ url, fetch }) {
 			bool: {
 				should: folders.map((folder) => ({ term: { folder: folder } }))
 			}
-		}
+		},
+		{ term: { type: 'file' } }
 	];
 
+	// When we have a text query, search for page contents
 	if (query) {
 		must.push({
 			nested: {
@@ -62,10 +44,9 @@ export async function load({ url, fetch }) {
 			'Content-Type': 'application/json'
 		},
 		body: JSON.stringify({
+			// Don't return all page contents
 			_source: { excludes: ['pages'] },
-			aggs: { folder: { terms: { field: 'folder' } } },
-			query: { term: { type: 'file' } },
-			post_filter: { bool: { must } }
+			query: { bool: { must } }
 		})
 	});
 
@@ -76,10 +57,10 @@ export async function load({ url, fetch }) {
 
 	return {
 		total: body.hits.total.value,
-		options: body.aggregations.folder.buckets.map((bucket: Record<string, any>) => ({
-			label: bucket.key,
-			...bucket
-		})),
+		//options: body.aggregations.folder.buckets.map((bucket: Record<string, any>) => ({
+		//label: bucket.key,
+		//...bucket
+		//})),
 		files: body.hits.hits.map((hit) => {
 			return {
 				id: hit._id,

@@ -7,7 +7,11 @@ import { schema } from '$lib/validation/prompt';
 class EmbedError extends Error {}
 type Fetch = typeof fetch;
 
-async function get_folder_options(fetch: Fetch, folders: string[]) {
+async function get_folder_options(
+	fetch: Fetch,
+	folders: string[],
+	query: string | undefined = undefined
+) {
 	const must: Record<string, any>[] = [
 		{
 			bool: {
@@ -67,8 +71,6 @@ export async function load({ fetch, depends, params }) {
 			: [];
 
 	const { options, total } = await get_folder_options(fetch, paths);
-
-	console.log(conversation);
 
 	return { paths, ...conversation, options, total };
 }
