@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Folder } from './FolderFilter.svelte';
+	import Icon from './Icon.svelte';
 
 	export let key: string;
 	export let doc_count: number;
@@ -9,7 +10,10 @@
 </script>
 
 <li style="padding-left: {indent}rem">
-	<span>{key}</span>
+	{#if indent > 0}
+		<Icon class="gg-corner-down-right" />
+	{/if}
+	<span class="name">{key}</span>
 	<span>{doc_count} file{doc_count != 1 ? 's' : ''}</span>
 </li>
 
@@ -20,15 +24,18 @@
 <style>
 	li {
 		display: flex;
-		justify-content: space-between;
+		align-items: center;
 	}
 
 	li span {
+		padding-top: 0.5rem;
 		white-space: nowrap;
 	}
 
-	li span:first-child {
+	.name {
+		flex-grow: 1;
 		text-overflow: ellipsis;
 		overflow-x: hidden;
+		padding-left: 0.5rem;
 	}
 </style>

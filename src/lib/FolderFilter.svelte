@@ -92,7 +92,7 @@
 	.options {
 		background: var(--color-white);
 		color: var(--text-color-dark);
-		padding: 0;
+		padding: 1rem;
 		list-style-type: none;
 		min-width: 50rem;
 		max-width: 50rem;
