@@ -26,7 +26,7 @@ export async function load({ depends, params, fetch, url }) {
 	return {
 		inodes,
 		page,
-		parent_id: params.id,
+		parent_id: params.id ? parseInt(params.id) : undefined,
 		...pagination
 	};
 }

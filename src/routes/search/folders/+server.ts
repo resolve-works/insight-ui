@@ -6,6 +6,16 @@ export async function GET({ fetch, url }) {
 	const query = url.searchParams.get('query');
 	const folders = parse_folders(url.searchParams.get('folders'));
 
+	const must: Record<string, any>[] = [{ term: { type: 'file' } }];
+
+	if (query) {
+		must.push({
+			wildcard: {
+				folder: `*${query}*`
+			}
+		});
+	}
+
 	const res = await fetch(`${env.OPENSEARCH_ENDPOINT}/inodes/_search`, {
 		method: 'post',
 		headers: {
@@ -13,7 +23,7 @@ export async function GET({ fetch, url }) {
 		},
 		body: JSON.stringify({
 			_source: { excludes: ['pages'] },
-			aggs: { folder: { terms: { field: 'folder' } } },
+			aggs: { folder: { terms: { field: 'folder', size: 50 } } },
 			// Do folder filtering after the query stage so that aggregations contain all folders
 			post_filter: {
 				bool: {
@@ -27,30 +37,15 @@ export async function GET({ fetch, url }) {
 				}
 			},
 			query: {
-				bool: {
-					must: [
-						{ term: { type: 'file' } },
-						{
-							match: {
-								folder: query
-							}
-						}
-					]
-				}
+				bool: { must }
 			}
 		})
 	});
 
 	const body = await res.json();
-	console.log(body);
 	if (res.status !== 200) {
 		return error(500, `Invalid response from opensearch. ${body.error.type}: ${body.error.reason}`);
 	}
 
-	return json(
-		body.aggregations.folder.buckets.map((bucket: Record<string, any>) => ({
-			label: bucket.key,
-			...bucket
-		}))
-	);
+	return json(body.aggregations.folder.buckets);
 }

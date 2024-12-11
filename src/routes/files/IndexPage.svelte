@@ -21,12 +21,12 @@
 
 	export let name;
 	export let is_owned: boolean = true;
-	export let users: { name: string } | undefined;
+	export let users: { name: string } | undefined = undefined;
 	export let inodes;
 	export let form;
 
-	export let parent_id: number | undefined;
-	export let path: string;
+	export let parent_id: number | undefined = undefined;
+	export let path: string | undefined = undefined;
 
 	// Pagination
 	export let page;

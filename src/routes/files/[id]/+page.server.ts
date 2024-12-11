@@ -85,9 +85,8 @@ export async function load(event: ServerLoadEvent) {
 		`?id=eq.${params.id}` +
 		`&select=id,name,is_owned,owner_id,path,type,from_page,to_page,ancestors(id,name),users(name)`;
 
-	const res = await fetch(api_url);
-	const inodes = await res.json();
-	const inode = inodes[0];
+	const res = await fetch(api_url, { headers: { Accept: 'application/vnd.pgrst.object+json' } });
+	const inode = await res.json();
 	const { owner_id, path, type } = inode;
 	const optimized_path = path.replace(/(.+)(\/[^/.]+)(\..+)$/, '$1$2_optimized$3');
 

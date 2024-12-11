@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import Section from '$lib/Section.svelte';
 	import File from './File.svelte';
 	import Title from '$lib/Title.svelte';
@@ -10,6 +11,8 @@
 
 	export let data;
 
+	let form: HTMLFormElement;
+
 	$: {
 		breadcrumbs.set([{ name: 'Search', path: '/search' }]);
 	}
@@ -19,15 +22,11 @@
 	<h2 slot="header">Filters</h2>
 
 	<nav>
-		<form action="/conversations?/create_conversation" method="POST">
+		<form action="/search" bind:this={form}>
 			<Section>
 				<p>Filter by folder</p>
-				<FolderFilter />
+				<FolderFilter on:change={() => form.requestSubmit()} />
 			</Section>
-
-			<button class="secondary" title="Start a conversation with these filters">
-				Start Conversation
-			</button>
 		</form>
 	</nav>
 </SideBar>

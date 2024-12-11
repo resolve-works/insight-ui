@@ -5,47 +5,6 @@ import { validate, ValidationError } from '$lib/validation';
 import { schema } from '$lib/validation/prompt';
 
 class EmbedError extends Error {}
-type Fetch = typeof fetch;
-
-async function get_folder_options(
-	fetch: Fetch,
-	folders: string[],
-	query: string | undefined = undefined
-) {
-	const must: Record<string, any>[] = [
-		{
-			bool: {
-				should: folders.map((folder) => ({ term: { folder: folder } }))
-			}
-		}
-	];
-
-	const res = await fetch(`${env.OPENSEARCH_ENDPOINT}/inodes/_search`, {
-		method: 'post',
-		headers: {
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({
-			_source: { excludes: ['pages'] },
-			aggs: { folder: { terms: { field: 'folder' } } },
-			query: { term: { type: 'file' } },
-			post_filter: { bool: { must } }
-		})
-	});
-
-	const body = await res.json();
-	if (res.status !== 200) {
-		throw new Error(`Invalid response from opensearch. ${body.error.type}: ${body.error.reason}`);
-	}
-
-	return {
-		total: body.hits.total.value,
-		options: body.aggregations.folder.buckets.map((bucket: Record<string, any>) => ({
-			label: bucket.key,
-			...bucket
-		}))
-	};
-}
 
 export async function load({ fetch, depends, params }) {
 	depends('api:conversations');
@@ -70,9 +29,7 @@ export async function load({ fetch, depends, params }) {
 			? conversation.inodes.map((inode: { path: string }) => inode.path)
 			: [];
 
-	const { options, total } = await get_folder_options(fetch, paths);
-
-	return { paths, ...conversation, options, total };
+	return { paths, ...conversation };
 }
 
 async function embed(input: string) {

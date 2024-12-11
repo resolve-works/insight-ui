@@ -1,68 +1,44 @@
-<script lang="ts" context="module">
-	export type FolderOption = ObjectOption & {
-		label: string;
-		doc_count: number;
-	};
-</script>
-
 <script lang="ts">
-	import MultiSelect from 'svelte-multiselect';
-	import type { ObjectOption } from 'svelte-multiselect';
+	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
+	import { createEventDispatcher, tick } from 'svelte';
 
-	export let selected: FolderOption[] = [];
+	let folders = $page.url.searchParams.get('folders');
 
-	let value;
-	let searchText = '';
+	let selected = folders ? JSON.parse(folders) : [];
+	let query = '';
 	let loading = false;
-	let options: FolderOption[] = [];
+	let options: { key: string; doc_count: number }[];
 
-	async function fetch_folders(searchText: string) {
+	const dispatch = createEventDispatcher();
+
+	async function change() {
+		await tick();
+		dispatch('change');
+	}
+
+	async function fetch_folders(query: string) {
 		loading = true;
-		// perform some fetch/database request here to get list of options matching searchText
-		const response = await fetch(`/search/folders?query=${searchText}`);
+		// perform some fetch/database request here to get list of options matching query
+		const response = await fetch(`/search/folders?query=${query}`);
 		options = await response.json();
-		console.log(options.length);
 		loading = false;
 	}
 
 	$: {
 		if (browser) {
-			fetch_folders(searchText);
+			fetch_folders(query);
 		}
 	}
-
-	$: selected_paths = selected.map((option) => option.key);
 </script>
 
-{#each selected_paths as path}
-	<input type="hidden" name="folders[]" value={path} />
-{/each}
+<input type="hidden" name="folders" value={JSON.stringify(selected)} />
 
-<pre>value = {JSON.stringify(value)}</pre>
+<input bind:value={query} />
 
-<MultiSelect
-	{options}
-	placeholder="Select folders ..."
-	ulOptionsClass="dropdown"
-	bind:value
-	bind:selected
-	bind:searchText
-	on:change
-	{loading}
->
+{#each options as option}
 	<div class="option" slot="option" let:option>
-		<span>{option.label}</span>
+		<span>{option.key}</span>
 		<span>{option.doc_count} file{option.doc_count != 1 ? 's' : ''}</span>
 	</div>
-	<div class="option" slot="selected" let:option>
-		<span>{option.label}</span>
-	</div>
-</MultiSelect>
-
-<style>
-	.option {
-		display: flex;
-		justify-content: space-between;
-	}
-</style>
+{/each}
