@@ -11,7 +11,10 @@ export async function GET({ fetch, url }) {
 	if (query) {
 		must.push({
 			wildcard: {
-				folder: `*${query}*`
+				folder: {
+					value: `*${query}*`,
+					case_insensitive: true
+				}
 			}
 		});
 	}

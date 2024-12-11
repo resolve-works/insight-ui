@@ -45,8 +45,8 @@
 		display: grid;
 		grid-template-rows: var(--header-height) 1fr var(--footer-height);
 		min-height: 100vh;
-		z-index: 3;
 		position: sticky;
+		z-index: 3;
 		top: 0;
 	}
 

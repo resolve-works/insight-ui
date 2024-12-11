@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { tick } from 'svelte';
 	import Section from '$lib/Section.svelte';
 	import File from './File.svelte';
 	import Title from '$lib/Title.svelte';
