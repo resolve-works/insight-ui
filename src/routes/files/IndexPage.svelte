@@ -252,7 +252,7 @@
 	{/each}
 
 	{#if !inodes.length}
-		<p>empty</p>
+		<p class="empty">This folder is empty.</p>
 	{/if}
 
 	<Pagination {page} {first_item} {last_item} {amount_of_items} {amount_of_pages} />
@@ -297,6 +297,10 @@
 
 	.shared {
 		margin-right: 1rem;
+		color: var(--text-color-page);
+	}
+
+	.empty {
 		color: var(--text-color-page);
 	}
 </style>

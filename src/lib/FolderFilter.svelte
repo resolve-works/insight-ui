@@ -13,25 +13,28 @@
 </script>
 
 <script lang="ts">
+	import Icon from './Icon.svelte';
 	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
-	import { createEventDispatcher, tick } from 'svelte';
+	import { onMount, createEventDispatcher } from 'svelte';
 	import FolderFilterFolder from './FolderFilterFolder.svelte';
 	import { parse_folders } from './search';
-
-	let selected = parse_folders($page.url.searchParams.get('folders'));
-	let query = '';
-	let loading = false;
-	let is_opened = true;
-	let folders: Folder[] = [];
-	let focussed_index = 0;
+	import { writable } from 'svelte/store';
 
 	const dispatch = createEventDispatcher();
 
-	async function change() {
-		await tick();
+	let selected = writable(parse_folders($page.url.searchParams.get('folders')));
+	selected.subscribe(() => {
 		dispatch('change');
-	}
+	});
+
+	let folder_container: HTMLDivElement;
+	let query = '';
+	let is_loading = false;
+	let is_opened = false;
+	let is_focussed = false;
+	let folders: Folder[] = [];
+	let focussed_index = 0;
 
 	// Sort tree by doc_count
 	function sort(inodes: Inode[]) {
@@ -77,10 +80,24 @@
 	function select(index: number) {
 		const index_key = folders[index].key;
 
-		if (selected.find((key) => key == index_key)) {
-			selected = selected.filter((key) => key != index_key);
+		if ($selected.find((key) => key == index_key)) {
+			$selected = $selected.filter((key) => key != index_key);
 		} else {
-			selected = [...selected, index_key];
+			$selected = [...$selected, index_key];
+		}
+	}
+
+	function focus(index: number) {
+		if (index >= 0 && index < folders.length) {
+			focussed_index = index;
+
+			const element = folder_container.children[index];
+			const element_rect = element.getBoundingClientRect();
+			const parent_rect = folder_container.getBoundingClientRect();
+
+			if (element_rect.bottom > parent_rect.bottom || element_rect.top < parent_rect.top) {
+				element.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+			}
 		}
 	}
 
@@ -88,11 +105,11 @@
 		switch (event.key) {
 			case 'ArrowUp':
 				event.preventDefault();
-				focussed_index -= 1;
+				focus(focussed_index - 1);
 				break;
 			case 'ArrowDown':
 				event.preventDefault();
-				focussed_index += 1;
+				focus(focussed_index + 1);
 				break;
 			case 'Enter':
 				event.preventDefault();
@@ -101,23 +118,38 @@
 		}
 	}
 
+	function close(e: MouseEvent) {
+		if (e.target == null) {
+			return;
+		}
+
+		is_opened = false;
+	}
+
+	onMount(() => {
+		document.addEventListener('click', close);
+		return () => {
+			document.removeEventListener('click', close);
+		};
+	});
+
 	$: {
 		if (browser) {
 			(async () => {
-				loading = true;
+				is_loading = true;
 				const unsorted_folders = await fetch_folders(query);
 				folders = flatten_inode_tree(sort(unsorted_folders));
 				focussed_index = 0;
-				loading = false;
+				is_loading = false;
 			})();
 		}
 	}
 </script>
 
-<input type="hidden" name="folders" value={JSON.stringify(selected)} />
+<input type="hidden" name="folders" value={JSON.stringify($selected)} />
 
 <ul>
-	{#each selected as key}
+	{#each $selected as key}
 		<li>{key}</li>
 	{/each}
 </ul>
@@ -127,25 +159,40 @@
 	class:is-opened={is_opened}
 	type="text"
 	bind:value={query}
-	on:focus={() => (is_opened = true)}
-	on:blur={() => (is_opened = false)}
+	on:focus={() => {
+		is_opened = true;
+		is_focussed = true;
+	}}
+	on:blur={() => (is_focussed = false)}
+	on:click|stopPropagation
 	on:keydown={keydown}
 />
 
 <div class="holder">
-	<ul class:is-opened={is_opened} class="folders">
-		{#each folders as folder, index}
-			<FolderFilterFolder
-				{...folder}
-				is_selected={selected.includes(folder.key)}
-				is_focussed={index == focussed_index}
-				on:focus={() => (focussed_index = index)}
-				on:click={() => {
-					select(index);
-				}}
-			/>
-		{/each}
-	</ul>
+	<div
+		class="folders"
+		class:is-opened={is_opened}
+		class:is-focussed={is_focussed}
+		bind:this={folder_container}
+	>
+		{#if is_loading}
+			<p>
+				<Icon class="gg-loadbar" /> Loading ...
+			</p>
+		{:else if !folders.length}
+			<p class="empty">No results</p>
+		{:else}
+			{#each folders as folder, index}
+				<FolderFilterFolder
+					{...folder}
+					is_selected={$selected.includes(folder.key)}
+					is_focussed={index == focussed_index}
+					on:mouseenter={() => (focussed_index = index)}
+					on:click={async () => select(index)}
+				/>
+			{/each}
+		{/if}
+	</div>
 </div>
 
 <style>
@@ -169,22 +216,35 @@
 		position: absolute;
 		top: calc(var(--input-border-size) * -1);
 		display: none;
-		margin: 0;
 		color: var(--text-color-dark);
-		padding: 0;
 		list-style-type: none;
-		max-width: 40rem;
+		width: 40rem;
 		max-height: 20rem;
 		border-bottom-left-radius: var(--input-border-radius);
 		border-bottom-right-radius: var(--input-border-radius);
 		border-top-right-radius: var(--input-border-radius);
-		border: var(--input-border-size) solid var(--input-focus-border-color);
+		border: var(--input-border);
 		background: var(--input-background-color);
-		overflow: scroll;
+		overflow-y: auto;
 		z-index: 1;
 	}
 
 	.folders.is-opened {
 		display: block;
+	}
+
+	.folders.is-focussed {
+		border-color: var(--input-focus-border-color);
+	}
+
+	.folders p {
+		display: flex;
+		gap: 0.5rem;
+		margin: 0;
+		padding: 0.5rem 1rem;
+	}
+
+	.empty {
+		color: var(--text-color-page);
 	}
 </style>

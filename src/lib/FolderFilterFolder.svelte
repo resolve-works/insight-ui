@@ -1,8 +1,5 @@
 <script lang="ts">
 	import Icon from './Icon.svelte';
-	import { createEventDispatcher } from 'svelte';
-
-	const dispatch = createEventDispatcher();
 
 	export let label: string;
 	export let doc_count: number;
@@ -15,11 +12,10 @@
 
 <button
 	style="padding-left: {padding + 1}rem"
-	class:is_selected
-	class:is_focussed
-	on:mouseenter={() => dispatch('focus')}
-	on:mousedown
-	on:click
+	class:is-selected={is_selected}
+	class:is-focussed={is_focussed}
+	on:mouseenter
+	on:click|stopPropagation
 >
 	{#if indent > 0}
 		<Icon class="gg-corner-down-right" />
@@ -36,12 +32,16 @@
 		padding: 0.5rem 1rem;
 	}
 
-	button.is_selected {
-		background: var(--color-secondary) !important;
+	button.is-selected {
+		background: var(--color-secondary);
 	}
 
-	button.is_focussed {
+	button.is-focussed {
 		background: var(--color-secondary-lighter);
+	}
+
+	button.is-focussed.is-selected {
+		background: var(--color-secondary-darker);
 	}
 
 	button :global(.icon) {

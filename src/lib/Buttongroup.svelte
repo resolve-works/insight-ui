@@ -5,14 +5,14 @@
 	export let test_id: string | undefined;
 
 	let is_enhanced = false;
-	let is_open = false;
+	let is_opened = false;
 
 	function close(e: MouseEvent) {
 		if (e.target == null) {
 			return;
 		}
 
-		is_open = false;
+		is_opened = false;
 	}
 
 	onMount(() => {
@@ -25,10 +25,10 @@
 	});
 </script>
 
-<div class="buttongroup" class:enhance={is_enhanced} class:open={is_open} data-testid={test_id}>
+<div class="buttongroup" class:enhance={is_enhanced} class:open={is_opened} data-testid={test_id}>
 	<button
 		class="button toggle"
-		on:click|preventDefault|stopPropagation={() => (is_open = !is_open)}
+		on:click|preventDefault|stopPropagation={() => (is_opened = !is_opened)}
 		data-testid={test_id ? `${test_id}-toggle` : undefined}
 	>
 		<Icon class="gg-more-vertical-alt" />
