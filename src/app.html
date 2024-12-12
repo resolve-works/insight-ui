@@ -68,23 +68,6 @@
 
 		--font-body: 'Rubik Variable', sans-serif;
 		--font-heading: 'Roboto Slab Variable', sans-serif;
-
-		--sms-font-size: 1rem;
-		--sms-padding: var(--input-padding);
-		--sms-border: var(--input-border);
-		--sms-focus-border: var(--input-border-size) solid var(--input-focus-border-color);
-		--sms-border-radius: var(--input-border-radius);
-		--sms-bg: var(--input-background-color);
-		--sms-text-color: var(--input-text-color);
-		--sms-options-bg: var(--input-background-color);
-		--sms-options-border-radius: var(--input-border-radius);
-		--sms-options-shadow: none;
-		--sms-selected-bg: var(--color-secondary);
-		--sms-li-active-bg: var(--color-secondary-lighter);
-		--sms-selected-text-color: var(--text-color-dark);
-		--sms-selected-li-padding: 0.1rem 0.3rem;
-		--sms-placeholder-color: var(--input-placeholder-color);
-		--sms-placeholder-opacity: 1;
 	}
 
 	*,
@@ -127,19 +110,23 @@
 		text-decoration: underline;
 	}
 
-	a.unstyled {
-		text-decoration: none;
-		color: var(--text-color-dark);
-	}
-
-	a.unstyled:hover {
-		text-decoration: underline;
-		color: var(--color-primary);
-	}
-
-	input[type='submit'],
-	a.button,
 	button {
+		background: none;
+		border: none;
+		margin: 0;
+		padding: 0;
+		display: inline-block;
+		font: inherit;
+		color: inherit;
+		text-align: left;
+		outline: none;
+	}
+	button::-moz-focus-inner {
+		border: 0;
+		padding: 0;
+	}
+
+	.button {
 		display: flex;
 		gap: 0.5rem;
 		align-items: center;
@@ -155,23 +142,17 @@
 		cursor: pointer;
 	}
 
-	input[type='submit']:hover,
-	a.button:hover,
-	button:hover {
+	.button:hover {
 		text-decoration: underline;
 	}
 
-	input[type='submit'].primary,
-	a.button.primary,
-	button.primary {
+	.button.primary {
 		background: var(--color-primary);
 		color: var(--text-color-light);
 		border-color: var(--color-primary-darker);
 	}
 
-	input[type='submit'].secondary,
-	a.button.secondary,
-	button.secondary {
+	.button.secondary {
 		background: var(--color-secondary);
 		color: var(--text-color-dark);
 		border-color: var(--color-secondary-darker);
@@ -250,10 +231,5 @@
 	input[type='checkbox']:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
-	}
-
-	div.multiselect > ul.options {
-		transition: initial !important;
-		transform: initial !important;
 	}
 </style>

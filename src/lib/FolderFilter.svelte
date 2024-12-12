@@ -41,7 +41,6 @@
 	}
 
 	async function fetch_folders(query: string) {
-		// perform some fetch/database request here to get list of options matching query
 		const response = await fetch(`/search/folders?query=${query}`);
 		const options = await response.json();
 
@@ -75,6 +74,16 @@
 			.flat();
 	}
 
+	function select(index: number) {
+		const index_key = folders[index].key;
+
+		if (selected.find((key) => key == index_key)) {
+			selected = selected.filter((key) => key != index_key);
+		} else {
+			selected = [...selected, index_key];
+		}
+	}
+
 	function keydown(event: KeyboardEvent) {
 		switch (event.key) {
 			case 'ArrowUp':
@@ -87,7 +96,8 @@
 				break;
 			case 'Enter':
 				event.preventDefault();
-				selected = [...selected, folders[focussed_index].key];
+				select(focussed_index);
+				break;
 		}
 	}
 
@@ -106,7 +116,14 @@
 
 <input type="hidden" name="folders" value={JSON.stringify(selected)} />
 
+<ul>
+	{#each selected as key}
+		<li>{key}</li>
+	{/each}
+</ul>
+
 <input
+	placeholder="Type folder name ..."
 	class:is-opened={is_opened}
 	type="text"
 	bind:value={query}
@@ -120,8 +137,12 @@
 		{#each folders as folder, index}
 			<FolderFilterFolder
 				{...folder}
-				is_selected={index == focussed_index}
+				is_selected={selected.includes(folder.key)}
+				is_focussed={index == focussed_index}
 				on:focus={() => (focussed_index = index)}
+				on:click={() => {
+					select(index);
+				}}
 			/>
 		{/each}
 	</ul>

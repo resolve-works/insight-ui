@@ -69,7 +69,7 @@
 
 					<FormErrors errors={form?.errors} key="is_public" />
 
-					<button class="primary" data-testid="update-inode">
+					<button class="button primary" data-testid="update-inode">
 						<Icon class="gg-pen" /> Update {data.type == 'file' ? 'Document' : 'Folder'}
 					</button>
 				</Form>

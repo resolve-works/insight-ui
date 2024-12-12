@@ -37,7 +37,8 @@
 
 				<form method="POST" action="?/remove" use:enhance>
 					<input type="hidden" name="id" value={id} />
-					<button data-testid="delete-inode"><Icon class="gg-trash" /> Delete</button>
+					<button class="button" data-testid="delete-inode"><Icon class="gg-trash" /> Delete</button
+					>
 				</form>
 			</Buttongroup>
 		{/if}

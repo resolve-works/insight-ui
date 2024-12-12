@@ -8,40 +8,48 @@
 	export let doc_count: number;
 	export let indent = 0;
 	export let is_selected = false;
+	export let is_focussed = false;
 
 	const padding = indent > 0 ? (indent - 1) * 2 + 1 : indent;
 </script>
 
-<li
+<button
 	style="padding-left: {padding + 1}rem"
 	class:is_selected
+	class:is_focussed
 	on:mouseenter={() => dispatch('focus')}
+	on:mousedown
+	on:click
 >
 	{#if indent > 0}
 		<Icon class="gg-corner-down-right" />
 	{/if}
 	<span class="name" class:padded={indent > 0}>{label}</span>
 	<span>{doc_count} file{doc_count != 1 ? 's' : ''}</span>
-</li>
+</button>
 
 <style>
-	li {
+	button {
 		display: flex;
 		align-items: center;
 		line-height: 1.6rem;
-		padding: 0.25rem 1rem;
+		padding: 0.5rem 1rem;
 	}
 
-	li.is_selected {
-		background: #ff0;
+	button.is_selected {
+		background: var(--color-secondary) !important;
 	}
 
-	li :global(.icon) {
+	button.is_focussed {
+		background: var(--color-secondary-lighter);
+	}
+
+	button :global(.icon) {
 		position: relative;
-		bottom: 0.3rem;
+		bottom: 0.25rem;
 	}
 
-	li span {
+	button span {
 		white-space: nowrap;
 	}
 

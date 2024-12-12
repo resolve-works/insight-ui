@@ -12,7 +12,7 @@
 <Card data-testid={test_id}>
 	<header>
 		<h3 data-testid={test_id ? `${test_id}-title` : undefined}>
-			<a data-testid={test_id ? `${test_id}-link` : undefined} class="unstyled" href={path}>
+			<a data-testid={test_id ? `${test_id}-link` : undefined} href={path}>
 				<Icon class={icon} />
 
 				{#if name}
@@ -39,8 +39,15 @@
 	}
 
 	a {
+		text-decoration: none;
+		color: var(--text-color-dark);
 		display: flex;
 		gap: 1rem;
 		align-items: center;
+	}
+
+	a:hover {
+		text-decoration: underline;
+		color: var(--color-primary);
 	}
 </style>

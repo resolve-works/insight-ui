@@ -156,7 +156,7 @@
 					<input name="parent_id" type="hidden" value={parent_id} />
 				{/if}
 
-				<button on:click|preventDefault={() => files_input.click()}>
+				<button class="button" on:click|preventDefault={() => files_input.click()}>
 					<Icon class="gg-software-upload" />
 					Upload PDFs
 				</button>
@@ -169,6 +169,7 @@
 					folder_input.focus();
 				}}
 				data-testid="show-folder-form"
+				class="button"
 			>
 				<Icon class="gg-folder-add" />
 				Create Folder
@@ -180,6 +181,7 @@
 				<button
 					title="Start conversation about the files in this folder"
 					data-testid="start-conversation"
+					class="button"
 				>
 					<Icon class="gg-comment" />
 					Start Conversation
@@ -227,9 +229,10 @@
 						</div>
 
 						<InputGroup>
-							<button class="primary" data-testid="create-folder">Create</button>
+							<button class="button primary" data-testid="create-folder">Create</button>
 
 							<button
+								class="button"
 								data-testid="cancel-create-folder"
 								on:click|preventDefault={() => {
 									folder_form.reset();

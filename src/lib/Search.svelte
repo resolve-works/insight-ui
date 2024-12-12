@@ -27,7 +27,7 @@
 		on:blur={() => (is_focused = false)}
 	/>
 
-	<button class:focus={is_focused}>
+	<button class="button" class:focus={is_focused}>
 		<Icon class="gg-search" />
 	</button>
 </form>

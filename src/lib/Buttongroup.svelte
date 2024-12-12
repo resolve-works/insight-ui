@@ -27,7 +27,7 @@
 
 <div class="buttongroup" class:enhance={is_enhanced} class:open={is_open} data-testid={test_id}>
 	<button
-		class="toggle"
+		class="button toggle"
 		on:click|preventDefault|stopPropagation={() => (is_open = !is_open)}
 		data-testid={test_id ? `${test_id}-toggle` : undefined}
 	>

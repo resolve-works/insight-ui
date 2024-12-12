@@ -52,7 +52,7 @@
 			</a>
 
 			<div class="page-select">
-				<button on:click|preventDefault={decrease} class:focus={is_focused}>
+				<button class="button" on:click|preventDefault={decrease} class:focus={is_focused}>
 					<Icon class="gg-chevron-left" />
 				</button>
 
@@ -65,7 +65,7 @@
 					on:blur={() => (is_focused = false)}
 				/>
 
-				<button on:click|preventDefault={increase} class:focus={is_focused}>
+				<button class="button" on:click|preventDefault={increase} class:focus={is_focused}>
 					<Icon class="gg-chevron-right" />
 				</button>
 			</div>
@@ -99,9 +99,9 @@
 	}
 
 	.cover-button {
-		border: none;
-		background: transparent;
+		display: flex;
 		justify-content: center;
+		align-items: center;
 		position: absolute;
 		opacity: 0;
 		width: 10rem;
