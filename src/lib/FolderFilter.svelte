@@ -16,17 +16,13 @@
 	import Icon from './Icon.svelte';
 	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
-	import { onMount, createEventDispatcher } from 'svelte';
+	import { onMount, createEventDispatcher, tick } from 'svelte';
 	import FolderFilterFolder from './FolderFilterFolder.svelte';
 	import { parse_folders } from './search';
-	import { writable } from 'svelte/store';
 
 	const dispatch = createEventDispatcher();
 
-	let selected = writable(parse_folders($page.url.searchParams.get('folders')));
-	selected.subscribe(() => {
-		dispatch('change');
-	});
+	$: selected = parse_folders($page.url.searchParams.get('folders'));
 
 	let folder_container: HTMLDivElement;
 	let query = '';
@@ -77,14 +73,17 @@
 			.flat();
 	}
 
-	function select(index: number) {
+	async function select(index: number) {
 		const index_key = folders[index].key;
 
-		if ($selected.find((key) => key == index_key)) {
-			$selected = $selected.filter((key) => key != index_key);
+		if (selected.find((key) => key == index_key)) {
+			selected = selected.filter((key) => key != index_key);
 		} else {
-			$selected = [...$selected, index_key];
+			selected = [...selected, index_key];
 		}
+
+		await tick();
+		dispatch('change');
 	}
 
 	function focus(index: number) {
@@ -150,10 +149,10 @@
 	}
 </script>
 
-<input type="hidden" name="folders" value={JSON.stringify($selected)} />
+<input type="hidden" name="folders" value={JSON.stringify(selected)} />
 
 <ul>
-	{#each $selected as key}
+	{#each selected as key}
 		<li>{key}</li>
 	{/each}
 </ul>
@@ -189,7 +188,7 @@
 			{#each folders as folder, index}
 				<FolderFilterFolder
 					{...folder}
-					is_selected={$selected.includes(folder.key)}
+					is_selected={selected.includes(folder.key)}
 					is_focussed={index == focussed_index}
 					on:mouseenter={() => (focussed_index = index)}
 					on:click={async () => select(index)}
