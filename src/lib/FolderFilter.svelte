@@ -136,8 +136,12 @@
 	$: {
 		if (browser) {
 			(async () => {
-				is_loading = true;
+				// Defer showing loader to prevent flashing
+				const timeout = setTimeout(() => {
+					is_loading = true;
+				}, 500);
 				const unsorted_folders = await fetch_folders(query);
+				clearTimeout(timeout);
 				folders = flatten_inode_tree(sort(unsorted_folders));
 				focussed_index = 0;
 				is_loading = false;
