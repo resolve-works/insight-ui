@@ -17,7 +17,7 @@
 	let selected = folders_param ? JSON.parse(folders_param) : [];
 	let query = '';
 	let loading = false;
-	let is_opened = false;
+	let is_opened = true;
 	let options: Option[] = [];
 	let folders: Folder[] = [];
 
@@ -78,29 +78,55 @@
 	}
 </script>
 
-<input type="hidden" name="folders" value={JSON.stringify(selected)} />
+<div class:is-opened={is_opened}>
+	<input type="hidden" name="folders" value={JSON.stringify(selected)} />
 
-<input bind:value={query} on:focus={open} on:blur={close} />
+	<input type="text" bind:value={query} on:focus={open} on:blur={close} />
 
-<ul class="options" class:is-opened={is_opened}>
-	{#each folders as folder}
-		<FolderFilterFolder {...folder} />
-	{/each}
-</ul>
+	<ul class="folders">
+		{#each folders as folder}
+			<FolderFilterFolder {...folder} />
+		{/each}
+	</ul>
+</div>
 
 <style>
-	.options {
-		background: var(--color-white);
-		color: var(--text-color-dark);
-		padding: 1rem;
-		list-style-type: none;
-		min-width: 50rem;
-		max-width: 50rem;
-		max-height: 20rem;
-		overflow: scroll;
+	div {
+		position: relative;
 	}
 
-	.options.is-opened {
+	input[type='text'] {
+		position: relative;
+		display: block;
+	}
+
+	.is-opened input[type='text'] {
+		border-bottom-color: var(--input-background-color);
+		border-bottom-left-radius: 0;
+		border-bottom-right-radius: 0;
+		z-index: 2;
+	}
+
+	.folders {
+		position: relative;
+		top: calc(var(--input-border-size) * -1);
+		display: none;
+		margin: 0;
+		color: var(--text-color-dark);
+		padding: 0.5rem 1rem;
+		list-style-type: none;
+		max-width: 40rem;
+		max-height: 20rem;
+		border-bottom-left-radius: var(--input-border-radius);
+		border-bottom-right-radius: var(--input-border-radius);
+		border-top-right-radius: var(--input-border-radius);
+		border: var(--input-border-size) solid var(--input-focus-border-color);
+		background: var(--input-background-color);
+		overflow: scroll;
+		z-index: 1;
+	}
+
+	.is-opened .folders {
 		display: block;
 	}
 </style>

@@ -71,7 +71,7 @@
 	.buttongroup.enhance.open .toggle {
 		border-color: var(--input-border-color);
 		background-color: var(--input-background-color);
-		border-bottom-color: var(--color-white);
+		border-bottom-color: var(--input-background-color);
 		border-bottom-left-radius: 0;
 		border-bottom-right-radius: 0;
 		z-index: 2;
@@ -89,7 +89,7 @@
 		border-bottom-right-radius: var(--input-border-radius);
 		border-top-left-radius: var(--input-border-radius);
 		border: var(--input-border);
-		background: var(--color-white);
+		background: var(--input-background-color);
 		z-index: 1;
 	}
 

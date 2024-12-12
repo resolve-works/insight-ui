@@ -2,14 +2,14 @@
 	export let test_id: string | undefined = undefined;
 </script>
 
-<span>
+<span class="icon">
 	<i data-testid={test_id} role={$$props.class == 'gg-loadbar' ? 'progressbar' : ''} {...$$props} />
 </span>
 
 <style>
 	@import './icons.css';
 
-	span {
+	.icon {
 		width: 1.35rem;
 		height: 1.35rem;
 		display: flex;
