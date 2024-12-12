@@ -189,6 +189,7 @@
 					is_focussed={index == focussed_index}
 					on:mouseenter={() => (focussed_index = index)}
 					on:click={async () => select(index)}
+					on:mousedown
 				/>
 			{/each}
 		{/if}

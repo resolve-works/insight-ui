@@ -21,7 +21,7 @@
 	<h2 slot="header">Filters</h2>
 
 	<nav>
-		<form action="/search" bind:this={form}>
+		<form action="/search" bind:this={form} data-sveltekit-keepfocus>
 			<Section>
 				<p>Filter by folder</p>
 				<FolderFilter on:change={() => form.requestSubmit()} />

@@ -14,6 +14,7 @@
 	style="padding-left: {padding + 1}rem"
 	class:is-selected={is_selected}
 	class:is-focussed={is_focussed}
+	on:mousedown|preventDefault
 	on:mouseenter
 	on:click|stopPropagation
 >
