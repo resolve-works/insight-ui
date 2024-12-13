@@ -98,6 +98,14 @@
 <Page class="with-sidebar-left">
 	<div class="chat">
 		<div class="messages">
+			<Message type={MessageType.machine}>
+				<p>
+					We are having a conversation about {#if !selected_folders.length}all files{:else}the files
+						contained in the chosen folders{/if}. To what question do you think these files hold the
+					answer?
+				</p>
+			</Message>
+
 			{#each data.prompts as prompt}
 				<Message type={MessageType.human}>
 					<p>{prompt.query}</p>

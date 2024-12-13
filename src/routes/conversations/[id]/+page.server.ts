@@ -7,16 +7,13 @@ import { schema as conversation_schema } from '$lib/validation/conversation';
 
 class EmbedError extends Error {}
 
-export async function load({ fetch, depends, params }) {
-	depends('api:conversations');
-	depends('api:prompts');
-
+async function get_conversation(fetch: typeof global.fetch, id: string) {
 	const url = new URL(`${env.API_ENDPOINT}/conversations`);
 	const sources = `sources(similarity,...pages(index,...inodes(id,name,from_page)))`;
 	url.searchParams.set('select', `error,prompts(query,response,error,${sources}),inodes(path)`);
 	url.searchParams.set('prompts.order', 'created_at.asc');
 	url.searchParams.set('prompts.sources.order', 'similarity.asc');
-	url.searchParams.set('id', `eq.${params.id}`);
+	url.searchParams.set('id', `eq.${id}`);
 
 	const response = await fetch(url, {
 		headers: {
@@ -26,7 +23,14 @@ export async function load({ fetch, depends, params }) {
 	if (response.status !== 200) {
 		throw new Error(await response.text());
 	}
-	const conversation = await response.json();
+	return response.json();
+}
+
+export async function load({ fetch, depends, params }) {
+	depends('api:conversations');
+	depends('api:prompts');
+
+	const conversation = await get_conversation(fetch, params.id);
 
 	const selected_folders =
 		'inodes' in conversation
