@@ -176,7 +176,7 @@
 			</button>
 
 			<form action="/conversations?/create_conversation" method="POST">
-				<input type="hidden" name="folders[]" value={path} />
+				<input type="hidden" name="folders" value={JSON.stringify(path ? [path] : [])} />
 
 				<button
 					title="Start conversation about the files in this folder"

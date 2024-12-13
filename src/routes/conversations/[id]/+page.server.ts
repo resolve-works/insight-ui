@@ -109,22 +109,22 @@ async function create_prompt(fetch: Function, conversation_id: number, query: st
 	}
 
 	const url = new URL(`${env.API_ENDPOINT}/prompts`);
-	url.searchParams.set('select', 'id');
+	url.searchParams.set('select', 'id,error');
 
 	const response = await fetch(url, {
 		method: 'POST',
 		body: JSON.stringify(data),
 		headers: {
 			'Content-Type': 'application/json',
-			Prefer: 'return=representation'
+			Prefer: 'return=representation',
+			Accept: 'application/vnd.pgrst.object+json'
 		}
 	});
 	if (response.status != 201) {
 		throw new Error(await response.text());
 	}
 
-	const prompts = await response.json();
-	return prompts[0];
+	return response.json();
 }
 
 /*
