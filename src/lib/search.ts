@@ -1,3 +1,4 @@
+// TODO - Use zod instead
 export function parse_folders(param: string | null) {
 	if (!param) {
 		return [];

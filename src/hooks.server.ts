@@ -9,6 +9,26 @@ import {
 	clear_tokens
 } from '$lib/auth.ts';
 
+/*
+TODO - Either extend the ServerLoadEvent to provide an API wrapper
+or use the fetch hook to add some error handling to postgrest API
+
+class InsightClient {
+	fetch: typeof global.fetch;
+
+	constructor(fetch: typeof global.fetch) {
+		this.fetch = fetch;
+	}
+}
+
+// Extend the ServerLoadEvent type
+declare module '@sveltejs/kit' {
+	interface ServerLoadEvent {
+		api: InsightClient;
+	}
+}
+*/
+
 export async function handle({ event, resolve }) {
 	// Did the authentication platform just redirect to us with a new code?
 	// TODO - add querystring to redirect_uri

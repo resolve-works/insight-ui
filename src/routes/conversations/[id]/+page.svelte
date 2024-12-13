@@ -23,6 +23,7 @@
 
 	$: sources = data.prompts.map((prompt: { sources: Source[] }) => prompt.sources).flat();
 
+	let filter_form: HTMLFormElement;
 	let input: HTMLInputElement;
 	let answer: string = '';
 
@@ -82,9 +83,9 @@
 	<h2 slot="header">Filters</h2>
 
 	<nav>
-		<form action="/conversations?/create_conversation" method="POST">
+		<form bind:this={filter_form} action="/conversations?/create_conversation" method="POST">
 			<Section>
-				<FolderFilter selected={selected_folders} />
+				<FolderFilter selected={selected_folders} on:change={() => filter_form.requestSubmit()} />
 			</Section>
 
 			<button class="button secondary" title="Start a new conversation with these filters">

@@ -14,26 +14,19 @@
 
 <script lang="ts">
 	import Icon from './Icon.svelte';
-	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
 	import { onMount, createEventDispatcher, tick } from 'svelte';
 	import FolderFilterFolder from './FolderFilterFolder.svelte';
 	import FolderTag from './FolderTag.svelte';
-	import { parse_folders } from './search';
 
 	const dispatch = createEventDispatcher();
 
-	export let selected: string[] = parse_folders($page.url.searchParams.get('folders'));
-
-	page.subscribe(({ url }) => {
-		selected = parse_folders(url.searchParams.get('folders'));
-	});
+	export let selected: string[] = [];
 
 	let folder_container: HTMLDivElement;
 	let query = '';
 	let is_loading = false;
 	let is_opened = false;
-	let is_focussed = false;
 	let folders: Folder[] = [];
 	let focussed_index = 0;
 
@@ -104,6 +97,7 @@
 	}
 
 	function keydown(event: KeyboardEvent) {
+		console.log(event.key);
 		switch (event.key) {
 			case 'ArrowUp':
 				event.preventDefault();
@@ -158,7 +152,7 @@
 	<p>Selected folders</p>
 {/if}
 {#each selected as key (key)}
-	<FolderTag {key} is_removable on:click={() => select(key)} />
+	<FolderTag path={key} is_removable on:click={() => select(key)} />
 {/each}
 
 <p>Filter by folder</p>
@@ -167,22 +161,14 @@
 	class:is-opened={is_opened}
 	type="text"
 	bind:value={query}
-	on:focus={() => {
-		is_opened = true;
-		is_focussed = true;
-	}}
-	on:blur={() => (is_focussed = false)}
+	on:focus={() => (is_opened = true)}
+	on:blur={() => (is_opened = false)}
 	on:click|stopPropagation
 	on:keydown={keydown}
 />
 
 <div class="holder">
-	<div
-		class="folders"
-		class:is-opened={is_opened}
-		class:is-focussed={is_focussed}
-		bind:this={folder_container}
-	>
+	<div class="folders" class:is-opened={is_opened} bind:this={folder_container}>
 		{#if is_loading}
 			<p>
 				<Icon class="gg-loadbar" /> Loading ...
@@ -233,6 +219,7 @@
 		border-bottom-right-radius: var(--input-border-radius);
 		border-top-right-radius: var(--input-border-radius);
 		border: var(--input-border);
+		border-color: var(--input-focus-border-color);
 		background: var(--input-background-color);
 		overflow-y: auto;
 		z-index: 1;
@@ -240,10 +227,6 @@
 
 	.folders.is-opened {
 		display: block;
-	}
-
-	.folders.is-focussed {
-		border-color: var(--input-focus-border-color);
 	}
 
 	.folders p {

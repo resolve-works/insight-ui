@@ -50,3 +50,12 @@ export async function validate(request: Request, schema: Schema) {
 		throw err;
 	}
 }
+
+export const string_to_json_schema = z.string().transform((str, ctx) => {
+	try {
+		return JSON.parse(str);
+	} catch (e) {
+		ctx.addIssue({ code: 'custom', message: 'Invalid JSON' });
+		return z.NEVER;
+	}
+});

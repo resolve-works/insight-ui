@@ -2,9 +2,9 @@
 	import Icon from './Icon.svelte';
 	export let is_width_limited = false;
 	export let is_removable = false;
-	export let key: string;
+	export let path: string;
 
-	let parts = key.split('/').filter(Boolean);
+	let parts = path.split('/').filter(Boolean);
 </script>
 
 <div class="tag" class:is-width-limited={is_width_limited}>
@@ -37,7 +37,7 @@
 	}
 
 	.tag.is-width-limited {
-		max-width: 20rem;
+		max-width: 40%;
 	}
 
 	.part {

@@ -2,7 +2,8 @@ import { env } from '$env/dynamic/private';
 import type { Actions } from './$types';
 import { fail } from '@sveltejs/kit';
 import { validate, ValidationError } from '$lib/validation';
-import { schema } from '$lib/validation/prompt';
+import { schema as prompt_schema } from '$lib/validation/prompt';
+import { schema as conversation_schema } from '$lib/validation/conversation';
 
 class EmbedError extends Error {}
 
@@ -147,11 +148,61 @@ async function substantiate_prompt(
 	return response.json();
 }
 
+async function get_inodes(fetch: typeof global.fetch, paths: string[]) {
+	const url = new URL(`${env.API_ENDPOINT}/inodes`);
+	url.searchParams.set('path', `in.(${paths.map((path: string) => `"${path}"`).join(',')})`);
+	url.searchParams.set('select', 'id');
+	const response = await fetch(url);
+	if (response.status != 200) {
+		throw new Error(await response.text());
+	}
+	return response.json();
+}
+
+async function upsert_conversations_inodes(
+	fetch: typeof global.fetch,
+	conversation_id: number,
+	inodes: { id: number }[]
+) {
+	// Upsert chosen folders
+	const url = new URL(`${env.API_ENDPOINT}/conversations_inodes`);
+	const response = await fetch(url, {
+		method: 'POST',
+		body: JSON.stringify(inodes.map(({ id }) => ({ inode_id: id, conversation_id }))),
+		headers: {
+			'Content-Type': 'application/json',
+			Prefer: 'resolution=merge-duplicates'
+		}
+	});
+
+	if (response.status != 200) {
+		throw new Error(await response.text());
+	}
+}
+
+async function delete_conversations_inodes(
+	fetch: typeof global.fetch,
+	conversation_id: number,
+	inodes: { id: number }[]
+) {
+	// Remove folders that are not chosen
+	const url = new URL(`${env.API_ENDPOINT}/conversations_inodes`);
+	url.searchParams.set('conversation_id', `eq.${conversation_id}`);
+	url.searchParams.set('inode_id', `in.(${inodes.map(({ id }) => `"${id}"`).join(',')})`);
+	const response = await fetch(url, {
+		method: 'DELETE'
+	});
+
+	if (response.status != 200) {
+		throw new Error(await response.text());
+	}
+}
+
 export const actions = {
 	create_prompt: async ({ request, fetch, params }) => {
 		const conversation_id = parseInt(params.id);
 		try {
-			const data = await validate(request, schema);
+			const data = await validate(request, prompt_schema);
 
 			const prompt = await create_prompt(fetch, conversation_id, data.query);
 			// Don't substantiate errored prompts (that have no embedding)
@@ -162,6 +213,24 @@ export const actions = {
 			await substantiate_prompt(fetch, prompt.id, data.similarity_top_k);
 
 			return { success: true };
+		} catch (err) {
+			if (err instanceof ValidationError) {
+				return fail(400, err.format());
+			} else {
+				throw err;
+			}
+		}
+	},
+
+	update_filters: async ({ request, fetch, params }) => {
+		const conversation_id = parseInt(params.id);
+
+		try {
+			const data = await validate(request, conversation_schema);
+			const inodes = await get_inodes(fetch, data.folders);
+
+			await upsert_conversations_inodes(fetch, conversation_id, inodes);
+			await delete_conversations_inodes(fetch, conversation_id, inodes);
 		} catch (err) {
 			if (err instanceof ValidationError) {
 				return fail(400, err.format());

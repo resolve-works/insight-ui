@@ -41,7 +41,7 @@ async function create_conversation({ request, fetch }: RequestEvent) {
 
 		const res = await fetch(api_url, {
 			method: 'POST',
-			body: JSON.stringify({ folders: data['folders[]'] }),
+			body: JSON.stringify(data),
 			headers: {
 				'Content-Type': 'application/json',
 				Prefer: 'return=representation'

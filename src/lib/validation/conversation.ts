@@ -1,6 +1,6 @@
-
-import {z} from 'zod';
+import { z } from 'zod';
+import { string_to_json_schema } from '.';
 
 export const schema = z.object({
-    "folders[]": z.string().array().optional().default([])
-})
+	folders: string_to_json_schema.pipe(z.string().array())
+});
