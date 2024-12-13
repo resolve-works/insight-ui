@@ -31,6 +31,7 @@
 		align-items: center;
 		line-height: 1.6rem;
 		padding: 0.5rem 1rem;
+		width: 100%;
 	}
 
 	button.is-selected {

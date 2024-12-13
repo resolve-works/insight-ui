@@ -18,6 +18,7 @@
 	import { browser } from '$app/environment';
 	import { onMount, createEventDispatcher, tick } from 'svelte';
 	import FolderFilterFolder from './FolderFilterFolder.svelte';
+	import FolderTag from './FolderTag.svelte';
 	import { parse_folders } from './search';
 
 	const dispatch = createEventDispatcher();
@@ -73,13 +74,11 @@
 			.flat();
 	}
 
-	async function select(index: number) {
-		const index_key = folders[index].key;
-
-		if (selected.find((key) => key == index_key)) {
-			selected = selected.filter((key) => key != index_key);
+	async function select(key: string) {
+		if (selected.find((selected_key) => selected_key == key)) {
+			selected = selected.filter((selected_key) => selected_key != key);
 		} else {
-			selected = [...selected, index_key];
+			selected = [...selected, key].sort();
 		}
 
 		await tick();
@@ -112,7 +111,7 @@
 				break;
 			case 'Enter':
 				event.preventDefault();
-				select(focussed_index);
+				select(folders[focussed_index].key);
 				break;
 		}
 	}
@@ -151,12 +150,14 @@
 
 <input type="hidden" name="folders" value={JSON.stringify(selected)} />
 
-<ul>
-	{#each selected as key}
-		<li>{key}</li>
-	{/each}
-</ul>
+{#if selected.length}
+	<p>Selected folders</p>
+{/if}
+{#each selected as key (key)}
+	<FolderTag {key} is_removable on:click={() => select(key)} />
+{/each}
 
+<p>Filter by folder</p>
 <input
 	placeholder="Type folder name ..."
 	class:is-opened={is_opened}
@@ -185,13 +186,13 @@
 		{:else if !folders.length}
 			<p class="empty">No results</p>
 		{:else}
-			{#each folders as folder, index}
+			{#each folders as folder, index (folder.key)}
 				<FolderFilterFolder
 					{...folder}
 					is_selected={selected.includes(folder.key)}
 					is_focussed={index == focussed_index}
 					on:mouseenter={() => (focussed_index = index)}
-					on:click={async () => select(index)}
+					on:click={async () => select(folder.key)}
 					on:mousedown
 				/>
 			{/each}

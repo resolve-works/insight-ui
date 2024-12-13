@@ -23,7 +23,6 @@
 	<nav>
 		<form action="/search" bind:this={form} data-sveltekit-keepfocus data-sveltekit-replacestate>
 			<Section>
-				<p>Filter by folder</p>
 				<FolderFilter on:change={() => form.requestSubmit()} />
 			</Section>
 		</form>
@@ -39,3 +38,10 @@
 		<File {...file} />
 	{/each}
 </Page>
+
+<style>
+	nav {
+		/* https://css-tricks.com/flexbox-truncated-text/ */
+		min-width: 0;
+	}
+</style>
