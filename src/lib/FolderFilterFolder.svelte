@@ -17,6 +17,7 @@
 	on:mousedown|preventDefault
 	on:mouseenter
 	on:click|stopPropagation|preventDefault
+	title={label}
 >
 	{#if indent > 0}
 		<Icon class="gg-corner-down-right" />

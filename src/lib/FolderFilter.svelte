@@ -97,7 +97,6 @@
 	}
 
 	function keydown(event: KeyboardEvent) {
-		console.log(event.key);
 		switch (event.key) {
 			case 'ArrowUp':
 				event.preventDefault();
@@ -213,7 +212,8 @@
 		display: none;
 		color: var(--text-color-dark);
 		list-style-type: none;
-		width: 40rem;
+		max-width: 50vw;
+		min-width: 40rem;
 		max-height: 20rem;
 		border-bottom-left-radius: var(--input-border-radius);
 		border-bottom-right-radius: var(--input-border-radius);
