@@ -1,9 +1,9 @@
 import { env } from '$env/dynamic/private';
-import { parse_folders } from '$lib/search';
+import { parse_array_param } from '$lib/validation';
 
 export async function load({ url, fetch }) {
 	const query = url.searchParams.get('query');
-	const folders = parse_folders(url.searchParams.get('folders'));
+	const folders = parse_array_param(url.searchParams.get('folders'));
 
 	const must: Record<string, any>[] = [
 		{

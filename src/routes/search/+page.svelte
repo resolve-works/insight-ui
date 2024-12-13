@@ -8,16 +8,18 @@
 	import FolderFilter from '$lib/FolderFilter.svelte';
 	import { breadcrumbs } from '$lib/stores';
 	import { page } from '$app/stores';
-	import { parse_folders } from '$lib/search';
+	import { parse_array_param } from '$lib/validation';
 
 	export let data;
 
 	let form: HTMLFormElement;
 
-	let selected_folders: string[] = parse_folders($page.url.searchParams.get('folders'));
+	$page.url.searchParams.get('folders');
+
+	let selected_folders: string[] = parse_array_param($page.url.searchParams.get('folders'));
 
 	page.subscribe(({ url }) => {
-		selected_folders = parse_folders(url.searchParams.get('folders'));
+		selected_folders = parse_array_param(url.searchParams.get('folders'));
 	});
 
 	$: {

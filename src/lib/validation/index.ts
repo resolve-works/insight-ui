@@ -59,3 +59,11 @@ export const string_to_json_schema = z.string().transform((str, ctx) => {
 		return z.NEVER;
 	}
 });
+
+export function parse_array_param(string: string | null): string[] {
+	try {
+		return string_to_json_schema.parse(string ?? '');
+	} catch {
+		return [];
+	}
+}

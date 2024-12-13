@@ -28,7 +28,7 @@
 
 	div {
 		display: flex;
-		gap: 0.5rem;
+		gap: 0rem 0.5rem;
 		margin-bottom: 0.5rem;
 		flex-wrap: wrap;
 	}
