@@ -23,7 +23,11 @@
 
 	const dispatch = createEventDispatcher();
 
-	$: selected = parse_folders($page.url.searchParams.get('folders'));
+	export let selected: string[] = parse_folders($page.url.searchParams.get('folders'));
+
+	page.subscribe(({ url }) => {
+		selected = parse_folders(url.searchParams.get('folders'));
+	});
 
 	let folder_container: HTMLDivElement;
 	let query = '';

@@ -16,7 +16,7 @@
 	class:is-focussed={is_focussed}
 	on:mousedown|preventDefault
 	on:mouseenter
-	on:click|stopPropagation
+	on:click|stopPropagation|preventDefault
 >
 	{#if indent > 0}
 		<Icon class="gg-corner-down-right" />

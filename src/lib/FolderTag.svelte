@@ -1,12 +1,13 @@
 <script lang="ts">
 	import Icon from './Icon.svelte';
+	export let is_width_limited = false;
 	export let is_removable = false;
 	export let key: string;
 
 	let parts = key.split('/').filter(Boolean);
 </script>
 
-<div class="tag">
+<div class="tag" class:is-width-limited={is_width_limited}>
 	{#each parts as part, index}
 		<span class="part">{part}</span>
 		{#if index < parts.length - 1}
@@ -33,6 +34,10 @@
 		background: var(--color-secondary);
 		color: var(--text-color-dark);
 		border-radius: var(--input-border-radius);
+	}
+
+	.tag.is-width-limited {
+		max-width: 20rem;
 	}
 
 	.part {

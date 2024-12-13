@@ -17,19 +17,22 @@ export async function load({ fetch, depends, params }) {
 	url.searchParams.set('prompts.sources.order', 'similarity.asc');
 	url.searchParams.set('id', `eq.${params.id}`);
 
-	const response = await fetch(url);
+	const response = await fetch(url, {
+		headers: {
+			Accept: 'application/vnd.pgrst.object+json'
+		}
+	});
 	if (response.status !== 200) {
 		throw new Error(await response.text());
 	}
-	const conversations = await response.json();
-	const conversation = conversations[0];
+	const conversation = await response.json();
 
-	const paths =
+	const selected_folders =
 		'inodes' in conversation
 			? conversation.inodes.map((inode: { path: string }) => inode.path)
 			: [];
 
-	return { paths, ...conversation };
+	return { selected_folders, ...conversation };
 }
 
 async function embed(input: string) {

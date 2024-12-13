@@ -10,7 +10,6 @@
 	import FolderFilter from '$lib/FolderFilter.svelte';
 	import Message, { MessageType } from './Message.svelte';
 	import Sources from './Sources.svelte';
-	import type { FolderOption } from '$lib/FolderFilter.svelte';
 	import { breadcrumbs } from '$lib/stores';
 	import ErrorMessage from '$lib/ErrorMessage.svelte';
 	import Row from '$lib/Row.svelte';
@@ -20,19 +19,16 @@
 
 	export let data;
 	export let form;
-	const { options, total, paths } = data;
+	const { selected_folders } = data;
 
 	$: sources = data.prompts.map((prompt: { sources: Source[] }) => prompt.sources).flat();
 
-	let create_conversation_form: HTMLFormElement;
 	let input: HTMLInputElement;
 	let answer: string = '';
 
 	$: {
 		breadcrumbs.set([{ name: 'Conversations', path: '/conversations' }]);
 	}
-
-	$: selected = options.filter((option: FolderOption) => paths.includes(option.key));
 
 	// This is a chat, scroll to bottom
 	async function scroll_to_bottom() {
@@ -86,25 +82,12 @@
 	<h2 slot="header">Filters</h2>
 
 	<nav>
-		<form
-			action="/conversations?/create_conversation"
-			method="POST"
-			bind:this={create_conversation_form}
-		>
+		<form action="/conversations?/create_conversation" method="POST">
 			<Section>
-				<p>Filter by folder</p>
-				<FolderFilter
-					{options}
-					{selected}
-					on:change={async () => {
-						// Start a new conversation when the filters change
-						await tick();
-						create_conversation_form.submit();
-					}}
-				/>
+				<FolderFilter selected={selected_folders} />
 			</Section>
 
-			<button class="secondary" title="Start a new conversation with these filters">
+			<button class="button secondary" title="Start a new conversation with these filters">
 				New Conversation
 			</button>
 		</form>
@@ -114,18 +97,6 @@
 <Page class="with-sidebar-left">
 	<div class="chat">
 		<div class="messages">
-			<Message type={MessageType.machine}>
-				<p>
-					We are conversing about {total} file{#if total != 1}s{/if}.
-
-					{#if !selected.length}
-						You can narrow the context of our conversation with the filters.
-					{/if}
-
-					To what question do you think these files hold the answer?
-				</p>
-			</Message>
-
 			{#each data.prompts as prompt}
 				<Message type={MessageType.human}>
 					<p>{prompt.query}</p>
@@ -187,7 +158,7 @@
 					<FormErrors errors={form?.errors} key="similarity_top_k" />
 				</div>
 
-				<button class="primary" data-testid="create-prompt">Prompt</button>
+				<button class="button primary" data-testid="create-prompt">Prompt</button>
 			</Row>
 		</form>
 	</div>
@@ -210,5 +181,15 @@
 
 	.similarity {
 		max-width: 15rem;
+	}
+
+	nav button {
+		min-width: 100%;
+		justify-content: center;
+	}
+
+	nav {
+		/* https://css-tricks.com/flexbox-truncated-text/ */
+		min-width: 0;
 	}
 </style>
