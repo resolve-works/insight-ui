@@ -11,6 +11,7 @@
 </script>
 
 <button
+	type="button"
 	style="padding-left: {padding + 1}rem"
 	class:is-selected={is_selected}
 	class:is-focussed={is_focussed}

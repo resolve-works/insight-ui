@@ -1,10 +1,12 @@
 <script lang="ts">
-	import Search from '$lib/Search.svelte';
 	import InputGroup from '$lib/InputGroup.svelte';
 	import Icon from '$lib/Icon.svelte';
 	import Page from '$lib/Page.svelte';
 	import Title from '$lib/Title.svelte';
+	import QueryFilter from '$lib/QueryFilter.svelte';
 	import PDFViewer from '$lib/PDFViewer.svelte';
+	import Section from '$lib/Section.svelte';
+	import SideBar from '$lib/SideBar.svelte';
 	import { ssp, queryParam } from 'sveltekit-search-params';
 
 	const page = queryParam('page', ssp.number(1), { pushHistory: false });
@@ -35,9 +37,19 @@
 	}
 </script>
 
-<Page>
-	<Search pushHistory={false} slot="header" />
+<SideBar>
+	<h2 slot="header">Filters</h2>
 
+	<nav>
+		<form action="" data-sveltekit-keepfocus data-sveltekit-replacestate>
+			<Section>
+				<QueryFilter />
+			</Section>
+		</form>
+	</nav>
+</SideBar>
+
+<Page class="with-sidebar-left">
 	<Title>
 		{name}
 

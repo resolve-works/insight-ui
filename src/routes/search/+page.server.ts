@@ -33,7 +33,8 @@ export async function load({ url, fetch }) {
 					highlight: {
 						fields: {
 							'pages.contents': {
-								fragment_size: 200
+								fragment_size: 200,
+								type: 'fvh'
 							}
 						}
 					}

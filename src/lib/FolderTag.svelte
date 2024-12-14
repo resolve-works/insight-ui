@@ -16,7 +16,7 @@
 	{/each}
 
 	{#if is_removable}
-		<button on:click>
+		<button type="button" on:click>
 			<Icon class="gg-close" />
 		</button>
 	{/if}
@@ -34,6 +34,7 @@
 		background: var(--color-secondary);
 		color: var(--text-color-dark);
 		border-radius: var(--input-border-radius);
+		font-size: 0.8rem;
 	}
 
 	.tag.is-width-limited {
@@ -55,6 +56,7 @@
 		cursor: pointer;
 	}
 
+	button:focus,
 	button:hover {
 		color: var(--text-color-dark);
 	}

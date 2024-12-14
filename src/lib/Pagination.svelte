@@ -8,18 +8,20 @@
 	export let page: number;
 	export let amount_of_pages: number;
 
-	function url_for_page(page: number) {
-		$page_store.url.searchParams.set('page', page.toString());
-		return $page_store.url.toString();
+	function url_for_page(url: URL, page: number) {
+		url.searchParams.set('page', page.toString());
+		return url.toString();
 	}
 
 	$: previous_page = page > 1 ? page - 1 : 1;
 	$: next_page = page < amount_of_pages ? page + 1 : page;
+
+	$: ({ url } = $page_store);
 </script>
 
 <aside>
-	<a href={url_for_page(1)} class="button"><Icon class="gg-chevron-double-left" /></a>
-	<a href={url_for_page(previous_page)} class="button"><Icon class="gg-chevron-left" /></a>
+	<a href={url_for_page(url, 1)} class="button"><Icon class="gg-chevron-double-left" /></a>
+	<a href={url_for_page(url, previous_page)} class="button"><Icon class="gg-chevron-left" /></a>
 
 	<p>
 		<span>{first_item !== undefined ? first_item + 1 : 0}</span>
@@ -28,8 +30,9 @@
 		<span>{amount_of_items}</span>
 	</p>
 
-	<a href={url_for_page(next_page)} class="button"><Icon class="gg-chevron-right" /></a>
-	<a href={url_for_page(amount_of_pages)} class="button"><Icon class="gg-chevron-double-right" /></a
+	<a href={url_for_page(url, next_page)} class="button"><Icon class="gg-chevron-right" /></a>
+	<a href={url_for_page(url, amount_of_pages)} class="button"
+		><Icon class="gg-chevron-double-right" /></a
 	>
 </aside>
 

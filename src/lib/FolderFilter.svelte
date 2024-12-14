@@ -145,7 +145,9 @@
 	}
 </script>
 
-<input type="hidden" name="folders" value={JSON.stringify(selected)} />
+{#if selected.length}
+	<input type="hidden" name="folders" value={JSON.stringify(selected)} />
+{/if}
 
 {#if selected.length}
 	<p>Selected folders</p>

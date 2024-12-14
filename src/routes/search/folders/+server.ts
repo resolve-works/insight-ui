@@ -25,7 +25,7 @@ export async function GET({ fetch, url }) {
 			'Content-Type': 'application/json'
 		},
 		body: JSON.stringify({
-			_source: { excludes: ['pages'] },
+			size: 0,
 			aggs: { folder: { terms: { field: 'folder', size: 50 } } },
 			// Do folder filtering after the query stage so that aggregations contain all folders
 			post_filter: {
