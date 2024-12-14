@@ -7,9 +7,8 @@
 	import PDFViewer from '$lib/PDFViewer.svelte';
 	import Section from '$lib/Section.svelte';
 	import SideBar from '$lib/SideBar.svelte';
-	import { ssp, queryParam } from 'sveltekit-search-params';
-
-	const page = queryParam('page', ssp.number(1), { pushHistory: false });
+	import { page as page_store } from '$app/stores';
+	import { tick } from 'svelte';
 
 	export let id;
 	export let name;
@@ -20,19 +19,33 @@
 	export let is_owned: boolean;
 	export let users: { name: string };
 
+	let page_form: HTMLFormElement;
+
 	let is_focused = false;
 
 	$: number_of_pages = (to_page ?? 0) - from_page;
 
+	$: folders_param = $page_store.url.searchParams.get('folders');
+	$: query_param = $page_store.url.searchParams.get('query');
+	$: page_param = $page_store.url.searchParams.get('page');
+
+	let page: number = parseInt($page_store.url.searchParams.get('page') ?? '1');
+
+	async function set_page(index: number) {
+		page = index;
+		await tick();
+		page_form.requestSubmit();
+	}
+
 	function increase() {
-		if ($page !== null && $page < number_of_pages) {
-			$page += 1;
+		if (page < number_of_pages) {
+			set_page(page + 1);
 		}
 	}
 
 	function decrease() {
-		if ($page !== null && $page > 1) {
-			$page -= 1;
+		if (page > 1) {
+			set_page(page - 1);
 		}
 	}
 </script>
@@ -41,9 +54,13 @@
 	<h2 slot="header">Filters</h2>
 
 	<nav>
-		<form action="" data-sveltekit-keepfocus data-sveltekit-replacestate>
+		<form data-sveltekit-keepfocus data-sveltekit-replacestate>
 			<Section>
 				<QueryFilter />
+
+				{#if page_param}
+					<input type="hidden" name="page" value={page_param} />
+				{/if}
 			</Section>
 		</form>
 	</nav>
@@ -63,29 +80,53 @@
 				Edit
 			</a>
 
-			<div class="page-select">
-				<button class="button" on:click|preventDefault={decrease} class:focus={is_focused}>
+			<form
+				bind:this={page_form}
+				class="page-select"
+				data-sveltekit-keepfocus
+				data-sveltekit-replacestate
+			>
+				<button
+					class="button"
+					type="button"
+					on:click|preventDefault={decrease}
+					class:focus={is_focused}
+				>
 					<Icon class="gg-chevron-left" />
 				</button>
+
+				{#if folders_param}
+					<input type="hidden" name="folders" value={folders_param} />
+				{/if}
+				{#if query_param}
+					<input type="hidden" name="query" value={query_param} />
+				{/if}
 
 				<input
 					min="1"
 					max={number_of_pages}
 					type="number"
-					bind:value={$page}
+					name="page"
+					bind:value={page}
 					on:focus={() => (is_focused = true)}
 					on:blur={() => (is_focused = false)}
+					on:change={() => page_form.requestSubmit()}
 				/>
 
-				<button class="button" on:click|preventDefault={increase} class:focus={is_focused}>
+				<button
+					class="button"
+					type="button"
+					on:click|preventDefault={increase}
+					class:focus={is_focused}
+				>
 					<Icon class="gg-chevron-right" />
 				</button>
-			</div>
+			</form>
 		</InputGroup>
 	</Title>
 
 	<div class="container">
-		<PDFViewer {url} {highlights} index={$page ?? 1} />
+		<PDFViewer {url} {highlights} index={page ?? 1} />
 
 		<button class="cover-button" on:click|preventDefault={decrease}>
 			<Icon class="gg-chevron-left" />
@@ -121,6 +162,7 @@
 		bottom: 0;
 		color: var(--text-color-page);
 		animation: 3s infinite alternate slidein;
+		cursor: pointer;
 	}
 	.cover-button:hover {
 		opacity: 1;

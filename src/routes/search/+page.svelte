@@ -47,7 +47,7 @@
 <Page class="with-sidebar-left">
 	<Title>{amount_of_items} file{amount_of_items == 1 ? '' : 's'} found</Title>
 
-	{#each data.files as file}
+	{#each data.files as file (file.id)}
 		<File {...file} />
 	{/each}
 
