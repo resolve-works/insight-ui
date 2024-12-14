@@ -1,9 +1,13 @@
 import { env } from '$env/dynamic/private';
 import { parse_array_param } from '$lib/validation';
+import { PAGE_SIZE, calculate_pagination } from '$lib/pagination';
 
 export async function load({ url, fetch }) {
 	const query = url.searchParams.get('query');
 	const folders = parse_array_param(url.searchParams.get('folders'));
+
+	const param = url.searchParams.get('page');
+	const page = param ? parseInt(param) : 1;
 
 	const must: Record<string, any>[] = [
 		{
@@ -44,6 +48,9 @@ export async function load({ url, fetch }) {
 			'Content-Type': 'application/json'
 		},
 		body: JSON.stringify({
+			from: page - 1,
+			size: PAGE_SIZE,
+			track_total_hits: true,
 			// Don't return all page contents
 			_source: { excludes: ['pages'] },
 			query: { bool: { must } }
@@ -56,20 +63,16 @@ export async function load({ url, fetch }) {
 	}
 
 	return {
-		total: body.hits.total.value,
-		//options: body.aggregations.folder.buckets.map((bucket: Record<string, any>) => ({
-		//label: bucket.key,
-		//...bucket
-		//})),
-		files: body.hits.hits.map((hit) => {
+		...calculate_pagination(body.hits.total.value, page),
+		files: body.hits.hits.map((hit: Record<string, any>) => {
 			return {
 				id: hit._id,
 				filename: hit._source.filename,
 				pages:
 					'inner_hits' in hit
 						? hit.inner_hits.pages.hits.hits
-								.filter((page) => 'highlight' in page)
-								.map((page) => {
+								.filter((page: Record<string, any>) => 'highlight' in page)
+								.map((page: Record<string, any>) => {
 									return {
 										// Humans index from 1
 										index: page['_source']['index'] + 1,
