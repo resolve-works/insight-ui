@@ -27,3 +27,8 @@ export function calculate_pagination(amount_of_items: number, page: number) {
 		amount_of_pages: Math.ceil(amount_of_items / PAGE_SIZE)
 	};
 }
+
+export function replace_searchparam(url: URL, key: string, value: string) {
+	url.searchParams.set(key, value);
+	return url.toString();
+}

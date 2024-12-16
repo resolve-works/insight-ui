@@ -22,7 +22,7 @@ async function get_highlights({ params, fetch, url }: ServerLoadEvent) {
 				bool: {
 					must: [
 						// Get highlights for this document
-						{ ids: { values: [params.id.toString()] } },
+						{ ids: { values: [params.id!.toString()] } },
 						{
 							nested: {
 								path: 'pages',
@@ -76,6 +76,61 @@ async function get_highlights({ params, fetch, url }: ServerLoadEvent) {
 	}
 }
 
+async function get_hit_pages({ fetch, params, url }: ServerLoadEvent) {
+	const query = url.searchParams.get('query');
+
+	if (!query) {
+		return [];
+	}
+
+	const res = await fetch(`${env.OPENSEARCH_ENDPOINT}/inodes/_search`, {
+		method: 'post',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			_source: { excludes: ['pages'] },
+			query: {
+				bool: {
+					must: [
+						// Get highlights for this document
+						{ ids: { values: [params.id!.toString()] } },
+						{
+							nested: {
+								path: 'pages',
+								query: {
+									bool: {
+										must: [
+											{
+												query_string: {
+													query,
+													default_field: 'pages.contents'
+												}
+											}
+										]
+									}
+								},
+								inner_hits: {
+									_source: { excludes: ['pages.contents'] }
+								}
+							}
+						}
+					]
+				}
+			}
+		})
+	});
+
+	const body = await res.json();
+	if (res.status !== 200) {
+		throw new Error(`Invalid response from opensearch. ${body.error.type}: ${body.error.reason}`);
+	}
+
+	try {
+		return body.hits.hits[0].inner_hits.pages.hits.hits.map((hit) => hit._source.index);
+	} catch (e) {
+		return [];
+	}
+}
+
 export async function load(event: ServerLoadEvent) {
 	const { params, fetch, cookies, depends } = event;
 	depends('api:inodes');
@@ -96,10 +151,12 @@ export async function load(event: ServerLoadEvent) {
 	}
 
 	const highlights = await get_highlights(event);
+	const hit_pages = await get_hit_pages(event);
 
 	return {
 		url: sign(`users/${owner_id}${optimized_path}`, cookies),
 		highlights: [...new Set(highlights)],
+		hit_pages,
 		...inode
 	};
 }

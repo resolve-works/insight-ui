@@ -7,6 +7,7 @@
 	import PDFViewer from '$lib/PDFViewer.svelte';
 	import Section from '$lib/Section.svelte';
 	import SideBar from '$lib/SideBar.svelte';
+	import { replace_searchparam } from '$lib/pagination';
 	import { page as page_store } from '$app/stores';
 	import { tick } from 'svelte';
 
@@ -16,6 +17,7 @@
 	export let from_page: number;
 	export let to_page: number | undefined;
 	export let highlights;
+	export let hit_pages;
 	export let is_owned: boolean;
 	export let users: { name: string };
 
@@ -28,6 +30,8 @@
 	$: folders_param = $page_store.url.searchParams.get('folders');
 	$: query_param = $page_store.url.searchParams.get('query');
 	$: page_param = $page_store.url.searchParams.get('page');
+
+	$: ({ url } = $page_store);
 
 	let page: number = parseInt($page_store.url.searchParams.get('page') ?? '1');
 
@@ -62,6 +66,21 @@
 					<input type="hidden" name="page" value={page_param} />
 				{/if}
 			</Section>
+
+			{#if hit_pages.length}
+				<Section>
+					<p>
+						Found on {hit_pages.length} page{#if hit_pages.length != 1}s{/if}
+					</p>
+					<ul class="hit-pages">
+						{#each hit_pages as index}
+							<li class:active={index == page}>
+								<a href={replace_searchparam(url, 'page', index)}>Page {index}</a>
+							</li>
+						{/each}
+					</ul>
+				</Section>
+			{/if}
 		</form>
 	</nav>
 </SideBar>
@@ -208,5 +227,17 @@
 
 	button.focus {
 		border-color: var(--input-focus-border-color);
+	}
+
+	.hit-pages {
+		line-height: 1.6rem;
+	}
+
+	.hit-pages .active {
+		font-weight: bold;
+	}
+
+	.hit-pages a {
+		color: var(--text-color-white);
 	}
 </style>

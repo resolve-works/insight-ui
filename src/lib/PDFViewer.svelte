@@ -86,7 +86,7 @@
 						// TODO - this could replace the "strong" tag itself
 						innerHTML = innerHTML.replace(
 							match[0],
-							match[0].replace(highlight, `<strong class="highlight">${highlight}</strong>`)
+							match[0].replace(highlight, `<em class="highlight">${highlight}</em>`)
 						);
 					}
 				}
@@ -115,7 +115,7 @@
 		margin: 0 auto;
 	}
 
-	:global(.viewer strong) {
-		font-weight: normal;
+	:global(.viewer em) {
+		font-style: normal;
 	}
 </style>
