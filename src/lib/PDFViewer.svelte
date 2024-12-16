@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { onMount, getContext } from 'svelte';
+	import * as pdfjs from 'pdfjs-dist';
+	import type { PDFWorker } from 'pdfjs-dist';
 	import 'pdfjs-dist/web/pdf_viewer.css';
 
 	export let url: string;
 	export let index: number;
-	export let highlights: string[];
+	export let highlights: string[] | undefined;
 
 	let container: HTMLElement;
 	let canvas: HTMLCanvasElement;
@@ -13,8 +15,7 @@
 	let set_highlights: Function;
 
 	// Re-use existing worker so we don't load a new one every time we render a document
-	const pdfjs = getContext('pdfjs');
-	const worker = getContext('pdfjs-worker');
+	const worker: PDFWorker = getContext('pdfjs-worker');
 
 	$: {
 		if (load_page) {
@@ -24,7 +25,7 @@
 
 	$: {
 		if (set_highlights) {
-			set_highlights(highlights);
+			set_highlights(highlights ?? []);
 		}
 	}
 
@@ -67,7 +68,7 @@
 			if (text_layer) {
 				await text_layer.render();
 			}
-			set_highlights(highlights);
+			set_highlights(highlights ?? []);
 		};
 
 		// Find all words in the textLayer and wrap them in highlight

@@ -16,7 +16,7 @@
 	export let url;
 	export let from_page: number;
 	export let to_page: number | undefined;
-	export let highlights: string[];
+	export let highlights: string[] | undefined = undefined;
 	export let next_hit_index: number | undefined = undefined;
 	export let previous_hit_index: number | undefined = undefined;
 	export let is_owned: boolean;

@@ -8,9 +8,8 @@
 	import { browser } from '$app/environment';
 
 	// Create PDF worker in context once to prevent creating a new worker on every PDFViewer load
-	import * as pdfjs from 'pdfjs-dist/build/pdf.mjs';
+	import * as pdfjs from 'pdfjs-dist';
 	import worker_url from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-	setContext('pdfjs', pdfjs);
 
 	if (browser) {
 		pdfjs.GlobalWorkerOptions.workerSrc = worker_url;

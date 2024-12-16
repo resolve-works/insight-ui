@@ -136,10 +136,7 @@ async function get_search_properties({ params, fetch, url }: ServerLoadEvent) {
 		const highlights: string[] =
 			data.responses[0].hits.hits[0].inner_hits.pages.hits.hits[0].highlight['pages.contents'];
 		search_properties.highlights = [...new Set(highlights)];
-	} catch {
-		// TODO - Make highlights code handle undefined
-		search_properties.highlights = [];
-	}
+	} catch {}
 
 	// Results are possibly non-existant when there is no next or previous pages containing query
 	try {
