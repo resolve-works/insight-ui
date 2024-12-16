@@ -16,8 +16,9 @@
 	export let url;
 	export let from_page: number;
 	export let to_page: number | undefined;
-	export let highlights;
-	export let hit_pages;
+	export let highlights: string[];
+	export let next_hit_index: number | undefined = undefined;
+	export let previous_hit_index: number | undefined = undefined;
 	export let is_owned: boolean;
 	export let users: { name: string };
 
@@ -31,9 +32,11 @@
 	$: query_param = $page_store.url.searchParams.get('query');
 	$: page_param = $page_store.url.searchParams.get('page');
 
-	$: ({ url } = $page_store);
+	let page = parseInt($page_store.url.searchParams.get('page') ?? '1');
 
-	let page: number = parseInt($page_store.url.searchParams.get('page') ?? '1');
+	page_store.subscribe(({ url }) => {
+		page = parseInt(url.searchParams.get('page') ?? '1');
+	});
 
 	async function set_page(index: number) {
 		page = index;
@@ -67,19 +70,30 @@
 				{/if}
 			</Section>
 
-			{#if hit_pages.length}
-				<Section>
-					<p>
-						Found on {hit_pages.length} page{#if hit_pages.length != 1}s{/if}
-					</p>
-					<ul class="hit-pages">
-						{#each hit_pages as index}
-							<li class:active={index == page}>
-								<a href={replace_searchparam(url, 'page', index)}>Page {index}</a>
-							</li>
-						{/each}
-					</ul>
-				</Section>
+			{#if previous_hit_index || next_hit_index}
+				<div class="hit-navigation">
+					{#if previous_hit_index}
+						<a
+							class="button previous"
+							href={replace_searchparam($page_store.url, 'page', previous_hit_index + 1)}
+							data-sveltekit-replacestate
+						>
+							<Icon class="gg-chevron-left" />
+							Previous Hit
+						</a>
+					{/if}
+					{#if next_hit_index}
+						<a
+							class="button next"
+							href={replace_searchparam($page_store.url, 'page', next_hit_index + 1)}
+							data-sveltekit-replacestate
+						>
+							Next Hit
+
+							<Icon class="gg-chevron-right" />
+						</a>
+					{/if}
+				</div>
 			{/if}
 		</form>
 	</nav>
@@ -229,15 +243,18 @@
 		border-color: var(--input-focus-border-color);
 	}
 
-	.hit-pages {
-		line-height: 1.6rem;
+	.hit-navigation {
+		display: flex;
+		gap: 0.5rem;
 	}
 
-	.hit-pages .active {
-		font-weight: bold;
+	.hit-navigation .button {
+		flex-basis: 50%;
 	}
 
-	.hit-pages a {
-		color: var(--text-color-white);
+	.hit-navigation .button.next {
+		display: flex;
+		justify-content: end;
+		margin-left: auto;
 	}
 </style>

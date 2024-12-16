@@ -4,131 +4,155 @@ import { sign } from '$lib/storage';
 import { create_folder, remove } from '../';
 import type { ServerLoadEvent } from '@sveltejs/kit';
 
-async function get_highlights({ params, fetch, url }: ServerLoadEvent) {
+type SearchProperties = {
+	highlights?: string[];
+	previous_hit_index?: number;
+	next_hit_index?: number;
+};
+
+function pages_query(
+	id: string,
+	query: string,
+	must: Record<string, any>[],
+	inner_hits: Record<string, any>
+) {
+	return {
+		_source: { excludes: ['pages'] },
+		query: {
+			bool: {
+				must: [
+					// Get information for requested document
+					{ ids: { values: [id] } },
+					{
+						nested: {
+							path: 'pages',
+							query: {
+								bool: {
+									// Always search with query
+									must: [
+										{
+											query_string: {
+												query,
+												default_field: 'pages.contents'
+											}
+										},
+										// Highlight and nearest hits have differing requirements
+										...must
+									]
+								}
+							},
+							inner_hits
+						}
+					}
+				]
+			}
+		}
+	};
+}
+
+// Get next or previous page where search query occurs
+function nearest_hit_query(page: number, id: string, query: string, is_previous = false) {
+	const page_index: { gt?: number; lt?: number } = {};
+	if (is_previous) {
+		page_index.lt = page - 1;
+	} else {
+		page_index.gt = page - 1;
+	}
+
+	const must = [
+		{
+			range: {
+				'pages.index': page_index
+			}
+		}
+	];
+
+	const inner_hits = {
+		size: 1,
+		_source: { excludes: ['pages.contents'] },
+		sort: [{ 'pages.index': { order: is_previous ? 'desc' : 'asc' } }]
+	};
+
+	return pages_query(id, query, must, inner_hits);
+}
+
+// Try to get highlights for current page and next & previous page indices where search query occurs
+async function get_search_properties({ params, fetch, url }: ServerLoadEvent) {
 	const query = url.searchParams.get('query');
 	const param = url.searchParams.get('page');
 	const page = param ? parseInt(param) : 1;
 
 	if (!query) {
-		return [];
+		return {};
 	}
 
-	const res = await fetch(`${env.OPENSEARCH_ENDPOINT}/inodes/_search`, {
-		method: 'post',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({
-			_source: { excludes: ['pages'] },
-			query: {
-				bool: {
-					must: [
-						// Get highlights for this document
-						{ ids: { values: [params.id!.toString()] } },
-						{
-							nested: {
-								path: 'pages',
-								query: {
-									bool: {
-										must: [
-											{
-												query_string: {
-													query,
-													default_field: 'pages.contents'
-												}
-											},
-											{
-												// Only get highlights for current page
-												term: {
-													'pages.index': page - 1
-												}
-											}
-										]
-									}
-								},
-								inner_hits: {
-									highlight: {
-										pre_tags: [''],
-										post_tags: [''],
-										fields: {
-											'pages.contents': {
-												fragment_size: 1,
-												number_of_fragments: 100
-											}
-										}
-									}
-								}
-							}
-						}
-					]
+	const must = [
+		{
+			term: {
+				'pages.index': page - 1
+			}
+		}
+	];
+
+	const inner_hits = {
+		highlight: {
+			pre_tags: [''],
+			post_tags: [''],
+			fields: {
+				'pages.contents': {
+					fragment_size: 1,
+					number_of_fragments: 100
 				}
 			}
-		})
-	});
+		}
+	};
 
-	const body = await res.json();
-	if (res.status !== 200) {
-		throw new Error(`Invalid response from opensearch. ${body.error.type}: ${body.error.reason}`);
-	}
+	// Run multisearch
+	const body = [
+		pages_query(params.id!, query, must, inner_hits),
+		nearest_hit_query(page, params.id!, query, true),
+		nearest_hit_query(page, params.id!, query, false)
+	]
+		.map((query) => `{}\n${JSON.stringify(query)}\n`)
+		.join('');
 
-	try {
-		return body.hits.hits[0].inner_hits.pages.hits.hits[0].highlight['pages.contents'];
-	} catch (e) {
-		return [];
-	}
-}
-
-async function get_hit_pages({ fetch, params, url }: ServerLoadEvent) {
-	const query = url.searchParams.get('query');
-
-	if (!query) {
-		return [];
-	}
-
-	const res = await fetch(`${env.OPENSEARCH_ENDPOINT}/inodes/_search`, {
+	const res = await fetch(`${env.OPENSEARCH_ENDPOINT}/inodes/_msearch`, {
 		method: 'post',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({
-			_source: { excludes: ['pages'] },
-			query: {
-				bool: {
-					must: [
-						// Get highlights for this document
-						{ ids: { values: [params.id!.toString()] } },
-						{
-							nested: {
-								path: 'pages',
-								query: {
-									bool: {
-										must: [
-											{
-												query_string: {
-													query,
-													default_field: 'pages.contents'
-												}
-											}
-										]
-									}
-								},
-								inner_hits: {
-									_source: { excludes: ['pages.contents'] }
-								}
-							}
-						}
-					]
-				}
-			}
-		})
+		body
 	});
 
-	const body = await res.json();
-	if (res.status !== 200) {
-		throw new Error(`Invalid response from opensearch. ${body.error.type}: ${body.error.reason}`);
+	const data = await res.json();
+	for (const res of data.responses) {
+		if (res.status !== 200) {
+			throw new Error(`Invalid response from opensearch. ${res.error.type}: ${res.error.reason}`);
+		}
 	}
 
+	const search_properties: SearchProperties = {};
+
+	// Results are possibly non-existant for pages that don't contain query
 	try {
-		return body.hits.hits[0].inner_hits.pages.hits.hits.map((hit) => hit._source.index);
-	} catch (e) {
-		return [];
+		const highlights: string[] =
+			data.responses[0].hits.hits[0].inner_hits.pages.hits.hits[0].highlight['pages.contents'];
+		search_properties.highlights = [...new Set(highlights)];
+	} catch {
+		// TODO - Make highlights code handle undefined
+		search_properties.highlights = [];
 	}
+
+	// Results are possibly non-existant when there is no next or previous pages containing query
+	try {
+		search_properties.previous_hit_index =
+			data.responses[1].hits.hits[0].inner_hits.pages.hits.hits[0]._source.index;
+	} catch {}
+
+	try {
+		search_properties.next_hit_index =
+			data.responses[2].hits.hits[0].inner_hits.pages.hits.hits[0]._source.index;
+	} catch {}
+
+	return search_properties;
 }
 
 export async function load(event: ServerLoadEvent) {
@@ -150,14 +174,12 @@ export async function load(event: ServerLoadEvent) {
 		return inode;
 	}
 
-	const highlights = await get_highlights(event);
-	const hit_pages = await get_hit_pages(event);
+	const search_properties = await get_search_properties(event);
 
 	return {
 		url: sign(`users/${owner_id}${optimized_path}`, cookies),
-		highlights: [...new Set(highlights)],
-		hit_pages,
-		...inode
+		...inode,
+		...search_properties
 	};
 }
 
