@@ -3,6 +3,7 @@ import { env } from '$env/dynamic/private';
 import { sign } from '$lib/storage';
 import { create_folder, remove } from '../';
 import type { ServerLoadEvent } from '@sveltejs/kit';
+import { parse_array_param } from '$lib/validation';
 
 type SearchProperties = {
 	highlights?: string[];
@@ -153,7 +154,7 @@ async function get_search_properties({ params, fetch, url }: ServerLoadEvent) {
 }
 
 export async function load(event: ServerLoadEvent) {
-	const { params, fetch, cookies, depends } = event;
+	const { params, fetch, cookies, depends, url } = event;
 	depends('api:inodes');
 
 	const api_url =
@@ -176,7 +177,10 @@ export async function load(event: ServerLoadEvent) {
 	return {
 		url: sign(`users/${owner_id}${optimized_path}`, cookies),
 		...inode,
-		...search_properties
+		...search_properties,
+		page: parseInt(url.searchParams.get('page') ?? '1'),
+		folders: parse_array_param(url.searchParams.get('folders')),
+		query: url.searchParams.get('query')
 	};
 }
 

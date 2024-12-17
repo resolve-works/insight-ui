@@ -21,22 +21,13 @@
 	export let previous_hit_index: number | undefined = undefined;
 	export let is_owned: boolean;
 	export let users: { name: string };
+	export let page: number;
+	export let query: string | null;
+	export let folders: string | null;
 
 	let page_form: HTMLFormElement;
-
 	let is_focused = false;
-
 	$: number_of_pages = (to_page ?? 0) - from_page;
-
-	$: folders_param = $page_store.url.searchParams.get('folders');
-	$: query_param = $page_store.url.searchParams.get('query');
-	$: page_param = $page_store.url.searchParams.get('page');
-
-	let page = parseInt($page_store.url.searchParams.get('page') ?? '1');
-
-	page_store.subscribe(({ url }) => {
-		page = parseInt(url.searchParams.get('page') ?? '1');
-	});
 
 	async function set_page(index: number) {
 		page = index;
@@ -65,8 +56,8 @@
 			<Section>
 				<QueryFilter />
 
-				{#if page_param}
-					<input type="hidden" name="page" value={page_param} />
+				{#if $page_store.url.searchParams.has('page')}
+					<input type="hidden" name="page" value={page} />
 				{/if}
 			</Section>
 
@@ -75,7 +66,11 @@
 					{#if previous_hit_index}
 						<a
 							class="button previous"
-							href={replace_searchparam($page_store.url, 'page', previous_hit_index + 1)}
+							href={replace_searchparam(
+								$page_store.url,
+								'page',
+								(previous_hit_index + 1).toString()
+							)}
 							data-sveltekit-replacestate
 						>
 							<Icon class="gg-chevron-left" />
@@ -85,7 +80,7 @@
 					{#if next_hit_index}
 						<a
 							class="button next"
-							href={replace_searchparam($page_store.url, 'page', next_hit_index + 1)}
+							href={replace_searchparam($page_store.url, 'page', (next_hit_index + 1).toString())}
 							data-sveltekit-replacestate
 						>
 							Next Hit
@@ -128,11 +123,11 @@
 					<Icon class="gg-chevron-left" />
 				</button>
 
-				{#if folders_param}
-					<input type="hidden" name="folders" value={folders_param} />
+				{#if $page_store.url.searchParams.has('folders')}
+					<input type="hidden" name="folders" value={JSON.stringify(folders)} />
 				{/if}
-				{#if query_param}
-					<input type="hidden" name="query" value={query_param} />
+				{#if $page_store.url.searchParams.has('query')}
+					<input type="hidden" name="query" value={query} />
 				{/if}
 
 				<input
@@ -159,7 +154,7 @@
 	</Title>
 
 	<div class="container">
-		<PDFViewer {url} {highlights} index={page ?? 1} />
+		<PDFViewer {url} {highlights} page_number={page} />
 
 		<button class="cover-button" on:click|preventDefault={decrease}>
 			<Icon class="gg-chevron-left" />

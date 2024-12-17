@@ -8,20 +8,11 @@
 	import QueryFilter from '$lib/QueryFilter.svelte';
 	import Pagination from '$lib/Pagination.svelte';
 	import { breadcrumbs } from '$lib/stores';
-	import { page as page_store } from '$app/stores';
-	import { parse_array_param } from '$lib/validation';
 
 	export let data;
-	// Pagination
 	$: ({ page, first_item, last_item, amount_of_items, amount_of_pages } = data);
 
 	let form: HTMLFormElement;
-
-	let selected_folders: string[] = parse_array_param($page_store.url.searchParams.get('folders'));
-
-	page_store.subscribe(({ url }) => {
-		selected_folders = parse_array_param(url.searchParams.get('folders'));
-	});
 
 	$: {
 		breadcrumbs.set([{ name: 'Search', path: '/search' }]);
@@ -38,7 +29,7 @@
 			</Section>
 
 			<Section>
-				<FolderFilter selected={selected_folders} on:change={() => form.requestSubmit()} />
+				<FolderFilter selected={data.folders} on:change={() => form.requestSubmit()} />
 			</Section>
 		</form>
 	</nav>

@@ -5,7 +5,7 @@
 	import 'pdfjs-dist/web/pdf_viewer.css';
 
 	export let url: string;
-	export let index: number;
+	export let page_number: number;
 	export let highlights: string[] | undefined;
 
 	let container: HTMLElement;
@@ -19,7 +19,7 @@
 
 	$: {
 		if (load_page) {
-			load_page(index);
+			load_page(page_number);
 		}
 	}
 
@@ -32,8 +32,8 @@
 	onMount(async () => {
 		const pdf = await pdfjs.getDocument({ url, worker }).promise;
 
-		load_page = async (index: number) => {
-			const page = await pdf.getPage(index);
+		load_page = async (page_number: number) => {
+			const page = await pdf.getPage(page_number);
 
 			const default_viewport = page.getViewport({ scale: 1 });
 			const scale = container.clientWidth / default_viewport.width;

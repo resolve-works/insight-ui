@@ -5,9 +5,7 @@ import { PAGE_SIZE, calculate_pagination } from '$lib/pagination';
 export async function load({ url, fetch }) {
 	const query = url.searchParams.get('query');
 	const folders = parse_array_param(url.searchParams.get('folders'));
-
-	const param = url.searchParams.get('page');
-	const page = param ? parseInt(param) : 1;
+	const page = parseInt(url.searchParams.get('page') ?? '1');
 
 	const must: Record<string, any>[] = [
 		{
@@ -65,6 +63,7 @@ export async function load({ url, fetch }) {
 
 	return {
 		...calculate_pagination(body.hits.total.value, page),
+		folders,
 		files: body.hits.hits.map((hit: Record<string, any>) => {
 			return {
 				id: hit._id,
