@@ -11,23 +11,41 @@
 	import { page as page_store } from '$app/stores';
 	import { tick } from 'svelte';
 
-	export let id;
-	export let name;
-	export let url;
-	export let from_page: number;
-	export let to_page: number | undefined;
-	export let highlights: string[] | undefined = undefined;
-	export let next_hit_index: number | undefined = undefined;
-	export let previous_hit_index: number | undefined = undefined;
-	export let is_owned: boolean;
-	export let users: { name: string };
-	export let page: number;
-	export let query: string | null;
-	export let folders: string | null;
+	interface Props {
+		id: any;
+		name: any;
+		url: any;
+		from_page: number;
+		to_page: number | undefined;
+		highlights?: string[] | undefined;
+		next_hit_index?: number | undefined;
+		previous_hit_index?: number | undefined;
+		is_owned: boolean;
+		users: { name: string };
+		page: number;
+		query: string | null;
+		folders: string | null;
+	}
+
+	let {
+		id,
+		name,
+		url,
+		from_page,
+		to_page,
+		highlights = undefined,
+		next_hit_index = undefined,
+		previous_hit_index = undefined,
+		is_owned,
+		users,
+		page = $bindable(),
+		query,
+		folders
+	}: Props = $props();
 
 	let page_form: HTMLFormElement;
-	let is_focused = false;
-	$: number_of_pages = (to_page ?? 0) - from_page;
+	let is_focused = $state(false);
+	let number_of_pages = $derived((to_page ?? 0) - from_page);
 
 	async function set_page(index: number) {
 		page = index;
@@ -35,13 +53,15 @@
 		page_form.requestSubmit();
 	}
 
-	function increase() {
+	function increase(e: Event) {
+		e.preventDefault();
 		if (page < number_of_pages) {
 			set_page(page + 1);
 		}
 	}
 
-	function decrease() {
+	function decrease(e: Event) {
+		e.preventDefault();
 		if (page > 1) {
 			set_page(page - 1);
 		}
@@ -49,7 +69,9 @@
 </script>
 
 <SideBar>
-	<h2 slot="header">Filters</h2>
+	{#snippet header()}
+		<h2>Filters</h2>
+	{/snippet}
 
 	<nav>
 		<form data-sveltekit-keepfocus data-sveltekit-replacestate>
@@ -98,69 +120,61 @@
 	<Title>
 		{name}
 
-		<InputGroup slot="actions">
-			{#if !is_owned}
-				<span class="shared">Shared by {users.name}</span>
-			{/if}
-
-			<a class="button" href={`/files/${id}/edit`}>
-				<Icon class="gg-pen" />
-				Edit
-			</a>
-
-			<form
-				bind:this={page_form}
-				class="page-select"
-				data-sveltekit-keepfocus
-				data-sveltekit-replacestate
-			>
-				<button
-					class="button"
-					type="button"
-					on:click|preventDefault={decrease}
-					class:focus={is_focused}
-				>
-					<Icon class="gg-chevron-left" />
-				</button>
-
-				{#if $page_store.url.searchParams.has('folders')}
-					<input type="hidden" name="folders" value={JSON.stringify(folders)} />
-				{/if}
-				{#if $page_store.url.searchParams.has('query')}
-					<input type="hidden" name="query" value={query} />
+		{#snippet actions()}
+			<InputGroup>
+				{#if !is_owned}
+					<span class="shared">Shared by {users.name}</span>
 				{/if}
 
-				<input
-					min="1"
-					max={number_of_pages}
-					type="number"
-					name="page"
-					bind:value={page}
-					on:focus={() => (is_focused = true)}
-					on:blur={() => (is_focused = false)}
-					on:change={() => page_form.requestSubmit()}
-				/>
+				<a class="button" href={`/files/${id}/edit`}>
+					<Icon class="gg-pen" />
+					Edit
+				</a>
 
-				<button
-					class="button"
-					type="button"
-					on:click|preventDefault={increase}
-					class:focus={is_focused}
+				<form
+					bind:this={page_form}
+					class="page-select"
+					data-sveltekit-keepfocus
+					data-sveltekit-replacestate
 				>
-					<Icon class="gg-chevron-right" />
-				</button>
-			</form>
-		</InputGroup>
+					<button class="button" type="button" onclick={decrease} class:focus={is_focused}>
+						<Icon class="gg-chevron-left" />
+					</button>
+
+					{#if $page_store.url.searchParams.has('folders')}
+						<input type="hidden" name="folders" value={JSON.stringify(folders)} />
+					{/if}
+					{#if $page_store.url.searchParams.has('query')}
+						<input type="hidden" name="query" value={query} />
+					{/if}
+
+					<input
+						min="1"
+						max={number_of_pages}
+						type="number"
+						name="page"
+						bind:value={page}
+						onfocus={() => (is_focused = true)}
+						onblur={() => (is_focused = false)}
+						onchange={() => page_form.requestSubmit()}
+					/>
+
+					<button class="button" type="button" onclick={increase} class:focus={is_focused}>
+						<Icon class="gg-chevron-right" />
+					</button>
+				</form>
+			</InputGroup>
+		{/snippet}
 	</Title>
 
 	<div class="container">
 		<PDFViewer {url} {highlights} page_number={page} />
 
-		<button class="cover-button" on:click|preventDefault={decrease}>
+		<button class="cover-button" onclick={decrease}>
 			<Icon class="gg-chevron-left" />
 		</button>
 
-		<button class="cover-button" on:click|preventDefault={increase}>
+		<button class="cover-button" onclick={increase}>
 			<Icon class="gg-chevron-right" />
 		</button>
 	</div>

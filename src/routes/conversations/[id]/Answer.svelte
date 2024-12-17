@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	export type Source = {
 		index: number;
 		id: string;
@@ -13,18 +13,25 @@
 </script>
 
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import ErrorMessage from '$lib/ErrorMessage.svelte';
 	import SourceComponent from './Source.svelte';
 	import { marked } from 'marked';
+	import IndexPage from '../../files/IndexPage.svelte';
 
-	export let response: string;
-	export let sources: Source[];
+	interface Props {
+		response: string;
+		sources: Source[];
+	}
 
-	let source_links: SourceLink[] = [];
-	let sources_missing: number = 0;
-	let parsed_response = '';
+	let { response, sources }: Props = $props();
 
-	$: {
+	let source_links: SourceLink[] = $state([]);
+	let sources_missing: number = $state(0);
+	let parsed_response = $state('');
+
+	run(() => {
 		source_links = [];
 		sources_missing = 0;
 		// WARNING - this function has sides effects, next to replacing the LLM
@@ -47,7 +54,7 @@
 				return ``;
 			}
 		});
-	}
+	});
 </script>
 
 {@html marked.parse(parsed_response)}

@@ -1,8 +1,8 @@
-<script>
+<script lang="ts">
 	import Page from '$lib/Page.svelte';
 	import { breadcrumbs } from '$lib/stores';
 
-	export let data;
+	let { data } = $props();
 
 	breadcrumbs.set([]);
 </script>

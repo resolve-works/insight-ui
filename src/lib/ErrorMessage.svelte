@@ -1,6 +1,10 @@
 <script lang="ts">
 	import Icon from './Icon.svelte';
-	export let message: string;
+	interface Props {
+		message: string;
+	}
+
+	let { message }: Props = $props();
 </script>
 
 <p data-testid="error-message"><Icon class="gg-danger error" /> {message}</p>

@@ -1,12 +1,13 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import IndexPage from '../IndexPage.svelte';
 	import ViewPage from '../ViewPage.svelte';
 	import { breadcrumbs } from '$lib/stores';
 
-	export let data;
-	export let form;
+	let { data, form } = $props();
 
-	$: {
+	run(() => {
 		breadcrumbs.set([
 			{ name: 'Files', path: '/files' },
 			...data.ancestors.reverse().map((ancestor: Record<string, string>) => {
@@ -17,7 +18,7 @@
 			}),
 			{ name: data.name, path: `/files/${data.id}` }
 		]);
-	}
+	});
 </script>
 
 {#if data.type == 'file'}

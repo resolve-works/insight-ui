@@ -4,7 +4,7 @@
 	import Conversation from './Conversation.svelte';
 	import Pagination from '$lib/Pagination.svelte';
 
-	export let data;
+	let { data } = $props();
 
 	const { page, first_item, last_item, amount_of_items, amount_of_pages } = data;
 </script>

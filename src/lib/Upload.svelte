@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	export class Upload extends EventTarget {
 		id: string;
 		parent_id: string | undefined;
@@ -66,7 +66,11 @@
 	import Icon from './Icon.svelte';
 	import ErrorMessage from './ErrorMessage.svelte';
 
-	export let upload: Upload;
+	interface Props {
+		upload: Upload;
+	}
+
+	let { upload = $bindable() }: Props = $props();
 	// Re-assign to trigger svelte reactivity
 	upload.addEventListener('update', () => {
 		upload = upload;
@@ -78,7 +82,7 @@
 		<h3>{upload.file.name}</h3>
 
 		{#if upload.error}
-			<button on:click={() => upload.finish()}><Icon class="gg-close" /></button>
+			<button onclick={() => upload.finish()}><Icon class="gg-close" /></button>
 		{/if}
 	</header>
 

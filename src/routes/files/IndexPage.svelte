@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run, preventDefault } from 'svelte/legacy';
+
 	import { tick } from 'svelte';
 	import InputGroup from '$lib/InputGroup.svelte';
 	import Card from '$lib/Card.svelte';
@@ -19,32 +21,50 @@
 	import FormErrors from '$lib/FormErrors.svelte';
 	import Row from '$lib/Row.svelte';
 
-	export let name;
-	export let is_owned: boolean = true;
-	export let users: { name: string } | undefined = undefined;
-	export let inodes;
-	export let form;
 
-	export let parent_id: number | undefined = undefined;
-	export let path: string | undefined = undefined;
 
-	// Pagination
-	export let page;
-	export let first_item;
-	export let last_item;
-	export let amount_of_items;
-	export let amount_of_pages;
+	
+	interface Props {
+		name: any;
+		is_owned?: boolean;
+		users?: { name: string } | undefined;
+		inodes: any;
+		form: any;
+		parent_id?: number | undefined;
+		path?: string | undefined;
+		// Pagination
+		page: any;
+		first_item: any;
+		last_item: any;
+		amount_of_items: any;
+		amount_of_pages: any;
+	}
+
+	let {
+		name,
+		is_owned = true,
+		users = undefined,
+		inodes,
+		form = $bindable(),
+		parent_id = undefined,
+		path = undefined,
+		page,
+		first_item,
+		last_item,
+		amount_of_items,
+		amount_of_pages
+	}: Props = $props();
 
 	const PARALLEL_UPLOADS = 3;
 
 	// Dragevents trigger on every element. Keep track of how many bubbled up to stop drag on window leave
-	let counter = 0;
-	let files_input: HTMLInputElement;
-	let files_form: HTMLFormElement;
+	let counter = $state(0);
+	let files_input: HTMLInputElement = $state();
+	let files_form: HTMLFormElement = $state();
 
-	let folder_input: HTMLInputElement;
-	let folder_form: HTMLFormElement;
-	let show_folder_form = false;
+	let folder_input: HTMLInputElement = $state();
+	let folder_form: HTMLFormElement = $state();
+	let show_folder_form = $state(false);
 
 	function dragover(e: DragEvent) {
 		e.preventDefault();
@@ -97,7 +117,7 @@
 		};
 	});
 
-	$: {
+	run(() => {
 		for (const upload of $uploads.slice(0, PARALLEL_UPLOADS)) {
 			// Start active uploads that have not been started yet.
 			if (!upload.is_started) {
@@ -110,10 +130,10 @@
 				upload.start();
 			}
 		}
-	}
+	});
 
-	$: started = $uploads.filter((upload) => upload.is_started);
-	$: pending = $uploads.filter((upload) => !upload.is_started);
+	let started = $derived($uploads.filter((upload) => upload.is_started));
+	let pending = $derived($uploads.filter((upload) => !upload.is_started));
 </script>
 
 <Page>
@@ -137,57 +157,59 @@
 			<Unnamed />
 		{/if}
 
-		<InputGroup slot="actions">
-			{#if !is_owned}
-				<span class="shared">Shared by {users.name}</span>
-			{/if}
-
-			<form bind:this={files_form} on:submit|preventDefault={create_uploads}>
-				<input
-					name="files"
-					data-testid="files-input"
-					type="file"
-					accept=".pdf"
-					multiple
-					bind:this={files_input}
-					on:change={() => files_form.requestSubmit()}
-				/>
-				{#if parent_id}
-					<input name="parent_id" type="hidden" value={parent_id} />
+		{#snippet actions()}
+				<InputGroup >
+				{#if !is_owned}
+					<span class="shared">Shared by {users.name}</span>
 				{/if}
 
-				<button class="button" on:click|preventDefault={() => files_input.click()}>
-					<Icon class="gg-software-upload" />
-					Upload PDFs
-				</button>
-			</form>
+				<form bind:this={files_form} onsubmit={preventDefault(create_uploads)}>
+					<input
+						name="files"
+						data-testid="files-input"
+						type="file"
+						accept=".pdf"
+						multiple
+						bind:this={files_input}
+						onchange={() => files_form.requestSubmit()}
+					/>
+					{#if parent_id}
+						<input name="parent_id" type="hidden" value={parent_id} />
+					{/if}
 
-			<button
-				on:click|preventDefault={async () => {
-					show_folder_form = true;
-					await tick();
-					folder_input.focus();
-				}}
-				data-testid="show-folder-form"
-				class="button"
-			>
-				<Icon class="gg-folder-add" />
-				Create Folder
-			</button>
-
-			<form action="/conversations?/create_conversation" method="POST">
-				<input type="hidden" name="folders" value={JSON.stringify(path ? [path] : [])} />
+					<button class="button" onclick={preventDefault(() => files_input.click())}>
+						<Icon class="gg-software-upload" />
+						Upload PDFs
+					</button>
+				</form>
 
 				<button
-					title="Start conversation about the files in this folder"
-					data-testid="start-conversation"
+					onclick={preventDefault(async () => {
+						show_folder_form = true;
+						await tick();
+						folder_input.focus();
+					})}
+					data-testid="show-folder-form"
 					class="button"
 				>
-					<Icon class="gg-comment" />
-					Start Conversation
+					<Icon class="gg-folder-add" />
+					Create Folder
 				</button>
-			</form>
-		</InputGroup>
+
+				<form action="/conversations?/create_conversation" method="POST">
+					<input type="hidden" name="folders" value={JSON.stringify(path ? [path] : [])} />
+
+					<button
+						title="Start conversation about the files in this folder"
+						data-testid="start-conversation"
+						class="button"
+					>
+						<Icon class="gg-comment" />
+						Start Conversation
+					</button>
+				</form>
+			</InputGroup>
+			{/snippet}
 	</Title>
 
 	<h2 class="drop-message" class:dragover={counter > 0}>
@@ -234,11 +256,11 @@
 							<button
 								class="button"
 								data-testid="cancel-create-folder"
-								on:click|preventDefault={() => {
+								onclick={preventDefault(() => {
 									folder_form.reset();
 									show_folder_form = false;
 									form = undefined;
-								}}>Cancel</button
+								})}>Cancel</button
 							>
 						</InputGroup>
 					</Row>

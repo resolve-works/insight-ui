@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	export enum MessageType {
 		machine,
 		human
@@ -7,7 +7,12 @@
 
 <script lang="ts">
 	import Card from '$lib/Card.svelte';
-	export let type: MessageType;
+	interface Props {
+		type: MessageType;
+		children?: import('svelte').Snippet;
+	}
+
+	let { type, children }: Props = $props();
 
 	const type_class = MessageType[type];
 	const name = type_class.charAt(0).toUpperCase() + type_class.slice(1);
@@ -19,7 +24,7 @@
 	<Card class="card">
 		<h3>{name}</h3>
 
-		<slot />
+		{@render children?.()}
 	</Card>
 </div>
 

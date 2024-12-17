@@ -2,17 +2,28 @@
 	import Actionable from '$lib/Actionable.svelte';
 	import FolderTag from '$lib/FolderTag.svelte';
 
-	export let id;
-	export let prompts: { query: string }[];
-	export let inodes: { path: string }[];
-	export let created_at;
+	interface Props {
+		id: any;
+		prompts: { query: string }[];
+		inodes: { path: string }[];
+		created_at: any;
+	}
 
-	$: parsed_created_at = new Date(created_at).toLocaleString('en-US', { hour12: false });
-	$: name = prompts.length ? prompts[0].query : undefined;
+	let {
+		id,
+		prompts,
+		inodes,
+		created_at
+	}: Props = $props();
+
+	let parsed_created_at = $derived(new Date(created_at).toLocaleString('en-US', { hour12: false }));
+	let name = $derived(prompts.length ? prompts[0].query : undefined);
 </script>
 
 <Actionable {name} path={`/conversations/${id}`} icon="gg-comment">
-	<time slot="actions">{parsed_created_at}</time>
+	{#snippet actions()}
+		<time >{parsed_created_at}</time>
+	{/snippet}
 
 	<div>
 		{#each inodes as inode}

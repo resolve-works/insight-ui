@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
 	export type Option = { key: string; doc_count: number };
 
 	export type Inode = Option & {
@@ -13,6 +13,9 @@
 </script>
 
 <script lang="ts">
+	import { run, createBubbler, stopPropagation } from 'svelte/legacy';
+
+	const bubble = createBubbler();
 	import Icon from './Icon.svelte';
 	import { browser } from '$app/environment';
 	import { onMount, createEventDispatcher, tick } from 'svelte';
@@ -21,14 +24,18 @@
 
 	const dispatch = createEventDispatcher();
 
-	export let selected: string[] = [];
+	interface Props {
+		selected?: string[];
+	}
 
-	let folder_container: HTMLDivElement;
-	let query = '';
-	let is_loading = false;
-	let is_opened = false;
-	let folders: Folder[] = [];
-	let focussed_index = 0;
+	let { selected = $bindable([]) }: Props = $props();
+
+	let folder_container: HTMLDivElement = $state();
+	let query = $state('');
+	let is_loading = $state(false);
+	let is_opened = $state(false);
+	let folders: Folder[] = $state([]);
+	let focussed_index = $state(0);
 
 	// Sort tree by doc_count
 	function sort(inodes: Inode[]) {
@@ -128,7 +135,7 @@
 		};
 	});
 
-	$: {
+	run(() => {
 		if (browser) {
 			(async () => {
 				// Defer showing loader to prevent flashing
@@ -142,7 +149,7 @@
 				is_loading = false;
 			})();
 		}
-	}
+	});
 </script>
 
 {#if selected.length}
@@ -162,10 +169,10 @@
 	class:is-opened={is_opened}
 	type="text"
 	bind:value={query}
-	on:focus={() => (is_opened = true)}
-	on:blur={() => (is_opened = false)}
-	on:click|stopPropagation
-	on:keydown={keydown}
+	onfocus={() => (is_opened = true)}
+	onblur={() => (is_opened = false)}
+	onclick={stopPropagation(bubble('click'))}
+	onkeydown={keydown}
 />
 
 <div class="holder">

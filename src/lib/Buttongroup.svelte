@@ -1,11 +1,18 @@
 <script lang="ts">
+	import { preventDefault, stopPropagation } from 'svelte/legacy';
+
 	import { onMount } from 'svelte';
 	import Icon from './Icon.svelte';
 
-	export let test_id: string | undefined;
+	interface Props {
+		test_id: string | undefined;
+		children?: import('svelte').Snippet;
+	}
 
-	let is_enhanced = false;
-	let is_opened = false;
+	let { test_id, children }: Props = $props();
+
+	let is_enhanced = $state(false);
+	let is_opened = $state(false);
 
 	function close(e: MouseEvent) {
 		if (e.target == null) {
@@ -28,7 +35,7 @@
 <div class="buttongroup" class:enhance={is_enhanced} class:open={is_opened} data-testid={test_id}>
 	<button
 		class="button toggle"
-		on:click|preventDefault|stopPropagation={() => (is_opened = !is_opened)}
+		onclick={stopPropagation(preventDefault(() => (is_opened = !is_opened)))}
 		data-testid={test_id ? `${test_id}-toggle` : undefined}
 	>
 		<Icon class="gg-more-vertical-alt" />
@@ -36,7 +43,7 @@
 
 	<div class="holder">
 		<div class="buttons">
-			<slot />
+			{@render children?.()}
 		</div>
 	</div>
 </div>

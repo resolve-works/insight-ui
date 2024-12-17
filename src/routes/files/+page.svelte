@@ -1,15 +1,16 @@
-<script>
+<script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import IndexPage from './IndexPage.svelte';
 	import { breadcrumbs } from '$lib/stores';
 
-	export let data;
-	export let form;
+	let { data, form } = $props();
 
-	$: ({ inodes, parent_id, page, first_item, last_item, amount_of_items, amount_of_pages } = data);
+	let { inodes, parent_id, page, first_item, last_item, amount_of_items, amount_of_pages } = $derived(data);
 
-	$: {
+	run(() => {
 		breadcrumbs.set([{ name: 'Files', path: '/files' }]);
-	}
+	});
 </script>
 
 <IndexPage

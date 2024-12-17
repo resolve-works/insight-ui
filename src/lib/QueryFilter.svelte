@@ -1,10 +1,13 @@
 <script lang="ts">
+	import { createBubbler } from 'svelte/legacy';
+
+	const bubble = createBubbler();
 	import Icon from '$lib/Icon.svelte';
 	import { page } from '$app/stores';
 	import { createEventDispatcher, tick } from 'svelte';
 	const dispatch = createEventDispatcher();
 
-	let value: string = $page.url.searchParams.get('query') ?? '';
+	let value: string = $state($page.url.searchParams.get('query') ?? '');
 
 	page.subscribe(({ url }) => {
 		value = url.searchParams.get('query') ?? '';
@@ -20,10 +23,10 @@
 <p>Filter contents by query</p>
 
 <div>
-	<input name="query" type="text" placeholder="Type search query ..." bind:value on:change />
+	<input name="query" type="text" placeholder="Type search query ..." bind:value onchange={bubble('change')} />
 
 	{#if value}
-		<button type="button" on:click={reset}>
+		<button type="button" onclick={reset}>
 			<Icon class="gg-close" />
 		</button>
 	{/if}

@@ -1,8 +1,12 @@
 <script lang="ts">
 	import Icon from '$lib/Icon.svelte';
-	export let index: number;
-	export let from_page: number;
-	export let name: string;
+	interface Props {
+		index: number;
+		from_page: number;
+		name: string;
+	}
+
+	let { index, from_page, name }: Props = $props();
 </script>
 
 <span class="source">

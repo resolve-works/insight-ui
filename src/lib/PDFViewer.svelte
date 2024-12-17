@@ -1,33 +1,39 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { onMount, getContext } from 'svelte';
 	import * as pdfjs from 'pdfjs-dist';
 	import type { PDFWorker } from 'pdfjs-dist';
 	import 'pdfjs-dist/web/pdf_viewer.css';
 
-	export let url: string;
-	export let page_number: number;
-	export let highlights: string[] | undefined;
+	interface Props {
+		url: string;
+		page_number: number;
+		highlights: string[] | undefined;
+	}
 
-	let container: HTMLElement;
-	let canvas: HTMLCanvasElement;
-	let text: HTMLElement;
-	let load_page: Function;
-	let set_highlights: Function;
+	let { url, page_number, highlights }: Props = $props();
+
+	let container: HTMLElement = $state();
+	let canvas: HTMLCanvasElement = $state();
+	let text: HTMLElement = $state();
+	let load_page: Function = $state();
+	let set_highlights: Function = $state();
 
 	// Re-use existing worker so we don't load a new one every time we render a document
 	const worker: PDFWorker = getContext('pdfjs-worker');
 
-	$: {
+	run(() => {
 		if (load_page) {
 			load_page(page_number);
 		}
-	}
+	});
 
-	$: {
+	run(() => {
 		if (set_highlights) {
 			set_highlights(highlights ?? []);
 		}
-	}
+	});
 
 	onMount(async () => {
 		const pdf = await pdfjs.getDocument({ url, worker }).promise;
@@ -99,7 +105,7 @@
 </script>
 
 <div class="viewer" bind:this={container}>
-	<canvas bind:this={canvas} />
+	<canvas bind:this={canvas}></canvas>
 
 	<div class="textLayer" bind:this={text}></div>
 </div>

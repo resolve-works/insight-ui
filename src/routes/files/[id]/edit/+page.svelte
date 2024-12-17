@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { enhance } from '$app/forms';
 	import Page from '$lib/Page.svelte';
 	import Icon from '$lib/Icon.svelte';
@@ -10,10 +12,9 @@
 	import FormErrors from '$lib/FormErrors.svelte';
 	import Form from '$lib/Form.svelte';
 
-	export let data;
-	export let form;
+	let { data, form } = $props();
 
-	$: {
+	run(() => {
 		breadcrumbs.set([
 			{ name: 'Files', path: '/files' },
 			...data.ancestors.reverse().map((ancestor: Record<string, string>) => {
@@ -25,7 +26,7 @@
 			{ name: data.name, path: `/files/${data.id}` },
 			{ name: 'Edit', path: `/files/${data.id}/edit` }
 		]);
-	}
+	});
 </script>
 
 <Page>

@@ -1,11 +1,20 @@
+<script lang="ts">
+	interface Props {
+		header?: import('svelte').Snippet;
+		children?: import('svelte').Snippet;
+	}
+
+	let { header, children }: Props = $props();
+</script>
+
 <div class="background"></div>
 
 <aside>
 	<header>
-		<slot name="header" />
+		{@render header?.()}
 	</header>
 
-	<slot />
+	{@render children?.()}
 </aside>
 
 <style>

@@ -3,16 +3,26 @@
 	import { page as page_store } from '$app/stores';
 	import { replace_searchparam } from './pagination';
 
-	export let first_item: number | undefined;
-	export let last_item: number | undefined;
-	export let amount_of_items: number;
-	export let page: number;
-	export let amount_of_pages: number;
+	interface Props {
+		first_item: number | undefined;
+		last_item: number | undefined;
+		amount_of_items: number;
+		page: number;
+		amount_of_pages: number;
+	}
 
-	$: previous_page = page > 1 ? page - 1 : 1;
-	$: next_page = page < amount_of_pages ? page + 1 : page;
+	let {
+		first_item,
+		last_item,
+		amount_of_items,
+		page,
+		amount_of_pages
+	}: Props = $props();
 
-	$: ({ url } = $page_store);
+	let previous_page = $derived(page > 1 ? page - 1 : 1);
+	let next_page = $derived(page < amount_of_pages ? page + 1 : page);
+
+	let { url } = $derived($page_store);
 </script>
 
 <aside>

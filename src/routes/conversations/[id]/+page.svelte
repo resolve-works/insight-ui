@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { page } from '$app/stores';
 	import { invalidate } from '$app/navigation';
 	import { tick, onMount } from 'svelte';
@@ -17,19 +19,18 @@
 	import type { Source } from './Answer.svelte';
 	import Answer from './Answer.svelte';
 
-	export let data;
-	export let form;
+	let { data, form } = $props();
 	const { selected_folders } = data;
 
-	$: sources = data.prompts.map((prompt: { sources: Source[] }) => prompt.sources).flat();
+	let sources = $derived(data.prompts.map((prompt: { sources: Source[] }) => prompt.sources).flat());
 
-	let filter_form: HTMLFormElement;
-	let input: HTMLInputElement;
-	let answer: string = '';
+	let filter_form: HTMLFormElement = $state();
+	let input: HTMLInputElement = $state();
+	let answer: string = $state('');
 
-	$: {
+	run(() => {
 		breadcrumbs.set([{ name: 'Conversations', path: '/conversations' }]);
-	}
+	});
 
 	// This is a chat, scroll to bottom
 	async function scroll_to_bottom() {
@@ -76,11 +77,15 @@
 	onMount(() => input.focus());
 
 	// Scroll to bottom when data changes
-	$: data && scroll_to_bottom();
+	run(() => {
+		data && scroll_to_bottom();
+	});
 </script>
 
 <SideBar>
-	<h2 slot="header">Filters</h2>
+	{#snippet header()}
+		<h2 >Filters</h2>
+	{/snippet}
 
 	<nav>
 		<form bind:this={filter_form} action="/conversations?/create_conversation" method="POST">

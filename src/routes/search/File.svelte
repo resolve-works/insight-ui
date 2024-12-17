@@ -3,11 +3,15 @@
 	import Actionable from '$lib/Actionable.svelte';
 	import { page } from '$app/stores';
 
-	export let id: string;
-	export let filename: string;
-	export let pages: { index: number; highlights: string[] }[];
+	interface Props {
+		id: string;
+		filename: string;
+		pages: { index: number; highlights: string[] }[];
+	}
 
-	$: query = $page.url.searchParams.get('query');
+	let { id, filename, pages }: Props = $props();
+
+	let query = $derived($page.url.searchParams.get('query'));
 </script>
 
 <Actionable name={filename} path={`/files/${id}`} icon="gg-file-document">

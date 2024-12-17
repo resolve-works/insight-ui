@@ -1,7 +1,11 @@
 <script lang="ts">
 	import ErrorMessage from '$lib/ErrorMessage.svelte';
-	export let errors: Record<string, any> | undefined;
-	export let key: string;
+	interface Props {
+		errors: Record<string, any> | undefined;
+		key: string;
+	}
+
+	let { errors, key }: Props = $props();
 </script>
 
 {#if errors && key in errors}

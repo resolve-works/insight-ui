@@ -1,16 +1,23 @@
 <script lang="ts">
 	import Breadcrumbs from './Breadcrumbs.svelte';
+	interface Props {
+		header?: import('svelte').Snippet;
+		children?: import('svelte').Snippet;
+		[key: string]: any
+	}
+
+	let { ...props }: Props = $props();
 </script>
 
-<article {...$$props}>
+<article {...props}>
 	<header>
 		<Breadcrumbs />
 
-		<slot name="header" />
+		{@render props.header?.()}
 	</header>
 
 	<main>
-		<slot />
+		{@render props.children?.()}
 	</main>
 
 	<footer>

@@ -1,9 +1,18 @@
+<script lang="ts">
+	interface Props {
+		children?: import('svelte').Snippet;
+		actions?: import('svelte').Snippet;
+	}
+
+	let { children, actions }: Props = $props();
+</script>
+
 <header>
 	<h2 data-testid="title">
-		<slot />
+		{@render children?.()}
 	</h2>
 
-	<slot name="actions" />
+	{@render actions?.()}
 </header>
 
 <style>

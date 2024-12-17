@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
 	export type Source = {
 		id: number;
 		name: string;
@@ -10,9 +10,13 @@
 <script lang="ts">
 	import SourceComponent from './Source.svelte';
 
-	export let sources: Source[];
+	interface Props {
+		sources: Source[];
+	}
 
-	let is_opened = false;
+	let { sources }: Props = $props();
+
+	let is_opened = $state(false);
 </script>
 
 {#if sources.length}
@@ -28,7 +32,7 @@
 
 	<p>
 		<button
-			on:click={() => {
+			onclick={() => {
 				is_opened = !is_opened;
 			}}
 			title="Pages related to your query are used by the model to generate a response."

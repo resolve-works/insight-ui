@@ -1,8 +1,13 @@
 <script lang="ts">
 	import Icon from './Icon.svelte';
 
-	export let icon: string | undefined = undefined;
-	export let test_id: string | undefined = undefined;
+	interface Props {
+		icon?: string | undefined;
+		test_id?: string | undefined;
+		children?: import('svelte').Snippet;
+	}
+
+	let { icon = undefined, test_id = undefined, children }: Props = $props();
 </script>
 
 <div class="form" data-testid={test_id}>
@@ -13,7 +18,7 @@
 	{/if}
 
 	<div class="inputs">
-		<slot />
+		{@render children?.()}
 	</div>
 </div>
 

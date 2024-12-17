@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import Section from '$lib/Section.svelte';
 	import File from './File.svelte';
 	import Title from '$lib/Title.svelte';
@@ -9,18 +11,20 @@
 	import Pagination from '$lib/Pagination.svelte';
 	import { breadcrumbs } from '$lib/stores';
 
-	export let data;
-	$: ({ page, first_item, last_item, amount_of_items, amount_of_pages } = data);
+	let { data } = $props();
+	let { page, first_item, last_item, amount_of_items, amount_of_pages } = $derived(data);
 
-	let form: HTMLFormElement;
+	let form: HTMLFormElement = $state();
 
-	$: {
+	run(() => {
 		breadcrumbs.set([{ name: 'Search', path: '/search' }]);
-	}
+	});
 </script>
 
 <SideBar>
-	<h2 slot="header">Filters</h2>
+	{#snippet header()}
+		<h2 >Filters</h2>
+	{/snippet}
 
 	<nav>
 		<form action="/search" bind:this={form} data-sveltekit-keepfocus data-sveltekit-replacestate>

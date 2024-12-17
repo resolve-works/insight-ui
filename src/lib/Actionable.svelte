@@ -3,10 +3,23 @@
 	import Icon from '$lib/Icon.svelte';
 	import Unnamed from '$lib/Unnamed.svelte';
 
-	export let name: string | undefined;
-	export let path: string;
-	export let icon: string;
-	export let test_id: string | undefined = undefined;
+	interface Props {
+		name: string | undefined;
+		path: string;
+		icon: string;
+		test_id?: string | undefined;
+		actions?: import('svelte').Snippet;
+		children?: import('svelte').Snippet;
+	}
+
+	let {
+		name,
+		path,
+		icon,
+		test_id = undefined,
+		actions,
+		children
+	}: Props = $props();
 </script>
 
 <Card data-testid={test_id}>
@@ -23,10 +36,10 @@
 			</a>
 		</h3>
 
-		<slot name="actions" />
+		{@render actions?.()}
 	</header>
 
-	<slot />
+	{@render children?.()}
 </Card>
 
 <style>
