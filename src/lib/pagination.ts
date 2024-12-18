@@ -29,6 +29,7 @@ export function calculate_pagination(amount_of_items: number, page: number) {
 }
 
 export function replace_searchparam(url: URL, key: string, value: string) {
-	url.searchParams.set(key, value);
-	return url.toString();
+	const new_url = new URL(url.toString());
+	new_url.searchParams.set(key, value);
+	return new_url.toString();
 }

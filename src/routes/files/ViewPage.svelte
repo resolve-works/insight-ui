@@ -82,37 +82,33 @@
 					<input type="hidden" name="page" value={page} />
 				{/if}
 			</Section>
-
-			{#if previous_hit_index || next_hit_index}
-				<div class="hit-navigation">
-					{#if previous_hit_index}
-						<a
-							class="button previous"
-							href={replace_searchparam(
-								$page_store.url,
-								'page',
-								(previous_hit_index + 1).toString()
-							)}
-							data-sveltekit-replacestate
-						>
-							<Icon class="gg-chevron-left" />
-							Previous Hit
-						</a>
-					{/if}
-					{#if next_hit_index}
-						<a
-							class="button next"
-							href={replace_searchparam($page_store.url, 'page', (next_hit_index + 1).toString())}
-							data-sveltekit-replacestate
-						>
-							Next Hit
-
-							<Icon class="gg-chevron-right" />
-						</a>
-					{/if}
-				</div>
-			{/if}
 		</form>
+
+		{#if previous_hit_index || next_hit_index}
+			<div class="hit-navigation">
+				{#if previous_hit_index}
+					<a
+						class="button previous"
+						href={replace_searchparam($page_store.url, 'page', (previous_hit_index + 1).toString())}
+						data-sveltekit-replacestate
+					>
+						<Icon class="gg-chevron-left" />
+						Previous Hit
+					</a>
+				{/if}
+				{#if next_hit_index}
+					<a
+						class="button next"
+						href={replace_searchparam($page_store.url, 'page', (next_hit_index + 1).toString())}
+						data-sveltekit-replacestate
+					>
+						Next Hit
+
+						<Icon class="gg-chevron-right" />
+					</a>
+				{/if}
+			</div>
+		{/if}
 	</nav>
 </SideBar>
 
