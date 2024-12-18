@@ -20,6 +20,7 @@
 	import Row from '$lib/Row.svelte';
 	import type { Breadcrumb } from '$lib/Breadcrumbs.svelte';
 	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
+	import LoadingButton from '$lib/LoadingButton.svelte';
 
 	interface Props {
 		breadcrumbs: Breadcrumb[];
@@ -63,6 +64,7 @@
 	let folder_input: HTMLInputElement;
 	let folder_form: HTMLFormElement;
 	let show_folder_form = $state(false);
+	let is_loading = $state(false);
 
 	function dragover(e: DragEvent) {
 		e.preventDefault();
@@ -277,10 +279,12 @@
 				method="POST"
 				action="?/create_folder"
 				use:enhance={() => {
+					is_loading = true;
 					return async ({ update }) => {
 						await update();
 						invalidate('api:inodes');
 						show_folder_form = false;
+						is_loading = false;
 					};
 				}}
 				bind:this={folder_form}
@@ -293,6 +297,7 @@
 					<Row>
 						<div class="input">
 							<input
+								disabled={is_loading}
 								name="name"
 								data-testid="folder-name-input"
 								placeholder="Folder name"
@@ -303,7 +308,7 @@
 						</div>
 
 						<InputGroup>
-							<button class="button primary" data-testid="create-folder">Create</button>
+							<LoadingButton {is_loading} label={'Create'} test_id="create-folder" />
 
 							<button
 								class="button"

@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
 	import { enhance } from '$app/forms';
 	import Page from '$lib/Page.svelte';
 	import Icon from '$lib/Icon.svelte';

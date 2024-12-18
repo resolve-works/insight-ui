@@ -16,6 +16,7 @@
 	import type { Source } from './Answer.svelte';
 	import Answer from './Answer.svelte';
 	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
+	import LoadingButton from '$lib/LoadingButton.svelte';
 
 	let { data, form } = $props();
 	const { selected_folders } = data;
@@ -27,6 +28,7 @@
 	let filter_form: HTMLFormElement;
 	let input: HTMLInputElement;
 	let answer: string = $state('');
+	let is_loading = $state(false);
 
 	const breadcrumbs = [{ name: 'Conversations', path: '/conversations' }];
 
@@ -39,6 +41,8 @@
 	}
 
 	async function generate_answer() {
+		is_loading = true;
+
 		return async ({ update }: { update: Function }) => {
 			await update();
 
@@ -61,6 +65,7 @@
 					if (done) {
 						await invalidate('api:conversations');
 						answer = '';
+						is_loading = false;
 						input.focus();
 						break;
 					}
@@ -162,6 +167,7 @@
 						data-testid="query-input"
 						placeholder="Your question ..."
 						bind:this={input}
+						disabled={is_loading}
 					/>
 
 					<FormErrors errors={form?.errors} key="query" />
@@ -174,12 +180,13 @@
 						data-testid="similarity-top-k-input"
 						placeholder="Pages (default: 3) ..."
 						min="0"
+						disabled={is_loading}
 					/>
 
 					<FormErrors errors={form?.errors} key="similarity_top_k" />
 				</div>
 
-				<button class="button primary" data-testid="create-prompt">Prompt</button>
+				<LoadingButton {is_loading} label="Prompt" test_id="create-prompt" />
 			</Row>
 		</form>
 	</div>
