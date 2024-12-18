@@ -84,9 +84,9 @@
 			</Section>
 		</form>
 
-		{#if previous_hit_index || next_hit_index}
+		{#if previous_hit_index != undefined || next_hit_index != undefined}
 			<div class="hit-navigation">
-				{#if previous_hit_index}
+				{#if previous_hit_index != undefined}
 					<a
 						class="button previous"
 						href={replace_searchparam($page_store.url, 'page', (previous_hit_index + 1).toString())}
@@ -96,7 +96,7 @@
 						Previous Hit
 					</a>
 				{/if}
-				{#if next_hit_index}
+				{#if next_hit_index != undefined}
 					<a
 						class="button next"
 						href={replace_searchparam($page_store.url, 'page', (next_hit_index + 1).toString())}

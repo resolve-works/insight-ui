@@ -70,11 +70,7 @@
 		upload: Upload;
 	}
 
-	let { upload = $bindable() }: Props = $props();
-	// Re-assign to trigger svelte reactivity
-	upload.addEventListener('update', () => {
-		upload = upload;
-	});
+	let { upload }: Props = $props();
 </script>
 
 <Card>

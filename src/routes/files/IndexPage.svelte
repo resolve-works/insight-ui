@@ -21,9 +21,6 @@
 	import FormErrors from '$lib/FormErrors.svelte';
 	import Row from '$lib/Row.svelte';
 
-
-
-	
 	interface Props {
 		name: any;
 		is_owned?: boolean;
@@ -127,6 +124,10 @@
 					uploads.update((uploads) => uploads.filter((u) => u != upload));
 				});
 
+				upload.addEventListener('update', () => {
+					$uploads = $uploads;
+				});
+
 				upload.start();
 			}
 		}
@@ -158,7 +159,7 @@
 		{/if}
 
 		{#snippet actions()}
-				<InputGroup >
+			<InputGroup>
 				{#if !is_owned}
 					<span class="shared">Shared by {users.name}</span>
 				{/if}
@@ -209,7 +210,7 @@
 					</button>
 				</form>
 			</InputGroup>
-			{/snippet}
+		{/snippet}
 	</Title>
 
 	<h2 class="drop-message" class:dragover={counter > 0}>
