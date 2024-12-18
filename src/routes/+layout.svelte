@@ -14,12 +14,16 @@
 		children?: import('svelte').Snippet;
 	}
 
+	const DEBOUNCE_MILLISECONDS = 3000;
+
 	let { children }: Props = $props();
 
 	if (browser) {
 		pdfjs.GlobalWorkerOptions.workerSrc = worker_url;
 		setContext('pdfjs-worker', new pdfjs.PDFWorker());
 	}
+
+	const debounced_keys: string[] = [];
 
 	onMount(() => {
 		const source = new EventSource('/events');
@@ -36,7 +40,15 @@
 			if ('task' in body && body.task in mapping) {
 				// @ts-ignore
 				for (const key of mapping[body.task]) {
-					invalidate(key);
+					// Debounce to prevent overloading API in case when many events are triggered
+					if (!debounced_keys.includes(key)) {
+						invalidate(key);
+						debounced_keys.push(key);
+						setTimeout(
+							() => debounced_keys.splice(debounced_keys.indexOf(key), 1),
+							DEBOUNCE_MILLISECONDS
+						);
+					}
 				}
 			}
 		});
