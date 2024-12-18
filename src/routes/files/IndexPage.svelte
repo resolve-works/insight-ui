@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { run, preventDefault } from 'svelte/legacy';
-
 	import { tick } from 'svelte';
 	import InputGroup from '$lib/InputGroup.svelte';
 	import Card from '$lib/Card.svelte';
@@ -8,37 +6,40 @@
 	import Icon from '$lib/Icon.svelte';
 	import Page from '$lib/Page.svelte';
 	import Inode from '$lib/Inode.svelte';
-	import UploadComponent from '$lib/Upload.svelte';
+	import Upload from '$lib/Upload.svelte';
 	import Unnamed from '$lib/Unnamed.svelte';
-	import { Upload } from '$lib/Upload.svelte';
 	import Title from '$lib/Title.svelte';
 	import Section from '$lib/Section.svelte';
-	import { uploads } from '$lib/stores.ts';
 	import { enhance } from '$app/forms';
 	import { invalidate } from '$app/navigation';
+	import { uploads } from '$lib/upload.svelte';
+	import type { UploadState } from '$lib/upload.svelte';
 	import Pagination from '$lib/Pagination.svelte';
 	import Form from '$lib/Form.svelte';
 	import FormErrors from '$lib/FormErrors.svelte';
 	import Row from '$lib/Row.svelte';
+	import type { Breadcrumb } from '$lib/Breadcrumbs.svelte';
+	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
 
 	interface Props {
-		name: any;
+		breadcrumbs: Breadcrumb[];
+		name: string;
 		is_owned?: boolean;
 		users?: { name: string } | undefined;
 		inodes: any;
 		form: any;
 		parent_id?: number | undefined;
 		path?: string | undefined;
-		// Pagination
 		page: any;
-		first_item: any;
-		last_item: any;
-		amount_of_items: any;
-		amount_of_pages: any;
+		first_item: number | undefined;
+		last_item: number | undefined;
+		amount_of_items: number;
+		amount_of_pages: number;
 	}
 
 	let {
 		name,
+		breadcrumbs = [],
 		is_owned = true,
 		users = undefined,
 		inodes,
@@ -56,11 +57,11 @@
 
 	// Dragevents trigger on every element. Keep track of how many bubbled up to stop drag on window leave
 	let counter = $state(0);
-	let files_input: HTMLInputElement = $state();
-	let files_form: HTMLFormElement = $state();
+	let files_input: HTMLInputElement;
+	let files_form: HTMLFormElement;
 
-	let folder_input: HTMLInputElement = $state();
-	let folder_form: HTMLFormElement = $state();
+	let folder_input: HTMLInputElement;
+	let folder_form: HTMLFormElement;
 	let show_folder_form = $state(false);
 
 	function dragover(e: DragEvent) {
@@ -92,12 +93,24 @@
 	// Add files to the uploads store to show nice progress objects to user.
 	// This defeats the purpose of svelte enhance though.
 	function create_uploads(e: SubmitEvent) {
+		e.preventDefault();
 		const form_data = new FormData(e.target as HTMLFormElement);
 		const files = form_data.getAll('files') as File[];
 		const parent_id = form_data.get('parent_id') as string;
-		uploads.update((uploads) => {
-			return [...uploads, ...files.map((file) => new Upload(file, parent_id))];
-		});
+		for (const file of files) {
+			const upload: UploadState = {
+				id: self.crypto.randomUUID(),
+				parent_id,
+				file,
+				total: file.size,
+				loaded: 0,
+				xhr: new XMLHttpRequest(),
+				is_started: false,
+				error: undefined
+			};
+
+			uploads.push(upload);
+		}
 	}
 
 	onMount(() => {
@@ -114,35 +127,66 @@
 		};
 	});
 
-	run(() => {
-		for (const upload of $uploads.slice(0, PARALLEL_UPLOADS)) {
+	function discard_upload(upload: UploadState) {
+		uploads.splice(uploads.indexOf(upload), 1);
+	}
+
+	$effect(() => {
+		const slice = uploads.filter((upload) => upload.error == undefined).slice(0, PARALLEL_UPLOADS);
+
+		// Start unstarted uploads
+		for (const upload of slice) {
 			// Start active uploads that have not been started yet.
 			if (!upload.is_started) {
-				// Remove uploads from store on completion
-				upload.addEventListener('finished', () => {
-					invalidate('api:inodes');
-					uploads.update((uploads) => uploads.filter((u) => u != upload));
+				upload.is_started = true;
+
+				upload.xhr.upload.addEventListener('progress', (e: ProgressEvent) => {
+					upload.loaded = e.loaded;
+					upload.total = e.total;
 				});
 
-				upload.addEventListener('update', () => {
-					$uploads = $uploads;
+				upload.xhr.addEventListener('loadend', (e: ProgressEvent) => {
+					if (upload.xhr.status == 200) {
+						invalidate('api:inodes');
+						discard_upload(upload);
+					} else {
+						const data = JSON.parse(upload.xhr.response);
+						upload.error = data.message;
+					}
 				});
 
-				upload.start();
+				const data = new FormData();
+				data.append('file', upload.file);
+				if (upload.parent_id) {
+					data.append('parent_id', upload.parent_id);
+				}
+
+				upload.xhr.open('POST', `/files/upload`, true);
+				upload.xhr.send(data);
 			}
 		}
 	});
 
-	let started = $derived($uploads.filter((upload) => upload.is_started));
-	let pending = $derived($uploads.filter((upload) => !upload.is_started));
+	let started = $derived(uploads.filter((upload) => upload.is_started));
+	let pending = $derived(uploads.filter((upload) => !upload.is_started));
 </script>
 
-<Page>
+{#snippet header()}
+	<Breadcrumbs {breadcrumbs} />
+{/snippet}
+
+<Page {header}>
 	{#if started.length > 0}
 		<Section>
 			<h3>Uploading...</h3>
 			{#each started as upload (upload.id)}
-				<UploadComponent {upload} />
+				<Upload
+					name={upload.file.name}
+					error={upload.error}
+					discard_upload={() => discard_upload(upload)}
+					loaded={upload.loaded}
+					total={upload.total}
+				/>
 			{/each}
 
 			{#if pending.length > 0}
@@ -164,7 +208,7 @@
 					<span class="shared">Shared by {users.name}</span>
 				{/if}
 
-				<form bind:this={files_form} onsubmit={preventDefault(create_uploads)}>
+				<form bind:this={files_form} onsubmit={create_uploads}>
 					<input
 						name="files"
 						data-testid="files-input"
@@ -178,18 +222,25 @@
 						<input name="parent_id" type="hidden" value={parent_id} />
 					{/if}
 
-					<button class="button" onclick={preventDefault(() => files_input.click())}>
+					<button
+						class="button"
+						onclick={(e) => {
+							e.preventDefault();
+							files_input.click();
+						}}
+					>
 						<Icon class="gg-software-upload" />
 						Upload PDFs
 					</button>
 				</form>
 
 				<button
-					onclick={preventDefault(async () => {
+					onclick={async (e) => {
+						e.preventDefault();
 						show_folder_form = true;
 						await tick();
 						folder_input.focus();
-					})}
+					}}
 					data-testid="show-folder-form"
 					class="button"
 				>
@@ -257,11 +308,12 @@
 							<button
 								class="button"
 								data-testid="cancel-create-folder"
-								onclick={preventDefault(() => {
+								onclick={(e) => {
+									e.preventDefault();
 									folder_form.reset();
 									show_folder_form = false;
 									form = undefined;
-								})}>Cancel</button
+								}}>Cancel</button
 							>
 						</InputGroup>
 					</Row>

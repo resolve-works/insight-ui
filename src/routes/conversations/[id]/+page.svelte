@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
 	import { page } from '$app/stores';
 	import { invalidate } from '$app/navigation';
 	import { tick, onMount } from 'svelte';
@@ -12,12 +10,12 @@
 	import FolderFilter from '$lib/FolderFilter.svelte';
 	import Message from './Message.svelte';
 	import Sources from './Sources.svelte';
-	import { breadcrumbs } from '$lib/stores';
 	import ErrorMessage from '$lib/ErrorMessage.svelte';
 	import Row from '$lib/Row.svelte';
 	import FormErrors from '$lib/FormErrors.svelte';
 	import type { Source } from './Answer.svelte';
 	import Answer from './Answer.svelte';
+	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
 
 	let { data, form } = $props();
 	const { selected_folders } = data;
@@ -26,13 +24,11 @@
 		data.prompts.map((prompt: { sources: Source[] }) => prompt.sources).flat()
 	);
 
-	let filter_form: HTMLFormElement = $state();
-	let input: HTMLInputElement = $state();
+	let filter_form: HTMLFormElement;
+	let input: HTMLInputElement;
 	let answer: string = $state('');
 
-	run(() => {
-		breadcrumbs.set([{ name: 'Conversations', path: '/conversations' }]);
-	});
+	const breadcrumbs = [{ name: 'Conversations', path: '/conversations' }];
 
 	// This is a chat, scroll to bottom
 	async function scroll_to_bottom() {
@@ -79,30 +75,39 @@
 	onMount(() => input.focus());
 
 	// Scroll to bottom when data changes
-	run(() => {
+	$effect(() => {
 		data && scroll_to_bottom();
 	});
 </script>
 
-<SideBar>
+<Page>
 	{#snippet header()}
-		<h2>Filters</h2>
+		<Breadcrumbs {breadcrumbs} />
 	{/snippet}
 
-	<nav>
-		<form bind:this={filter_form} action="/conversations?/create_conversation" method="POST">
-			<Section>
-				<FolderFilter selected={selected_folders} on:change={() => filter_form.requestSubmit()} />
-			</Section>
+	{#snippet sidebar()}
+		<SideBar>
+			{#snippet header()}
+				<h2>Filters</h2>
+			{/snippet}
 
-			<button class="button secondary" title="Start a new conversation with these filters">
-				New Conversation
-			</button>
-		</form>
-	</nav>
-</SideBar>
+			<nav>
+				<form bind:this={filter_form} action="/conversations?/create_conversation" method="POST">
+					<Section>
+						<FolderFilter
+							selected={selected_folders}
+							on:change={() => filter_form.requestSubmit()}
+						/>
+					</Section>
 
-<Page class="with-sidebar-left">
+					<button class="button secondary" title="Start a new conversation with these filters">
+						New Conversation
+					</button>
+				</form>
+			</nav>
+		</SideBar>
+	{/snippet}
+
 	<div class="chat">
 		<div class="messages">
 			<Message type={'machine'}>

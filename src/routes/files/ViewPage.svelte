@@ -1,4 +1,6 @@
 <script lang="ts">
+	import type { Breadcrumb } from '$lib/Breadcrumbs.svelte';
+	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
 	import InputGroup from '$lib/InputGroup.svelte';
 	import Icon from '$lib/Icon.svelte';
 	import Page from '$lib/Page.svelte';
@@ -14,6 +16,7 @@
 	interface Props {
 		id: any;
 		name: any;
+		breadcrumbs: Breadcrumb[];
 		url: any;
 		from_page: number;
 		to_page: number | undefined;
@@ -30,6 +33,7 @@
 	let {
 		id,
 		name,
+		breadcrumbs,
 		url,
 		from_page,
 		to_page,
@@ -68,51 +72,61 @@
 	}
 </script>
 
-<SideBar>
-	{#snippet header()}
-		<h2>Filters</h2>
-	{/snippet}
+{#snippet sidebar()}
+	<SideBar>
+		{#snippet header()}
+			<h2>Filters</h2>
+		{/snippet}
 
-	<nav>
-		<form data-sveltekit-keepfocus data-sveltekit-replacestate>
-			<Section>
-				<QueryFilter />
+		<nav>
+			<form data-sveltekit-keepfocus data-sveltekit-replacestate>
+				<Section>
+					<QueryFilter />
 
-				{#if $page_store.url.searchParams.has('page')}
-					<input type="hidden" name="page" value={page} />
-				{/if}
-			</Section>
-		</form>
+					{#if $page_store.url.searchParams.has('page')}
+						<input type="hidden" name="page" value={page} />
+					{/if}
+				</Section>
+			</form>
 
-		{#if previous_hit_index != undefined || next_hit_index != undefined}
-			<div class="hit-navigation">
-				{#if previous_hit_index != undefined}
-					<a
-						class="button previous"
-						href={replace_searchparam($page_store.url, 'page', (previous_hit_index + 1).toString())}
-						data-sveltekit-replacestate
-					>
-						<Icon class="gg-chevron-left" />
-						Previous Hit
-					</a>
-				{/if}
-				{#if next_hit_index != undefined}
-					<a
-						class="button next"
-						href={replace_searchparam($page_store.url, 'page', (next_hit_index + 1).toString())}
-						data-sveltekit-replacestate
-					>
-						Next Hit
+			{#if previous_hit_index != undefined || next_hit_index != undefined}
+				<div class="hit-navigation">
+					{#if previous_hit_index != undefined}
+						<a
+							class="button previous"
+							href={replace_searchparam(
+								$page_store.url,
+								'page',
+								(previous_hit_index + 1).toString()
+							)}
+							data-sveltekit-replacestate
+						>
+							<Icon class="gg-chevron-left" />
+							Previous Hit
+						</a>
+					{/if}
+					{#if next_hit_index != undefined}
+						<a
+							class="button next"
+							href={replace_searchparam($page_store.url, 'page', (next_hit_index + 1).toString())}
+							data-sveltekit-replacestate
+						>
+							Next Hit
 
-						<Icon class="gg-chevron-right" />
-					</a>
-				{/if}
-			</div>
-		{/if}
-	</nav>
-</SideBar>
+							<Icon class="gg-chevron-right" />
+						</a>
+					{/if}
+				</div>
+			{/if}
+		</nav>
+	</SideBar>
+{/snippet}
 
-<Page class="with-sidebar-left">
+{#snippet header()}
+	<Breadcrumbs {breadcrumbs} />
+{/snippet}
+
+<Page {header} {sidebar}>
 	<Title>
 		{name}
 

@@ -7,29 +7,31 @@
 	import Card from '$lib/Card.svelte';
 	import Unnamed from '$lib/Unnamed.svelte';
 	import Section from '$lib/Section.svelte';
-	import { breadcrumbs } from '$lib/stores';
 	import Title from '$lib/Title.svelte';
 	import FormErrors from '$lib/FormErrors.svelte';
 	import Form from '$lib/Form.svelte';
+	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
 
 	let { data, form } = $props();
 
-	run(() => {
-		breadcrumbs.set([
-			{ name: 'Files', path: '/files' },
-			...data.ancestors.reverse().map((ancestor: Record<string, string>) => {
-				return {
-					name: ancestor.name,
-					path: `/files/${ancestor.id}`
-				};
-			}),
-			{ name: data.name, path: `/files/${data.id}` },
-			{ name: 'Edit', path: `/files/${data.id}/edit` }
-		]);
-	});
+	const breadcrumbs = [
+		{ name: 'Files', path: '/files' },
+		...data.ancestors.reverse().map((ancestor: Record<string, string>) => {
+			return {
+				name: ancestor.name,
+				path: `/files/${ancestor.id}`
+			};
+		}),
+		{ name: data.name, path: `/files/${data.id}` },
+		{ name: 'Edit', path: `/files/${data.id}/edit` }
+	];
 </script>
 
 <Page>
+	{#snippet header()}
+		<Breadcrumbs {breadcrumbs} />
+	{/snippet}
+
 	<Section>
 		<Title>
 			{#if data.name}

@@ -1,19 +1,24 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	export type Breadcrumb = {
-		name: string;
+		name: string | undefined;
 		path: string;
 	};
 </script>
 
 <script lang="ts">
-	import { breadcrumbs } from './stores';
 	import Unnamed from './Unnamed.svelte';
+
+	type Props = {
+		breadcrumbs?: Breadcrumb[];
+	};
+
+	const { breadcrumbs = [] }: Props = $props();
 </script>
 
 <ul>
 	<li><a href="/">Home</a></li>
 
-	{#each $breadcrumbs as crumb}
+	{#each breadcrumbs as crumb}
 		<li>
 			<a href={crumb.path}>
 				{#if crumb.name}

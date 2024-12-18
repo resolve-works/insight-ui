@@ -1,23 +1,23 @@
 <script lang="ts">
-	import Breadcrumbs from './Breadcrumbs.svelte';
 	interface Props {
 		header?: import('svelte').Snippet;
+		sidebar?: import('svelte').Snippet;
 		children?: import('svelte').Snippet;
-		[key: string]: any
+		[key: string]: any;
 	}
 
-	let { ...props }: Props = $props();
+	let { header, children, sidebar }: Props = $props();
 </script>
 
-<article {...props}>
-	<header>
-		<Breadcrumbs />
+{@render sidebar?.()}
 
-		{@render props.header?.()}
+<article class:with-sidebar-left={sidebar != undefined}>
+	<header>
+		{@render header?.()}
 	</header>
 
 	<main>
-		{@render props.children?.()}
+		{@render children?.()}
 	</main>
 
 	<footer>

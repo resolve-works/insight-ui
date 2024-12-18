@@ -1,13 +1,15 @@
 <script lang="ts">
+	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
 	import Page from '$lib/Page.svelte';
-	import { breadcrumbs } from '$lib/stores';
 
 	let { data } = $props();
-
-	breadcrumbs.set([]);
 </script>
 
 <Page>
+	{#snippet header()}
+		<Breadcrumbs />
+	{/snippet}
+
 	<h1>Welcome</h1>
 	<p>
 		Start exploring the <b>{data.amount_of_items}</b> files in this instance
