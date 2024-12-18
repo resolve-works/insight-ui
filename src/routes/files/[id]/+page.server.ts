@@ -173,7 +173,6 @@ export async function load(event: ServerLoadEvent) {
 	}
 
 	const search_properties = await get_search_properties(event);
-
 	return {
 		url: sign(`users/${owner_id}${optimized_path}`, cookies),
 		...inode,

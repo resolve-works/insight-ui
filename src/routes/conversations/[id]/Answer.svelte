@@ -18,7 +18,6 @@
 	import ErrorMessage from '$lib/ErrorMessage.svelte';
 	import SourceComponent from './Source.svelte';
 	import { marked } from 'marked';
-	import IndexPage from '../../files/IndexPage.svelte';
 
 	interface Props {
 		response: string;
@@ -27,9 +26,12 @@
 
 	let { response, sources }: Props = $props();
 
-	let source_links: SourceLink[] = $state([]);
+	const regex = /\[([^\]]+)\]\(([^\)]+)\)/g;
+
 	let sources_missing: number = $state(0);
 	let parsed_response = $state('');
+
+	let source_links: SourceLink[] = $state([]);
 
 	run(() => {
 		source_links = [];
@@ -38,7 +40,7 @@
 		// generated source links with actual links, it updates the
 		// `source_links` array so we can show all source links at the bottom
 		// of an answer
-		parsed_response = response.replaceAll(/\[([^\]]+)\]\(([^\)]+)\)/g, (_, source_index, quote) => {
+		parsed_response = response.replaceAll(regex, (_, source_index, quote) => {
 			// LLM answers with links to quotes in the form of
 			// [source_index]("quote"). Transform these into links to sources
 			try {

@@ -12,7 +12,7 @@
 	import { breadcrumbs } from '$lib/stores';
 
 	let { data } = $props();
-	let { page, first_item, last_item, amount_of_items, amount_of_pages } = $derived(data);
+	let { folders, page, first_item, last_item, amount_of_items, amount_of_pages } = $derived(data);
 
 	let form: HTMLFormElement = $state();
 
@@ -23,7 +23,7 @@
 
 <SideBar>
 	{#snippet header()}
-		<h2 >Filters</h2>
+		<h2>Filters</h2>
 	{/snippet}
 
 	<nav>
@@ -33,7 +33,7 @@
 			</Section>
 
 			<Section>
-				<FolderFilter selected={data.folders} on:change={() => form.requestSubmit()} />
+				<FolderFilter selected={folders} on:change={() => form.requestSubmit()} />
 			</Section>
 		</form>
 	</nav>
