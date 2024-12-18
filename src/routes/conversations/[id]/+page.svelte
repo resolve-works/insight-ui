@@ -10,7 +10,7 @@
 	import SideBar from '$lib/SideBar.svelte';
 	import Page from '$lib/Page.svelte';
 	import FolderFilter from '$lib/FolderFilter.svelte';
-	import Message, { MessageType } from './Message.svelte';
+	import Message from './Message.svelte';
 	import Sources from './Sources.svelte';
 	import { breadcrumbs } from '$lib/stores';
 	import ErrorMessage from '$lib/ErrorMessage.svelte';
@@ -22,7 +22,9 @@
 	let { data, form } = $props();
 	const { selected_folders } = data;
 
-	let sources = $derived(data.prompts.map((prompt: { sources: Source[] }) => prompt.sources).flat());
+	let sources = $derived(
+		data.prompts.map((prompt: { sources: Source[] }) => prompt.sources).flat()
+	);
 
 	let filter_form: HTMLFormElement = $state();
 	let input: HTMLInputElement = $state();
@@ -84,7 +86,7 @@
 
 <SideBar>
 	{#snippet header()}
-		<h2 >Filters</h2>
+		<h2>Filters</h2>
 	{/snippet}
 
 	<nav>
@@ -103,7 +105,7 @@
 <Page class="with-sidebar-left">
 	<div class="chat">
 		<div class="messages">
-			<Message type={MessageType.machine}>
+			<Message type={'machine'}>
 				<p>
 					We are having a conversation about {#if !selected_folders.length}all files{:else}the files
 						contained in the chosen folders{/if}. To what question do you think these files hold the
@@ -112,7 +114,7 @@
 			</Message>
 
 			{#each data.prompts as prompt}
-				<Message type={MessageType.human}>
+				<Message type={'human'}>
 					<p>{prompt.query}</p>
 
 					{#if prompt.error}
@@ -123,14 +125,14 @@
 				</Message>
 
 				{#if prompt.response}
-					<Message type={MessageType.machine}>
+					<Message type={'machine'}>
 						<Answer {sources} response={prompt.response} />
 					</Message>
 				{/if}
 			{/each}
 
 			{#if answer}
-				<Message type={MessageType.machine}>
+				<Message type={'machine'}>
 					<div class="response" data-testid="streamed-answer">
 						<Answer {sources} response={answer} />
 					</div>
@@ -138,7 +140,7 @@
 			{/if}
 
 			{#if data.error}
-				<Message type={MessageType.machine}>
+				<Message type={'machine'}>
 					<ErrorMessage
 						message="Maximum conversation context exceeded. Start a new conversation."
 					/>

@@ -1,24 +1,16 @@
-<script lang="ts" module>
-	export enum MessageType {
-		machine,
-		human
-	}
-</script>
-
 <script lang="ts">
 	import Card from '$lib/Card.svelte';
 	interface Props {
-		type: MessageType;
+		type: string;
 		children?: import('svelte').Snippet;
 	}
 
 	let { type, children }: Props = $props();
 
-	const type_class = MessageType[type];
-	const name = type_class.charAt(0).toUpperCase() + type_class.slice(1);
+	const name = type.charAt(0).toUpperCase() + type.slice(1);
 </script>
 
-<div class={`message ${type_class}`} data-testid={`${type_class}-message`}>
+<div class={`message ${type}`} data-testid={`${type}-message`}>
 	<h3 class="profile">{name.slice(0, 1)}</h3>
 
 	<Card class="card">
