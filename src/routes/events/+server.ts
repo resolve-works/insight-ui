@@ -28,7 +28,10 @@ export async function GET({ cookies, locals }) {
 
 				await channel.consume(queue, (message) => {
 					if (message !== null) {
-						controller.enqueue(`data: ${message.content.toString()}\n\n`);
+						const data = JSON.parse(message.content.toString());
+						// Make it possible to debounce public messages by passing the type
+						data.type = message.fields.routingKey == 'public' ? 'public' : 'user';
+						controller.enqueue(`data: ${JSON.stringify(data)}\n\n`);
 						channel.ack(message);
 					} else {
 						console.log('Consumer cancelled by server');

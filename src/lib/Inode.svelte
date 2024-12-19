@@ -17,24 +17,14 @@
 		users: { name: string };
 	}
 
-	let {
-		id,
-		parent_id,
-		name,
-		type,
-		is_indexed,
-		is_ready,
-		is_owned,
-		error,
-		users
-	}: Props = $props();
+	let { id, parent_id, name, type, is_indexed, is_ready, is_owned, error, users }: Props = $props();
 
 	let icon = type == 'file' ? 'gg-file-document' : 'gg-folder';
 </script>
 
 <Actionable {icon} {name} path={`/files/${id}`} test_id="inode">
 	{#snippet actions()}
-		<InputGroup >
+		<InputGroup>
 			{#if error}
 				<Icon test_id="inode-error" class="gg-danger error" title={error} />
 			{:else if (type == 'file' && !is_ready) || (type == 'folder' && !is_indexed)}
@@ -52,7 +42,8 @@
 
 					<form method="POST" action="?/remove" use:enhance>
 						<input type="hidden" name="id" value={id} />
-						<button class="button" data-testid="delete-inode"><Icon class="gg-trash" /> Delete</button
+						<button class="button" data-testid="delete-inode"
+							><Icon class="gg-trash" /> Delete</button
 						>
 					</form>
 				</Buttongroup>

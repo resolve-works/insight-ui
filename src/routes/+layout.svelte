@@ -14,8 +14,6 @@
 		children?: import('svelte').Snippet;
 	}
 
-	const DEBOUNCE_MILLISECONDS = 3000;
-
 	let { children }: Props = $props();
 
 	if (browser) {
@@ -23,7 +21,8 @@
 		setContext('pdfjs-worker', new pdfjs.PDFWorker());
 	}
 
-	const debounced_keys: string[] = [];
+	const DEBOUNCE_MILLISECONDS = 1000;
+	const debounced: Record<string, ReturnType<typeof setTimeout>> = {};
 
 	onMount(() => {
 		const source = new EventSource('/events');
@@ -40,14 +39,21 @@
 			if ('task' in body && body.task in mapping) {
 				// @ts-ignore
 				for (const key of mapping[body.task]) {
-					// Debounce to prevent overloading API in case when many events are triggered
-					if (!debounced_keys.includes(key)) {
-						invalidate(key);
-						debounced_keys.push(key);
-						setTimeout(
-							() => debounced_keys.splice(debounced_keys.indexOf(key), 1),
-							DEBOUNCE_MILLISECONDS
-						);
+					switch (body.type) {
+						// Handle private messages directly
+						case 'user':
+							invalidate(key);
+							break;
+						// Debounce public messages as to not overload API
+						case 'public':
+							if (key in debounced) {
+								clearTimeout(debounced[key]);
+							}
+							debounced[key] = setTimeout(() => {
+								invalidate(key);
+								delete debounced[key];
+							}, DEBOUNCE_MILLISECONDS);
+							break;
 					}
 				}
 			}
