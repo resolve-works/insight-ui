@@ -3,6 +3,7 @@
 	import * as pdfjs from 'pdfjs-dist';
 	import type { PDFWorker } from 'pdfjs-dist';
 	import 'pdfjs-dist/web/pdf_viewer.css';
+	import { browser } from '$app/environment';
 
 	interface Props {
 		url: string;
@@ -20,24 +21,13 @@
 	const worker: PDFWorker = getContext('pdfjs-worker');
 
 	const pdf_promise = $derived(pdfjs.getDocument({ url, worker }).promise);
-	const page_promise = $derived(
-		pdf_promise
-			.then((pdf) => pdf.getPage(page_number))
-			.then((page) => {
-				const default_viewport = page.getViewport({ scale: 1 });
-				const scale = container.clientWidth / default_viewport.width;
-				const viewport = page.getViewport({ scale: scale });
-
-				return {
-					page,
-					scale,
-					viewport
-				};
-			})
-	);
+	const page_promise = $derived(pdf_promise.then((pdf) => pdf.getPage(page_number)));
 
 	$effect(async () => {
-		const { page, viewport } = await page_promise;
+		const page = await page_promise;
+		const default_viewport = page.getViewport({ scale: 1 });
+		const scale = container.clientWidth / default_viewport.width;
+		const viewport = page.getViewport({ scale: scale });
 		// Support HiDPI-screens.
 		const outputScale = window.devicePixelRatio || 1;
 
@@ -57,7 +47,10 @@
 	});
 
 	$effect(async () => {
-		const { page, viewport, scale } = await page_promise;
+		const page = await page_promise;
+		const default_viewport = page.getViewport({ scale: 1 });
+		const scale = container.clientWidth / default_viewport.width;
+		const viewport = page.getViewport({ scale: scale });
 		text.innerHTML = '';
 		text.style.setProperty('--scale-factor', scale.toString());
 
