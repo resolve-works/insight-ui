@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import Page from '$lib/Page.svelte';
-	import Icon from '$lib/Icon.svelte';
 	import Card from '$lib/Card.svelte';
 	import Unnamed from '$lib/Unnamed.svelte';
 	import Section from '$lib/Section.svelte';
@@ -15,7 +14,7 @@
 
 	let is_loading = $state(false);
 
-	const breadcrumbs = [
+	const breadcrumbs = $derived([
 		{ name: 'Files', path: '/files' },
 		...data.ancestors.reverse().map((ancestor: Record<string, string>) => {
 			return {
@@ -25,7 +24,7 @@
 		}),
 		{ name: data.name, path: `/files/${data.id}` },
 		{ name: 'Edit', path: `/files/${data.id}/edit` }
-	];
+	]);
 </script>
 
 <Page>
