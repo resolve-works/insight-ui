@@ -9,8 +9,11 @@
 	import FormErrors from '$lib/FormErrors.svelte';
 	import Form from '$lib/Form.svelte';
 	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
+	import LoadingButton from '$lib/LoadingButton.svelte';
 
 	let { data, form } = $props();
+
+	let is_loading = $state(false);
 
 	const breadcrumbs = [
 		{ name: 'Files', path: '/files' },
@@ -43,9 +46,13 @@
 			<form
 				method="POST"
 				action="?/update"
-				use:enhance={() =>
-					async ({ update }) =>
-						update({ reset: false })}
+				use:enhance={() => {
+					is_loading = true;
+					return async ({ update }) => {
+						update({ reset: false });
+						is_loading = false;
+					};
+				}}
 			>
 				<Form icon={data.type == 'file' ? 'gg-file-document' : 'gg-folder'}>
 					<input
@@ -70,9 +77,11 @@
 
 					<FormErrors errors={form?.errors} key="is_public" />
 
-					<button class="button primary" data-testid="update-inode">
-						<Icon class="gg-pen" /> Update {data.type == 'file' ? 'Document' : 'Folder'}
-					</button>
+					<LoadingButton
+						label={`Update ${data.type == 'file' ? 'Document' : 'Folder'}`}
+						{is_loading}
+						test_id={'update-inode'}
+					/>
 				</Form>
 			</form>
 		</Card>
