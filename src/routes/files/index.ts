@@ -25,6 +25,14 @@ export async function create_folder({ request, fetch }: RequestEvent) {
 				throw new ValidationError(errors, data);
 			}
 
+			if (details.code == '23514') {
+				const errors = {
+					name: { _errors: ['Path can not contain slash characters'] }
+				};
+
+				throw new ValidationError(errors, data);
+			}
+
 			throw new Error(details.message);
 		}
 	} catch (err) {
