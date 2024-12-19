@@ -10,14 +10,13 @@
 		parent_id: string | undefined;
 		name: string;
 		type: string;
-		is_indexed: any;
 		is_ready: boolean;
 		is_owned: boolean;
 		error: string | undefined;
 		users: { name: string };
 	}
 
-	let { id, parent_id, name, type, is_indexed, is_ready, is_owned, error, users }: Props = $props();
+	let { id, parent_id, name, type, is_ready, is_owned, error, users }: Props = $props();
 
 	let icon = type == 'file' ? 'gg-file-document' : 'gg-folder';
 </script>
@@ -27,13 +26,14 @@
 		<InputGroup>
 			{#if error}
 				<Icon test_id="inode-error" class="gg-danger error" title={error} />
-			{:else if (type == 'file' && !is_ready) || (type == 'folder' && !is_indexed)}
+			{:else if !is_ready}
 				<Icon test_id="inode-loader" class="gg-loadbar" />
 			{/if}
 
 			{#if !is_owned && !parent_id}
 				<span>Shared by {users.name}</span>
-			{:else}
+			{/if}
+			{#if is_owned}
 				<Buttongroup test_id="inode-actions">
 					<a class="button" href={`/files/${id}/edit`} data-testid="edit-inode">
 						<Icon class="gg-pen" />

@@ -173,11 +173,11 @@
 	let pending = $derived(uploads.filter((upload) => !upload.is_started));
 </script>
 
-{#snippet header()}
-	<Breadcrumbs {breadcrumbs} />
-{/snippet}
+<Page>
+	{#snippet header()}
+		<Breadcrumbs {breadcrumbs} />
+	{/snippet}
 
-<Page {header}>
 	{#if started.length > 0}
 		<Section>
 			<h3>Uploading...</h3>

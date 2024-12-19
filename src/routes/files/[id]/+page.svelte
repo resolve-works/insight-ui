@@ -3,17 +3,18 @@
 	import ViewPage from '../ViewPage.svelte';
 
 	let { data, form } = $props();
+	let { ancestors } = $derived(data);
 
-	const breadcrumbs = [
+	const breadcrumbs = $derived([
 		{ name: 'Files', path: '/files' },
-		...data.ancestors.reverse().map((ancestor: Record<string, string>) => {
+		...ancestors.reverse().map((ancestor: Record<string, string>) => {
 			return {
 				name: ancestor.name,
 				path: `/files/${ancestor.id}`
 			};
 		}),
 		{ name: data.name, path: `/files/${data.id}` }
-	];
+	]);
 </script>
 
 {#if data.type == 'file'}
