@@ -44,10 +44,6 @@
 		grid-column-start: 3;
 	}
 
-	article.with-sidebar-right {
-		grid-column-end: 4;
-	}
-
 	header {
 		display: flex;
 		justify-content: space-between;

@@ -5,27 +5,26 @@
 	import { onMount, setContext } from 'svelte';
 	import { invalidate } from '$app/navigation';
 	import Navigation from '$lib/Navigation.svelte';
-	import { browser } from '$app/environment';
 
 	// Create PDF worker in context once to prevent creating a new worker on every PDFViewer load
-	import * as pdfjs from 'pdfjs-dist';
+	import { PDFWorker, GlobalWorkerOptions } from 'pdfjs-dist';
 	import worker_url from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+
 	interface Props {
 		children?: import('svelte').Snippet;
 	}
 
 	let { children }: Props = $props();
 
-	if (browser) {
-		pdfjs.GlobalWorkerOptions.workerSrc = worker_url;
-		setContext('pdfjs-worker', new pdfjs.PDFWorker());
-	}
-
 	const DEBOUNCE_MILLISECONDS = 1000;
 	const debounced: Record<string, ReturnType<typeof setTimeout>> = {};
 
 	onMount(() => {
 		const source = new EventSource('/events');
+
+		// Create PDF service worker that can be used by PDF pages
+		GlobalWorkerOptions.workerSrc = worker_url;
+		setContext('pdfjs-worker', new PDFWorker());
 
 		source.addEventListener('message', (message) => {
 			const body = JSON.parse(message.data);
