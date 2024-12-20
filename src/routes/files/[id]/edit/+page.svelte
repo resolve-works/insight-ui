@@ -11,12 +11,13 @@
 	import LoadingButton from '$lib/LoadingButton.svelte';
 
 	let { data, form } = $props();
+	let { ancestors } = $derived(data);
 
 	let is_loading = $state(false);
 
 	const breadcrumbs = $derived([
 		{ name: 'Files', path: '/files' },
-		...data.ancestors.reverse().map((ancestor: Record<string, string>) => {
+		...ancestors.map((ancestor: Record<string, string>) => {
 			return {
 				name: ancestor.name,
 				path: `/files/${ancestor.id}`

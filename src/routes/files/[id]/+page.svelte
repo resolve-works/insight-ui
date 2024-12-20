@@ -7,7 +7,7 @@
 
 	const breadcrumbs = $derived([
 		{ name: 'Files', path: '/files' },
-		...ancestors.reverse().map((ancestor: Record<string, string>) => {
+		...ancestors.map((ancestor: Record<string, string>) => {
 			return {
 				name: ancestor.name,
 				path: `/files/${ancestor.id}`
