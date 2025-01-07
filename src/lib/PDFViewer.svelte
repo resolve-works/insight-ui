@@ -94,7 +94,10 @@
 					let innerHTML = child.textContent;
 
 					for (const highlight of highlights) {
-						const match = innerHTML.match(new RegExp(String.raw`\b${highlight}\b`, 'i'));
+						// TODO - Switch to actual escape logic when it is available in browsers
+						// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/escape
+						const escaped_highlight = highlight.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+						const match = innerHTML.match(new RegExp(String.raw`\b${escaped_highlight}\b`, 'i'));
 						if (match) {
 							// Replace the word in the match to keep the original whitespace
 							// TODO - this could replace the "strong" tag itself
