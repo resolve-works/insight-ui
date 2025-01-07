@@ -173,17 +173,17 @@
 					<FormErrors errors={form?.errors} key="query" />
 				</div>
 
-				<div class="similarity">
+				<div class="amount">
 					<input
 						type="number"
-						name="similarity_top_k"
-						data-testid="similarity-top-k-input"
+						name="amount"
+						data-testid="amount-input"
 						placeholder="Pages (default: 3) ..."
 						min="0"
 						disabled={is_loading}
 					/>
 
-					<FormErrors errors={form?.errors} key="similarity_top_k" />
+					<FormErrors errors={form?.errors} key="amount" />
 				</div>
 
 				<LoadingButton {is_loading} label="Prompt" test_id="create-prompt" />
@@ -207,7 +207,7 @@
 		width: 100%;
 	}
 
-	.similarity {
+	.amount {
 		max-width: 15rem;
 	}
 

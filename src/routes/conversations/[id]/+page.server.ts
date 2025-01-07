@@ -12,7 +12,7 @@ async function get_conversation(fetch: typeof global.fetch, id: string) {
 	const sources = `sources(similarity,...pages(index,...inodes(id,name,from_page)))`;
 	url.searchParams.set('select', `error,prompts(query,response,error,${sources}),inodes(path)`);
 	url.searchParams.set('prompts.order', 'created_at.asc');
-	url.searchParams.set('prompts.sources.order', 'similarity.asc');
+	url.searchParams.set('prompts.sources.order', 'similarity.desc');
 	url.searchParams.set('id', `eq.${id}`);
 
 	const response = await fetch(url, {
@@ -131,16 +131,12 @@ async function create_prompt(fetch: Function, conversation_id: number, query: st
  * Substantiate prompt adds source pages to the prompts based on the filtered
  * context of the conversation the prompt is a part of
  */
-async function substantiate_prompt(
-	fetch: Function,
-	prompt_id: number,
-	similarity_top_k: number = 3
-) {
+async function substantiate_prompt(fetch: Function, prompt_id: number, amount: number = 3) {
 	const url = new URL(`${env.API_ENDPOINT}/rpc/substantiate_prompt`);
 
 	const response = await fetch(url, {
 		method: 'POST',
-		body: JSON.stringify({ prompt_id, similarity_top_k }),
+		body: JSON.stringify({ prompt_id, amount }),
 		headers: {
 			'Content-Type': 'application/json'
 		}
@@ -214,7 +210,7 @@ export const actions = {
 				return;
 			}
 
-			await substantiate_prompt(fetch, prompt.id, data.similarity_top_k);
+			await substantiate_prompt(fetch, prompt.id, data.amount);
 
 			return { success: true };
 		} catch (err) {

@@ -107,7 +107,7 @@ async function get_prompts(fetch: Function, conversation_id: string) {
 	// Fetch conversation history so we can send the whole conversation to LLM
 	url.searchParams.set('select', 'prompts(id,query,response,error,sources(...pages(contents)))');
 	url.searchParams.set('prompts.order', 'created_at.asc');
-	url.searchParams.set('prompts.sources.order', 'similarity.asc');
+	url.searchParams.set('prompts.sources.order', 'similarity.desc');
 	url.searchParams.set('id', `eq.${conversation_id}`);
 
 	const response = await fetch(url);
