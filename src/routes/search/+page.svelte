@@ -8,6 +8,7 @@
 	import QueryFilter from '$lib/QueryFilter.svelte';
 	import Pagination from '$lib/Pagination.svelte';
 	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
+	import Icon from '$lib/Icon.svelte';
 
 	let { data } = $props();
 	let { folders, page, first_item, last_item, amount_of_items, amount_of_pages } = $derived(data);
@@ -46,7 +47,23 @@
 		</SideBar>
 	{/snippet}
 
-	<Title>{amount_of_items} file{amount_of_items == 1 ? '' : 's'} found</Title>
+	<Title>
+		{#snippet actions()}
+			<form action="/conversations?/create_conversation" method="POST">
+				<input type="hidden" name="folders" value={JSON.stringify(folders)} />
+
+				<button
+					title="Start conversation about the selected folders"
+					data-testid="start-conversation"
+					class="button"
+				>
+					<Icon class="gg-comment" />
+					Start Conversation
+				</button>
+			</form>
+		{/snippet}
+		{amount_of_items} file{amount_of_items == 1 ? '' : 's'} found
+	</Title>
 
 	{#each data.files as file (file.id)}
 		<File {...file} />
@@ -59,5 +76,9 @@
 	nav {
 		/* https://css-tricks.com/flexbox-truncated-text/ */
 		min-width: 0;
+	}
+
+	button {
+		width: 100%;
 	}
 </style>
