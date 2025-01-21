@@ -176,8 +176,9 @@
 						onblur={() => (is_focused = false)}
 						onchange={() => page_form.requestSubmit()}
 					/>
+
 					<div class="total" class:focus={is_focused}>
-						<span class="seperator">/</span>
+						<span class="separator">/</span>
 						{to_page}
 					</div>
 
@@ -253,7 +254,10 @@
 	}
 
 	.page-select input[type='number'] {
-		width: fit-content;
+		width: auto;
+		min-width: 1rem;
+		max-width: auto;
+		padding: var(--input-padding-y) 0;
 	}
 
 	/* Chromium way of hiding the spinner */
@@ -269,10 +273,14 @@
 		border-left: none;
 	}
 
+	.page-select .separator {
+		color: var(--text-color-dark-lighter);
+	}
+
 	.page-select .total {
 		display: flex;
-		align-items: end;
 		gap: 0.5rem;
+		align-items: center;
 		padding: var(--input-padding-y) 0;
 		border-top: var(--input-border);
 		border-bottom: var(--input-border);
