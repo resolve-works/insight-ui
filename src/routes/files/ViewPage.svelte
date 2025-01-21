@@ -17,7 +17,10 @@
 		id: any;
 		name: any;
 		breadcrumbs: Breadcrumb[];
-		url: any;
+		url: {
+			optimized: string;
+			original: string;
+		};
 		from_page: number;
 		to_page: number | undefined;
 		highlights?: string[] | undefined;
@@ -141,6 +144,11 @@
 					Edit
 				</a>
 
+				<a class="button" href={url.original} target="_blank">
+					<Icon class="gg-software-download" />
+					Download
+				</a>
+
 				<form
 					bind:this={page_form}
 					class="page-select"
@@ -178,7 +186,7 @@
 	</Title>
 
 	<div class="container">
-		<PDFViewer {url} {highlights} page_number={page} />
+		<PDFViewer url={url.optimized} {highlights} page_number={page} />
 
 		<button class="cover-button" onclick={decrease}>
 			<Icon class="gg-chevron-left" />

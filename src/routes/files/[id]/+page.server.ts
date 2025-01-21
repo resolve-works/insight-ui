@@ -165,16 +165,19 @@ export async function load(event: ServerLoadEvent) {
 	const res = await fetch(api_url, { headers: { Accept: 'application/vnd.pgrst.object+json' } });
 	const inode = await res.json();
 	const { owner_id, path, type } = inode;
-	const optimized_path = path.replace(/(.+)(\/[^/.]+)(\..+)$/, '$1$2_optimized$3');
 
 	// This is a folder, there is no extra information we need
 	if (type == 'folder') {
 		return inode;
 	}
 
+	const optimized_path = path.replace(/(.+)(\/[^/.]+)(\..+)$/, '$1$2_optimized$3');
 	const search_properties = await get_search_properties(event);
 	return {
-		url: sign(`users/${owner_id}${optimized_path}`, cookies),
+		url: {
+			optimized: sign(`users/${owner_id}${optimized_path}`, cookies),
+			original: sign(`users/${owner_id}${path}`, cookies)
+		},
 		...inode,
 		...search_properties,
 		page: parseInt(url.searchParams.get('page') ?? '1'),
