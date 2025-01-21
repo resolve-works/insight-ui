@@ -176,6 +176,10 @@
 						onblur={() => (is_focused = false)}
 						onchange={() => page_form.requestSubmit()}
 					/>
+					<div class="total" class:focus={is_focused}>
+						<span class="seperator">/</span>
+						{to_page}
+					</div>
 
 					<button class="button" type="button" onclick={increase} class:focus={is_focused}>
 						<Icon class="gg-chevron-right" />
@@ -248,6 +252,10 @@
 		border-left: none;
 	}
 
+	.page-select input[type='number'] {
+		width: fit-content;
+	}
+
 	/* Chromium way of hiding the spinner */
 	.page-select input[type='number']::-webkit-inner-spin-button {
 		appearance: none;
@@ -261,13 +269,23 @@
 		border-left: none;
 	}
 
+	.page-select .total {
+		display: flex;
+		align-items: end;
+		gap: 0.5rem;
+		padding: var(--input-padding-y) 0;
+		border-top: var(--input-border);
+		border-bottom: var(--input-border);
+		background: var(--input-background-color);
+	}
+
+	.page-select .focus {
+		border-color: var(--input-focus-border-color);
+	}
+
 	.shared {
 		margin-right: 1rem;
 		color: var(--text-color-page);
-	}
-
-	button.focus {
-		border-color: var(--input-focus-border-color);
 	}
 
 	.hit-navigation {
