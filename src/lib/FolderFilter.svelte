@@ -1,15 +1,9 @@
 <script module lang="ts">
 	export type Option = { key: string; doc_count: number };
 
-	export type Inode = Option & {
-		label: string;
-		children: Inode[];
-	};
+	export type Inode = Option & { label: string; children: Inode[] };
 
-	export type Folder = Option & {
-		label: string;
-		indent: number;
-	};
+	export type Folder = Option & { label: string; indent: number };
 </script>
 
 <script lang="ts">
@@ -26,12 +20,13 @@
 
 	interface Props {
 		selected?: string[];
+		query?: string;
 	}
 
-	let { selected = $bindable([]) }: Props = $props();
+	let { selected = $bindable([]), query }: Props = $props();
 
-	let folder_container: HTMLDivElement = $state();
-	let query = $state('');
+	let folder_container: HTMLDivElement | undefined = $state();
+	let name = $state('');
 	let is_loading = $state(false);
 	let is_opened = $state(false);
 	let folders: Folder[] = $state([]);
@@ -44,8 +39,16 @@
 		return inodes;
 	}
 
-	async function fetch_folders(query: string) {
-		const response = await fetch(`/search/folders?query=${query}`);
+	async function fetch_folders(name: string) {
+		const params = new URLSearchParams();
+		if (name) {
+			params.append('name', name);
+		}
+		if (query) {
+			params.append('query', query);
+		}
+
+		const response = await fetch(`/search/folders?${params.toString()}`);
 		const options = await response.json();
 
 		// Build a tree from the paths
@@ -142,7 +145,7 @@
 				const timeout = setTimeout(() => {
 					is_loading = true;
 				}, 500);
-				const unsorted_folders = await fetch_folders(query);
+				const unsorted_folders = await fetch_folders(name);
 				clearTimeout(timeout);
 				folders = flatten_inode_tree(sort(unsorted_folders));
 				focussed_index = 0;
@@ -168,7 +171,7 @@
 	placeholder="Type folder name ..."
 	class:is-opened={is_opened}
 	type="text"
-	bind:value={query}
+	bind:value={name}
 	onfocus={() => (is_opened = true)}
 	onblur={() => (is_opened = false)}
 	onclick={stopPropagation(bubble('click'))}

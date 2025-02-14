@@ -31,12 +31,7 @@ function pages_query(
 								bool: {
 									// Always search with query
 									must: [
-										{
-											query_string: {
-												query,
-												default_field: 'pages.contents'
-											}
-										},
+										{ query_string: { query, default_field: 'pages.contents' } },
 										// Highlight and nearest hits have differing requirements
 										...must
 									]
@@ -60,13 +55,7 @@ function nearest_hit_query(page: number, id: string, query: string, is_previous 
 		page_index.gt = page - 1;
 	}
 
-	const must = [
-		{
-			range: {
-				'pages.index': page_index
-			}
-		}
-	];
+	const must = [{ range: { 'pages.index': page_index } }];
 
 	const inner_hits = {
 		size: 1,
@@ -87,24 +76,13 @@ async function get_search_properties({ params, fetch, url }: ServerLoadEvent) {
 		return {};
 	}
 
-	const must = [
-		{
-			term: {
-				'pages.index': page - 1
-			}
-		}
-	];
+	const must = [{ term: { 'pages.index': page - 1 } }];
 
 	const inner_hits = {
 		highlight: {
 			pre_tags: [''],
 			post_tags: [''],
-			fields: {
-				'pages.contents': {
-					fragment_size: 1,
-					number_of_fragments: 100
-				}
-			}
+			fields: { 'pages.contents': { fragment_size: 1, number_of_fragments: 100 } }
 		}
 	};
 
@@ -182,11 +160,8 @@ export async function load(event: ServerLoadEvent) {
 		...search_properties,
 		page: parseInt(url.searchParams.get('page') ?? '1'),
 		folders: parse_array_param(url.searchParams.get('folders')),
-		query: url.searchParams.get('query')
+		query: url.searchParams.get('query') ?? undefined
 	};
 }
 
-export const actions = {
-	create_folder,
-	remove
-} satisfies Actions;
+export const actions = { create_folder, remove } satisfies Actions;

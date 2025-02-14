@@ -17,10 +17,7 @@
 		id: any;
 		name: any;
 		breadcrumbs: Breadcrumb[];
-		url: {
-			optimized: string;
-			original: string;
-		};
+		url: { optimized: string; original: string };
 		from_page: number;
 		to_page: number | undefined;
 		highlights?: string[] | undefined;
@@ -84,7 +81,7 @@
 		<nav>
 			<form data-sveltekit-keepfocus data-sveltekit-replacestate>
 				<Section>
-					<QueryFilter />
+					<QueryFilter {query} />
 
 					{#if $page_store.url.searchParams.has('page')}
 						<input type="hidden" name="page" value={page} />

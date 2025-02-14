@@ -3,16 +3,12 @@ import { parse_array_param } from '$lib/validation';
 import { PAGE_SIZE, calculate_pagination } from '$lib/pagination';
 
 export async function load({ url, fetch }) {
-	const query = url.searchParams.get('query');
+	const query = url.searchParams.get('query') ?? undefined;
 	const folders = parse_array_param(url.searchParams.get('folders'));
 	const page = parseInt(url.searchParams.get('page') ?? '1');
 
 	const must: Record<string, any>[] = [
-		{
-			bool: {
-				should: folders.map((folder) => ({ term: { folder: folder } }))
-			}
-		},
+		{ bool: { should: folders.map((folder) => ({ term: { folder: folder } })) } },
 		{ term: { type: 'file' } }
 	];
 
@@ -21,21 +17,9 @@ export async function load({ url, fetch }) {
 		must.push({
 			nested: {
 				path: 'pages',
-				query: {
-					query_string: {
-						query,
-						default_field: 'pages.contents'
-					}
-				},
+				query: { query_string: { query, default_field: 'pages.contents' } },
 				inner_hits: {
-					highlight: {
-						fields: {
-							'pages.contents': {
-								fragment_size: 150,
-								type: 'fvh'
-							}
-						}
-					}
+					highlight: { fields: { 'pages.contents': { fragment_size: 150, type: 'fvh' } } }
 				}
 			}
 		});
@@ -43,9 +27,7 @@ export async function load({ url, fetch }) {
 
 	const res = await fetch(`${env.OPENSEARCH_ENDPOINT}/inodes/_search`, {
 		method: 'post',
-		headers: {
-			'Content-Type': 'application/json'
-		},
+		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({
 			from: page - 1,
 			size: PAGE_SIZE,
@@ -63,6 +45,7 @@ export async function load({ url, fetch }) {
 
 	return {
 		...calculate_pagination(body.hits.total.value, page),
+		query,
 		folders,
 		files: body.hits.hits.map((hit: Record<string, any>) => {
 			return {

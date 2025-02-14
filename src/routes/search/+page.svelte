@@ -11,7 +11,8 @@
 	import Icon from '$lib/Icon.svelte';
 
 	let { data } = $props();
-	let { folders, page, first_item, last_item, amount_of_items, amount_of_pages } = $derived(data);
+	let { query, folders, page, first_item, last_item, amount_of_items, amount_of_pages } =
+		$derived(data);
 
 	let form: HTMLFormElement;
 
@@ -36,11 +37,11 @@
 					data-sveltekit-replacestate
 				>
 					<Section>
-						<QueryFilter on:change={() => form.requestSubmit()} />
+						<QueryFilter {query} on:change={() => form.requestSubmit()} />
 					</Section>
 
 					<Section>
-						<FolderFilter selected={folders} on:change={() => form.requestSubmit()} />
+						<FolderFilter {query} selected={folders} on:change={() => form.requestSubmit()} />
 					</Section>
 				</form>
 			</nav>
