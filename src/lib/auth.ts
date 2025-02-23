@@ -43,6 +43,7 @@ export function parse_token(token: string) {
  * Get temporary storage credentials from the storage backend in exchange for our OIDC token
  */
 export async function get_storage_tokens(access_token: string) {
+	console.log('Getting storage tokens');
 	const url = new URL(env.STORAGE_IDENTITY_ENDPOINT);
 	const { sub } = parse_token(access_token);
 	url.searchParams.set('Action', 'AssumeRoleWithWebIdentity');
@@ -64,6 +65,8 @@ export async function get_storage_tokens(access_token: string) {
 		SessionToken: session_token
 	} = body.AssumeRoleWithWebIdentityResponse.AssumeRoleWithWebIdentityResult.Credentials;
 
+	console.log('Succesfully fetched storage tokens');
+
 	return { access_key_id, secret_access_key, session_token };
 }
 
@@ -75,6 +78,7 @@ export async function store_tokens(
 	cookies: Cookies,
 	{ access_token, refresh_token }: TokenReponse
 ) {
+	console.log('Storing tokens');
 	const storage_tokens = await get_storage_tokens(access_token);
 	const tokens = { access_token, refresh_token, ...storage_tokens };
 	for (const [key, value] of Object.entries(tokens)) {

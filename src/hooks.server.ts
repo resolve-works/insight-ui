@@ -39,6 +39,7 @@ export async function handle({ event, resolve }) {
 			await get_tokens(event.cookies, redirect_uri, code);
 		} catch (e) {
 			console.error(e);
+			console.log('Could not get tokens from authorization-code, redirecting to auth provider');
 			throw redirect_to_oidc_provider(redirect_uri);
 		}
 
@@ -46,6 +47,7 @@ export async function handle({ event, resolve }) {
 		event.url.searchParams.delete('code');
 		event.url.searchParams.delete('session_state');
 		event.url.searchParams.delete('iss');
+		console.log(`Stored tokens, redirecting to ${event.url}`);
 		throw redirect(307, event.url);
 	}
 
@@ -53,6 +55,7 @@ export async function handle({ event, resolve }) {
 	const access_token = event.cookies.get('access_token');
 	const refresh_token = event.cookies.get('refresh_token');
 	if (!refresh_token || !access_token) {
+		console.log('Could not get tokens from cookie, redirecting to auth provider');
 		throw redirect_to_oidc_provider(redirect_uri);
 	}
 
