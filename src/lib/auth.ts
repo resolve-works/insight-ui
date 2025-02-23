@@ -101,6 +101,7 @@ export function clear_tokens(cookies: Cookies) {
  * Request new tokens from OIDC provider with provider supplied auth code
  */
 export async function authorization_code_request(redirect_uri: string, code: string) {
+	console.log('Requesting tokens with authorization code');
 	// Code granted, get tokens
 	const data = {
 		grant_type: 'authorization_code',
@@ -116,6 +117,8 @@ export async function authorization_code_request(redirect_uri: string, code: str
 	});
 
 	if (response.status !== 200) {
+		const data = await response.text();
+		console.log(data);
 		throw new InvalidAuthorizationCodeError('Invalid authorization_code');
 	}
 
