@@ -110,6 +110,8 @@ export async function authorization_code_request(redirect_uri: string, code: str
 		code
 	};
 
+	console.log(data);
+
 	const response = await fetch(env.OIDC_ENDPOINT + '/token', {
 		method: 'post',
 		headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
