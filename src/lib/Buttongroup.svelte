@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { preventDefault, stopPropagation } from 'svelte/legacy';
-
 	import { onMount } from 'svelte';
 	import Icon from './Icon.svelte';
 
@@ -35,7 +33,11 @@
 <div class="buttongroup" class:enhance={is_enhanced} class:open={is_opened} data-testid={test_id}>
 	<button
 		class="button toggle"
-		onclick={stopPropagation(preventDefault(() => (is_opened = !is_opened)))}
+		onclick={(e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			is_opened = !is_opened;
+		}}
 		data-testid={test_id ? `${test_id}-toggle` : undefined}
 	>
 		<Icon class="gg-more-vertical-alt" />

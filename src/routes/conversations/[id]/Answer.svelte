@@ -13,8 +13,6 @@
 </script>
 
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
 	import ErrorMessage from '$lib/ErrorMessage.svelte';
 	import SourceComponent from './Source.svelte';
 	import { marked } from 'marked';
@@ -53,8 +51,6 @@
 
 		return { text, links, missing };
 	});
-
-	run(() => {});
 </script>
 
 {@html marked.parse(parsed.text)}
