@@ -1,15 +1,13 @@
 <script lang="ts">
-	import { createBubbler } from 'svelte/legacy';
-
-	const bubble = createBubbler();
 	import Icon from './Icon.svelte';
 	interface Props {
 		is_width_limited?: boolean;
 		is_removable?: boolean;
 		path: string;
+		onclick?: (event: MouseEvent) => void;
 	}
 
-	let { is_width_limited = false, is_removable = false, path }: Props = $props();
+	let { is_width_limited = false, is_removable = false, path, onclick }: Props = $props();
 
 	let parts = path.split('/').filter(Boolean);
 </script>
@@ -23,7 +21,7 @@
 	{/each}
 
 	{#if is_removable}
-		<button type="button" onclick={bubble('click')}>
+		<button type="button" {onclick}>
 			<Icon class="gg-close" />
 		</button>
 	{/if}

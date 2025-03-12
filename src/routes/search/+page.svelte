@@ -41,7 +41,7 @@
 					</Section>
 
 					<Section>
-						<FolderFilter {query} selected={folders} on:change={() => form.requestSubmit()} />
+						<FolderFilter {query} selected={folders} onchange={() => form.requestSubmit()} />
 					</Section>
 				</form>
 			</nav>

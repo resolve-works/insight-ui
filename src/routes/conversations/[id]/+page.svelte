@@ -101,7 +101,7 @@
 					<Section>
 						<FolderFilter
 							selected={selected_folders}
-							on:change={() => filter_form.requestSubmit()}
+							onchange={() => filter_form.requestSubmit()}
 						/>
 					</Section>
 

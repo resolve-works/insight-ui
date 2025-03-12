@@ -1,7 +1,4 @@
 <script lang="ts">
-	import { createBubbler, preventDefault, stopPropagation } from 'svelte/legacy';
-
-	const bubble = createBubbler();
 	import Icon from './Icon.svelte';
 
 	interface Props {
@@ -10,6 +7,9 @@
 		indent?: number;
 		is_selected?: boolean;
 		is_focussed?: boolean;
+		onclick?: (e: MouseEvent) => void;
+		onmousedown?: (e: MouseEvent) => void;
+		onmouseenter?: (e: MouseEvent) => void;
 	}
 
 	let {
@@ -17,7 +17,10 @@
 		doc_count,
 		indent = 0,
 		is_selected = false,
-		is_focussed = false
+		is_focussed = false,
+		onclick,
+		onmousedown,
+		onmouseenter
 	}: Props = $props();
 
 	const padding = indent > 0 ? (indent - 1) * 2 + 1 : indent;
@@ -28,9 +31,16 @@
 	style="padding-left: {padding + 1}rem"
 	class:is-selected={is_selected}
 	class:is-focussed={is_focussed}
-	onmousedown={preventDefault(bubble('mousedown'))}
-	onmouseenter={bubble('mouseenter')}
-	onclick={stopPropagation(preventDefault(bubble('click')))}
+	onclick={(e) => {
+		e.stopPropagation();
+		e.preventDefault();
+		onclick?.(e);
+	}}
+	onmousedown={(e) => {
+		e.preventDefault();
+		onmousedown?.(e);
+	}}
+	{onmouseenter}
 	title={label}
 >
 	{#if indent > 0}

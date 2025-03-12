@@ -7,25 +7,21 @@
 </script>
 
 <script lang="ts">
-	import { run, createBubbler, stopPropagation } from 'svelte/legacy';
-
-	const bubble = createBubbler();
 	import Icon from './Icon.svelte';
 	import { browser } from '$app/environment';
-	import { onMount, createEventDispatcher, tick } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import FolderFilterFolder from './FolderFilterFolder.svelte';
 	import FolderTag from './FolderTag.svelte';
-
-	const dispatch = createEventDispatcher();
 
 	interface Props {
 		selected?: string[];
 		query?: string;
+		onchange?: () => void;
 	}
 
-	let { selected = $bindable([]), query }: Props = $props();
+	let { selected = $bindable([]), query, onchange }: Props = $props();
 
-	let folder_container: HTMLDivElement | undefined = $state();
+	let folder_container: HTMLDivElement = $state();
 	let name = $state('');
 	let is_loading = $state(false);
 	let is_opened = $state(false);
@@ -89,7 +85,9 @@
 		}
 
 		await tick();
-		dispatch('change');
+
+		// Call the callback prop if provided
+		onchange?.();
 	}
 
 	function focus(index: number) {
@@ -138,7 +136,7 @@
 		};
 	});
 
-	run(() => {
+	$effect(() => {
 		if (browser) {
 			(async () => {
 				// Defer showing loader to prevent flashing
@@ -163,7 +161,7 @@
 	<p>Selected folders</p>
 {/if}
 {#each selected as key (key)}
-	<FolderTag path={key} is_removable on:click={() => select(key)} />
+	<FolderTag path={key} is_removable onclick={() => select(key)} />
 {/each}
 
 <p>Filter by folder</p>
@@ -174,7 +172,7 @@
 	bind:value={name}
 	onfocus={() => (is_opened = true)}
 	onblur={() => (is_opened = false)}
-	onclick={stopPropagation(bubble('click'))}
+	onclick={(e) => e.stopPropagation()}
 	onkeydown={keydown}
 />
 
@@ -192,9 +190,8 @@
 					{...folder}
 					is_selected={selected.includes(folder.key)}
 					is_focussed={index == focussed_index}
-					on:mouseenter={() => (focussed_index = index)}
-					on:click={async () => select(folder.key)}
-					on:mousedown
+					onmouseenter={() => (focussed_index = index)}
+					onclick={async () => select(folder.key)}
 				/>
 			{/each}
 		{/if}
