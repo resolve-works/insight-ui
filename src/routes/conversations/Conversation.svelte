@@ -9,12 +9,7 @@
 		created_at: any;
 	}
 
-	let {
-		id,
-		prompts,
-		inodes,
-		created_at
-	}: Props = $props();
+	let { id, prompts, inodes, created_at }: Props = $props();
 
 	let parsed_created_at = $derived(new Date(created_at).toLocaleString('en-US', { hour12: false }));
 	let name = $derived(prompts.length ? prompts[0].query : undefined);
@@ -22,7 +17,7 @@
 
 <Actionable {name} path={`/conversations/${id}`} icon="gg-comment">
 	{#snippet actions()}
-		<time >{parsed_created_at}</time>
+		<time>{parsed_created_at}</time>
 	{/snippet}
 
 	<div>
