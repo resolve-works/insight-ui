@@ -97,7 +97,7 @@
 			{/snippet}
 
 			<nav>
-				<form bind:this={filter_form} action="/conversations?/create_conversation" method="POST">
+				<form bind:this={filter_form} action="?/update_filters" method="POST" use:enhance>
 					<Section>
 						<FolderFilter
 							selected={selected_folders}

@@ -148,6 +148,28 @@ async function substantiate_prompt(fetch: Function, prompt_id: number, amount: n
 	return response.json();
 }
 
+async function set_conversation_filters(
+	fetch: Function,
+	prompt_id: number,
+	query: string | undefined = undefined,
+	folders: string[] = []
+) {
+	const url = new URL(`${env.API_ENDPOINT}/rpc/set_conversation_filters`);
+
+	const response = await fetch(url, {
+		method: 'POST',
+		body: JSON.stringify({ prompt_id, query, folders }),
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	});
+	if (response.status != 200) {
+		throw new Error(await response.text());
+	}
+
+	return response.json();
+}
+
 async function get_inodes(fetch: typeof global.fetch, paths: string[]) {
 	const url = new URL(`${env.API_ENDPOINT}/inodes`);
 	url.searchParams.set('path', `in.(${paths.map((path: string) => `"${path}"`).join(',')})`);
@@ -210,7 +232,9 @@ export const actions = {
 				return;
 			}
 
-			await substantiate_prompt(fetch, prompt.id, data.amount);
+			// TODO - Get nearest neighbours from opensearch
+
+			// TODO - Attach nearest neighbours to prompt
 
 			return { success: true };
 		} catch (err) {
@@ -227,10 +251,20 @@ export const actions = {
 
 		try {
 			const data = await validate(request, conversation_schema);
-			const inodes = await get_inodes(fetch, data.folders);
+			const { folders } = data;
 
-			await upsert_conversations_inodes(fetch, conversation_id, inodes);
-			await delete_conversations_inodes(fetch, conversation_id, inodes);
+			const url = new URL(`${env.API_ENDPOINT}/rpc/set_conversation_filters`);
+
+			const response = await fetch(url, {
+				method: 'POST',
+				body: JSON.stringify({ conversation_id, folders }),
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+			if (response.status != 204) {
+				throw new Error(await response.text());
+			}
 		} catch (err) {
 			if (err instanceof ValidationError) {
 				return fail(400, err.format());
