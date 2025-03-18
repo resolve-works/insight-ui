@@ -5,6 +5,7 @@ import { parse_content_range, PAGE_SIZE } from '$lib/pagination';
 import { validate, ValidationError } from '$lib/validation';
 import { schema } from '$lib/validation/conversation';
 import type { RequestEvent } from '@sveltejs/kit';
+import { update_filters } from '$lib/conversation';
 
 export async function load({ depends, fetch, url }) {
 	depends('api:conversations');
@@ -35,25 +36,29 @@ export async function load({ depends, fetch, url }) {
 async function create_conversation({ request, fetch }: RequestEvent) {
 	try {
 		const data = await validate(request, schema);
+		const { folders } = data;
 
-		const api_url = new URL(`${env.API_ENDPOINT}/rpc/create_conversation`);
-		api_url.searchParams.set('select', 'id');
+		// Conversation create url
+		const url = new URL(`${env.API_ENDPOINT}/conversations`);
+		url.searchParams.set('select', 'id');
 
-		const res = await fetch(api_url, {
+		// Create conversation
+		const res = await fetch(url, {
 			method: 'POST',
-			body: JSON.stringify(data),
+			body: JSON.stringify({}),
 			headers: {
 				'Content-Type': 'application/json',
-				Prefer: 'return=representation'
+				Prefer: 'return=representation',
+				Accept: 'application/vnd.pgrst.object+json'
 			}
 		});
 
-		if (res.status !== 200) {
+		if (res.status !== 201) {
 			throw new Error(await res.text());
 		}
 
-		const conversations = await res.json();
-		const conversation = conversations[0];
+		const conversation = await res.json();
+		await update_filters(fetch, conversation.id, folders);
 
 		return redirect(303, `/conversations/${conversation.id}`);
 	} catch (err) {

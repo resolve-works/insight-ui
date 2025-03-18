@@ -52,6 +52,7 @@
 				return;
 			}
 
+			// Post to ./answer route to stream answer
 			const url = new URL($page.url);
 			url.pathname += '/answer';
 
@@ -59,9 +60,11 @@
 
 			const response = await fetch(url, { method: 'POST' });
 			if (response.body) {
+				// Answer is streamed
 				const reader = response.body.getReader();
 				while (true) {
 					const { done, value } = await reader.read();
+					// If the reader is done, we should refetch the conversation from stored state
 					if (done) {
 						await invalidate('api:conversations');
 						answer = '';
@@ -69,6 +72,7 @@
 						input.focus();
 						break;
 					}
+					// Add streamed chunk to answer and scroll
 					answer += decoder.decode(value);
 					await scroll_to_bottom();
 				}
