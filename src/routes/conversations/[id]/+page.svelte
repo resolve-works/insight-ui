@@ -19,7 +19,7 @@
 	import LoadingButton from '$lib/LoadingButton.svelte';
 
 	let { data, form } = $props();
-	const { selected_folders } = data;
+	const { folders } = data;
 
 	let sources = $derived(
 		data.prompts.map((prompt: { sources: Source[] }) => prompt.sources).flat()
@@ -103,13 +103,14 @@
 			<nav>
 				<form bind:this={filter_form} action="?/update_filters" method="POST" use:enhance>
 					<Section>
-						<FolderFilter
-							selected={selected_folders}
-							onchange={() => filter_form.requestSubmit()}
-						/>
+						<FolderFilter selected={folders} onchange={() => filter_form.requestSubmit()} />
 					</Section>
 
-					<button class="button secondary" title="Start a new conversation with these filters">
+					<button
+						formaction="/conversations?/create_conversation"
+						class="button secondary"
+						title="Start a new conversation with these filters"
+					>
 						New Conversation
 					</button>
 				</form>
@@ -121,7 +122,7 @@
 		<div class="messages">
 			<Message type={'machine'}>
 				<p>
-					We are having a conversation about {#if !selected_folders.length}all files{:else}the files
+					We are having a conversation about {#if !folders.length}all files{:else}the files
 						contained in the chosen folders{/if}. To what question do you think these files hold the
 					answer?
 				</p>
@@ -163,6 +164,8 @@
 		</div>
 
 		<form class="prompt" method="POST" action="?/create_prompt" use:enhance={generate_answer}>
+			<input type="hidden" name="folders" value={JSON.stringify(folders)} />
+
 			<Row>
 				<div class="prompt">
 					<input

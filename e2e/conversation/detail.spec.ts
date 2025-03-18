@@ -45,7 +45,4 @@ test('error_on_exceed_embedding_context', async ({ empty_conversation_detail_pag
 	await expect(page.getByTestId('error-message')).toHaveCount(1);
 });
 
-// TODO
-// I tested this locally with a big PDF because we need quite a bit of data in
-// the system to exceed the context of the completion model.
-//test('Exceed context of completion model')
+// TODO - add test for new conversation button

@@ -7,12 +7,8 @@ export async function load({ url, fetch }) {
 	const folders = parse_array_param(url.searchParams.get('folders'));
 	const page = parseInt(url.searchParams.get('page') ?? '1');
 
-	const must: Record<string, any>[] = [
-		{ bool: { should: folders.map((folder) => ({ term: { folder: folder } })) } },
-		{ term: { type: 'file' } }
-	];
-
 	// When we have a text query, search for page contents
+	/*
 	if (query) {
 		must.push({
 			nested: {
@@ -24,6 +20,7 @@ export async function load({ url, fetch }) {
 			}
 		});
 	}
+    */
 
 	const res = await fetch(`${env.OPENSEARCH_ENDPOINT}/inodes/_search`, {
 		method: 'post',
@@ -34,7 +31,15 @@ export async function load({ url, fetch }) {
 			track_total_hits: true,
 			// Don't return all page contents
 			_source: { excludes: ['pages'] },
-			query: { bool: { must } }
+			query: {
+				bool: {
+					must: [
+						{ term: { join_field: 'inode' } },
+						{ term: { type: 'file' } },
+						{ bool: { should: folders.map((folder) => ({ term: { folder: folder } })) } }
+					]
+				}
+			}
 		})
 	});
 

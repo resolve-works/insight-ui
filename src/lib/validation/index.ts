@@ -22,21 +22,7 @@ export async function validate(request: Request, schema: Schema) {
 
 	// Convert form_data to object that zod can handle
 	const data = Array.from(form_data.entries()).reduce(
-		(agg: Record<string, any>, [key, value]: [string, any]) => {
-			// Support array inputs with `[]` appended to their name
-			const is_array = key.slice(-2) == '[]';
-			if (is_array && !Array.isArray(agg[key])) {
-				agg[key] = [];
-			}
-
-			if (is_array) {
-				agg[key] = [...agg[key], value];
-			} else {
-				agg[key] = value;
-			}
-
-			return agg;
-		},
+		(agg: Record<string, any>, [key, value]: [string, any]) => ({ ...agg, [key]: value }),
 		{}
 	);
 

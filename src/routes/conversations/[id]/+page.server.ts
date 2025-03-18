@@ -33,12 +33,12 @@ export async function load({ fetch, depends, params }) {
 
 	const conversation = await get_conversation(fetch, params.id);
 
-	const selected_folders =
+	const folders =
 		'inodes' in conversation
 			? conversation.inodes.map((inode: { path: string }) => inode.path)
 			: [];
 
-	return { selected_folders, ...conversation };
+	return { folders, ...conversation };
 }
 
 /**
@@ -119,6 +119,48 @@ async function create_prompt(
 	return response.json();
 }
 
+async function get_nearest_chunks(
+	fetch: Function,
+	embedding: Array<number>,
+	folders: string[] | undefined = []
+) {
+	const must: Record<string, any>[] = [
+		{ bool: { should: folders.map((folder) => ({ term: { folder: folder } })) } },
+		{ term: { type: 'file' } }
+	];
+
+	must.push({
+		nested: {
+			path: 'pages',
+			query: {
+				knn: {
+					'pages.embedding': {
+						vector: embedding,
+						k: 2
+					}
+				}
+			}
+		}
+	});
+
+	const response = await fetch(`${env.OPENSEARCH_ENDPOINT}/inodes/_search`, {
+		method: 'post',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			// Don't return all page contents
+			_source: { excludes: ['pages.embedding', 'pages.contents'] },
+			query: { bool: { must } }
+		})
+	});
+
+	if (response.status !== 200) {
+		throw new Error(`Invalid response from opensearch. ${body.error.type}: ${body.error.reason}`);
+	}
+
+	const data = await response.json();
+	return data.hits.hits;
+}
+
 export const actions = {
 	create_prompt: async ({ request, fetch, params }) => {
 		const conversation_id = parseInt(params.id);
@@ -132,6 +174,8 @@ export const actions = {
 				const prompt = await create_prompt(fetch, conversation_id, data.query, embedding);
 
 				// TODO - Get nearest neighbours from opensearch
+				const inodes = await get_nearest_chunks(fetch, embedding, data.folders);
+				console.log(inodes.map((inode) => inode._source));
 
 				// TODO - Attach nearest neighbours to prompt
 
