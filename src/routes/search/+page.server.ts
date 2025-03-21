@@ -7,20 +7,39 @@ export async function load({ url, fetch }) {
 	const folders = parse_array_param(url.searchParams.get('folders'));
 	const page = parseInt(url.searchParams.get('page') ?? '1');
 
+	const must: Object[] = [
+		{ term: { join_field: 'inode' } },
+		{ term: { type: 'file' } },
+		{ bool: { should: folders.map((folder) => ({ term: { folder: folder } })) } }
+	];
+
 	// When we have a text query, search for page contents
-	/*
 	if (query) {
 		must.push({
-			nested: {
-				path: 'pages',
-				query: { query_string: { query, default_field: 'pages.contents' } },
+			has_child: {
+				type: 'page',
+				query: {
+					bool: {
+						must: [
+							{ term: { join_field: 'page' } },
+							{ query_string: { query, default_field: 'contents' } }
+						]
+					}
+				},
 				inner_hits: {
-					highlight: { fields: { 'pages.contents': { fragment_size: 150, type: 'fvh' } } }
+					_source: { excludes: ['contents', 'embedding'] },
+					highlight: {
+						fields: {
+							contents: {
+								fragment_size: 150,
+								type: 'fvh'
+							}
+						}
+					}
 				}
 			}
 		});
 	}
-    */
 
 	const res = await fetch(`${env.OPENSEARCH_ENDPOINT}/inodes/_search`, {
 		method: 'post',
@@ -30,21 +49,15 @@ export async function load({ url, fetch }) {
 			size: PAGE_SIZE,
 			track_total_hits: true,
 			// Don't return all page contents
-			_source: { excludes: ['pages'] },
 			query: {
-				bool: {
-					must: [
-						{ term: { join_field: 'inode' } },
-						{ term: { type: 'file' } },
-						{ bool: { should: folders.map((folder) => ({ term: { folder: folder } })) } }
-					]
-				}
+				bool: { must }
 			}
 		})
 	});
 
 	const body = await res.json();
 	if (res.status !== 200) {
+		console.error(body.error);
 		throw new Error(`Invalid response from opensearch. ${body.error.type}: ${body.error.reason}`);
 	}
 
@@ -58,13 +71,13 @@ export async function load({ url, fetch }) {
 				filename: hit._source.filename,
 				pages:
 					'inner_hits' in hit
-						? hit.inner_hits.pages.hits.hits
+						? hit.inner_hits.page.hits.hits
 								.filter((page: Record<string, any>) => 'highlight' in page)
 								.map((page: Record<string, any>) => {
 									return {
 										// Humans index from 1
 										index: page['_source']['index'] + 1,
-										highlights: page['highlight']['pages.contents']
+										highlights: page['highlight']['contents']
 									};
 								})
 						: []

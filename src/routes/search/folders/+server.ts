@@ -17,7 +17,17 @@ export async function GET({ fetch, url }) {
 	// Only show user folders that contain files that they searched for
 	if (query) {
 		must.push({
-			nested: { path: 'pages', query: { query_string: { query, default_field: 'pages.contents' } } }
+			has_child: {
+				type: 'page',
+				query: {
+					bool: {
+						must: [
+							{ term: { join_field: 'page' } },
+							{ query_string: { query, default_field: 'contents' } }
+						]
+					}
+				}
+			}
 		});
 	}
 
@@ -39,7 +49,7 @@ export async function GET({ fetch, url }) {
 
 	const body = await res.json();
 	if (res.status !== 200) {
-		console.log(body);
+		console.error(body.error);
 		return error(500, `Invalid response from opensearch. ${body.error.type}: ${body.error.reason}`);
 	}
 
