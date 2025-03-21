@@ -19,7 +19,7 @@
 	import LoadingButton from '$lib/LoadingButton.svelte';
 
 	let { data, form } = $props();
-	const { folders } = data;
+	const { folders } = $derived(data);
 
 	let sources = $derived(
 		data.prompts.map((prompt: { sources: Source[] }) => prompt.sources).flat()
