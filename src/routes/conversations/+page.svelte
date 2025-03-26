@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Icon from '$lib/Icon.svelte';
 	import Page from '$lib/Page.svelte';
 	import Title from '$lib/Title.svelte';
 	import Conversation from './Conversation.svelte';
@@ -16,7 +17,20 @@
 {/snippet}
 
 <Page {header}>
-	<Title>Conversations</Title>
+	<Title>
+		Conversations
+
+		{#snippet actions()}
+			<form action="/conversations?/create_conversation" method="POST">
+				<input type="hidden" name="folders" value={JSON.stringify([])} />
+
+				<button title="Start conversation" data-testid="start-conversation" class="button">
+					<Icon class="gg-comment" />
+					Start Conversation
+				</button>
+			</form>
+		{/snippet}
+	</Title>
 
 	{#each data.conversations as conversation}
 		<Conversation {...conversation} />

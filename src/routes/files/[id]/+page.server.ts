@@ -18,12 +18,29 @@ function pages_query(
 	inner_hits: Record<string, any>
 ) {
 	return {
-		_source: { excludes: ['pages'] },
 		query: {
 			bool: {
 				must: [
 					// Get information for requested document
 					{ ids: { values: [id] } },
+
+					{
+						has_child: {
+							type: 'page',
+							query: {
+								bool: {
+									must: [
+										...must,
+										{ term: { join_field: 'page' } },
+										{ query_string: { query, default_field: 'contents' } }
+									]
+								}
+							},
+							inner_hits
+						}
+					}
+
+					/*
 					{
 						nested: {
 							path: 'pages',
@@ -40,6 +57,7 @@ function pages_query(
 							inner_hits
 						}
 					}
+                    */
 				]
 			}
 		}
@@ -55,12 +73,12 @@ function nearest_hit_query(page: number, id: string, query: string, is_previous 
 		page_index.gt = page - 1;
 	}
 
-	const must = [{ range: { 'pages.index': page_index } }];
+	const must = [{ range: { index: page_index } }];
 
 	const inner_hits = {
 		size: 1,
-		_source: { excludes: ['pages.contents'] },
-		sort: [{ 'pages.index': { order: is_previous ? 'desc' : 'asc' } }]
+		_source: { excludes: ['contents', 'embedding'] },
+		sort: [{ index: { order: is_previous ? 'desc' : 'asc' } }]
 	};
 
 	return pages_query(id, query, must, inner_hits);
@@ -76,13 +94,14 @@ async function get_search_properties({ params, fetch, url }: ServerLoadEvent) {
 		return {};
 	}
 
-	const must = [{ term: { 'pages.index': page - 1 } }];
+	const must = [{ term: { index: page - 1 } }];
 
 	const inner_hits = {
+		_source: { excludes: ['contents', 'embedding'] },
 		highlight: {
 			pre_tags: [''],
 			post_tags: [''],
-			fields: { 'pages.contents': { fragment_size: 1, number_of_fragments: 100 } }
+			fields: { contents: { fragment_size: 1, number_of_fragments: 100 } }
 		}
 	};
 
@@ -113,19 +132,19 @@ async function get_search_properties({ params, fetch, url }: ServerLoadEvent) {
 	// Results are possibly non-existant for pages that don't contain query
 	try {
 		const highlights: string[] =
-			data.responses[0].hits.hits[0].inner_hits.pages.hits.hits[0].highlight['pages.contents'];
+			data.responses[0].hits.hits[0].inner_hits.page.hits.hits[0].highlight.contents;
 		search_properties.highlights = [...new Set(highlights)];
 	} catch {}
 
 	// Results are possibly non-existant when there is no next or previous pages containing query
 	try {
 		search_properties.previous_hit_index =
-			data.responses[1].hits.hits[0].inner_hits.pages.hits.hits[0]._source.index;
+			data.responses[1].hits.hits[0].inner_hits.page.hits.hits[0]._source.index;
 	} catch {}
 
 	try {
 		search_properties.next_hit_index =
-			data.responses[2].hits.hits[0].inner_hits.pages.hits.hits[0]._source.index;
+			data.responses[2].hits.hits[0].inner_hits.page.hits.hits[0]._source.index;
 	} catch {}
 
 	return search_properties;

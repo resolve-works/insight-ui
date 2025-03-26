@@ -124,36 +124,38 @@ async function get_nearest_chunks(
 	embedding: Array<number>,
 	folders: string[] | undefined = []
 ) {
-	// Define the parent folders we're interested in
-	const must: Record<string, any>[] = [
-		{ term: { join_field: 'page' } },
-		{
-			has_parent: {
-				parent_type: 'inode',
-				query: {
-					bool: {
-						should: folders.map((folder) => ({ term: { folder: folder } }))
-					}
-				}
-			}
-		},
-		{
-			knn: {
-				embedding: {
-					vector: embedding,
-					min_score: 0.5
-				}
-			}
-		}
-	];
-
 	const response = await fetch(`${env.OPENSEARCH_ENDPOINT}/inodes/_search`, {
 		method: 'post',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({
 			// Don't return all page contents
 			_source: { excludes: ['embedding', 'contents'] },
-			query: { bool: { must } }
+			query: {
+				knn: {
+					embedding: {
+						vector: embedding,
+						k: 10,
+						filter: {
+							bool: {
+								must: [
+									{ term: { join_field: 'page' } },
+									// Filter by parent folders we're interested in
+									{
+										has_parent: {
+											parent_type: 'inode',
+											query: {
+												bool: {
+													should: folders.map((folder) => ({ term: { folder: folder } }))
+												}
+											}
+										}
+									}
+								]
+							}
+						}
+					}
+				}
+			}
 		})
 	});
 
@@ -166,10 +168,14 @@ async function get_nearest_chunks(
 	return body.hits.hits;
 }
 
-async function attach_chunks_to_prompt(fetch: Function, prompt_id: number, page_ids: number[]) {
-	const sources_data = page_ids.map((page_id) => {
+async function attach_chunks_to_prompt(
+	fetch: Function,
+	prompt_id: number,
+	pages: { page_id: number; similarity: number }[]
+) {
+	const sources_data = pages.map((page) => {
 		return {
-			page_id,
+			...page,
 			prompt_id
 		};
 	});
@@ -184,11 +190,9 @@ async function attach_chunks_to_prompt(fetch: Function, prompt_id: number, page_
 		}
 	});
 
-	if (response.status != 204) {
+	if (response.status != 201) {
 		throw new Error(await response.text());
 	}
-
-	return response.json();
 }
 
 export const actions = {
@@ -204,10 +208,12 @@ export const actions = {
 				const prompt = await create_prompt(fetch, conversation_id, data.query, embedding);
 
 				// Get nearest neighbours from opensearch
-				const pages = await get_nearest_chunks(fetch, embedding, data.folders);
-				const page_ids = pages.map((page: Record<string, any>) => page._source.id);
-				// TODO - Get similarity scores from Opensearch
-				await attach_chunks_to_prompt(fetch, prompt.id, page_ids);
+				const search_results = await get_nearest_chunks(fetch, embedding, data.folders);
+				const pages = search_results.map((page: Record<string, any>) => ({
+					page_id: page._source.id,
+					similarity: page._score
+				}));
+				await attach_chunks_to_prompt(fetch, prompt.id, pages);
 
 				return { success: true };
 			} catch (err) {
