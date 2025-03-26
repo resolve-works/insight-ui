@@ -23,7 +23,8 @@
 	<footer>
 		<p>Thank you for using Insight.</p>
 		<p>
-			Do you want to <a href="https://www.discourse.org/">ask for help</a> or
+			Do you want to <a href="https://github.com/resolve-works/insight/discussions">ask for help</a>
+			or
 			<a href="https://github.com/resolve-works/insight/issues">report a problem</a>?
 		</p>
 	</footer>

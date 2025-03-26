@@ -5,6 +5,7 @@ import { validate, ValidationError } from '$lib/validation';
 import { schema as prompt_schema } from '$lib/validation/prompt';
 import { schema as conversation_schema } from '$lib/validation/conversation';
 import { update_filters } from '$lib/conversation.ts';
+import { API_ENDPOINT } from '$env/static/private';
 
 class EmbedError extends Error {}
 
@@ -69,14 +70,10 @@ async function embed(input: string) {
 	return (await response.json()).data[0].embedding;
 }
 
-/**
- * Concatenate all queries from previous prompts with the current query.
- * We do this to search for pages that are related to all of the conversation
- */
-async function create_embed_query(fetch: Function, conversation_id: number, query: string) {
+async function get_previous_prompts(fetch: Function, conversation_id: number) {
 	const url = new URL(`${env.API_ENDPOINT}/prompts`);
 	url.searchParams.set('conversation_id', `eq.${conversation_id}`);
-	url.searchParams.set('select', 'query');
+	url.searchParams.set('select', 'query,sources(page_id)');
 	url.searchParams.set('order', 'created_at.asc');
 
 	const response = await fetch(url);
@@ -85,9 +82,7 @@ async function create_embed_query(fetch: Function, conversation_id: number, quer
 		throw new Error(await response.text());
 	}
 
-	const prompts = [...(await response.json()), { query }];
-
-	return prompts.map((prompt) => prompt.query).join(', ');
+	return response.json();
 }
 
 /**
@@ -119,10 +114,14 @@ async function create_prompt(
 	return response.json();
 }
 
+/**
+ * Get chunks (pages in this case) that are semantically related to our question.
+ */
 async function get_nearest_chunks(
 	fetch: Function,
 	embedding: Array<number>,
-	folders: string[] | undefined = []
+	folders: string[] | undefined = [],
+	previously_found_chunks: number[] = []
 ) {
 	const response = await fetch(`${env.OPENSEARCH_ENDPOINT}/inodes/_search`, {
 		method: 'post',
@@ -150,6 +149,14 @@ async function get_nearest_chunks(
 											}
 										}
 									}
+								],
+								must_not: [
+									// Filter out previously found chunks
+									{
+										terms: {
+											id: previously_found_chunks
+										}
+									}
 								]
 							}
 						}
@@ -161,7 +168,6 @@ async function get_nearest_chunks(
 
 	const body = await response.json();
 	if (response.status !== 200) {
-		console.error(body.error);
 		throw new Error(`Invalid response from opensearch. ${body.error.type}: ${body.error.reason}`);
 	}
 
@@ -202,13 +208,25 @@ export const actions = {
 			const data = await validate(request, prompt_schema);
 
 			try {
-				const embed_query = await create_embed_query(fetch, conversation_id, data.query);
+				const previous_prompts = await get_previous_prompts(fetch, conversation_id);
+
+				// Concatenate all queries from previous prompts with the current query.
+				// We do this to search for pages that are related to all of the conversation
+				const embed_query = [...previous_prompts.map((p) => p.query), data.query].join(', ');
 				const embedding = await embed(embed_query);
 
 				const prompt = await create_prompt(fetch, conversation_id, data.query, embedding);
 
 				// Get nearest neighbours from opensearch
-				const search_results = await get_nearest_chunks(fetch, embedding, data.folders);
+				const previously_found_chunks = previous_prompts
+					.map((p: { sources: { page_id: number }[] }) => p.sources.map((s) => s.page_id))
+					.reduce((a: number[], b: number[]) => [...a, ...b], []);
+				const search_results = await get_nearest_chunks(
+					fetch,
+					embedding,
+					data.folders,
+					previously_found_chunks
+				);
 				const pages = search_results.map((page: Record<string, any>) => ({
 					page_id: page._source.id,
 					similarity: page._score
